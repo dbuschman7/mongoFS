@@ -26,8 +26,7 @@ import java.io.OutputStream;
 import java.net.UnknownHostException;
 
 import org.bson.types.ObjectId;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.mongodb.BasicDBObject;
@@ -42,30 +41,35 @@ public class GridFSTest {
     private GridFS gridFS;
     private DB database;
 
-    @Before
-    public void setUp() {
+    private static MongoClient mongoClient;
+
+    // initializer
+    @BeforeClass
+    public static void initial() {
 
         MongoClientURI mongoURI = new MongoClientURI("mongodb://cayman-vm:27017");
         try {
-            MongoClient mongoClient = new MongoClient(mongoURI);
-            database = mongoClient.getDB("DriverTest-" + System.nanoTime());
-            gridFS = new GridFS(database);
+            mongoClient = new MongoClient(mongoURI);
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Invalid Mongo URI: " + mongoURI.getURI(), e);
         }
+
     }
 
-    @After
-    public void tearDown() {
-
-        database.dropDatabase();
-    }
+    //
+    // Tests
+    // /////////////////////////////
 
     @Test
     public void testSmall()
             throws Exception {
 
-        testInOut("this is a simple test");
+        try {
+            setUp("testSmall");
+            testInOut("this is a simple test");
+        } finally {
+            tearDown();
+        }
     }
 
     @Test
@@ -78,7 +82,304 @@ public class GridFSTest {
             buf.append("asdasdkjasldkjasldjlasjdlajsdljasldjlasjdlkasjdlaskjdlaskjdlsakjdlaskjdasldjsad");
         }
         String s = buf.toString();
-        testInOut(s);
+        try {
+            setUp("testBig");
+            testInOut(s);
+        } finally {
+            tearDown();
+        }
+    }
+
+    @Test
+    public void testOutStreamSmall()
+            throws Exception {
+
+        try {
+            setUp("testOutStreamSmall");
+            testOutStream("this is a simple test");
+        } finally {
+            tearDown();
+        }
+    }
+
+    @Test
+    public void testOutStreamBig()
+            throws Exception {
+
+        try {
+            setUp("testOutStreamBig");
+
+            int target = (int) (GridFS.DEFAULT_CHUNKSIZE * 3.5);
+            StringBuilder buf = new StringBuilder(target);
+            while (buf.length() < target) {
+                buf.append("asdasdkjasldkjasldjlasjdlajsdljasldjlasjdlkasjdlaskjdlaskjdlsakjdlaskjdasldjsad");
+            }
+            String s = buf.toString();
+            testOutStream(s);
+        } finally {
+            tearDown();
+        }
+    }
+
+    @Test
+    public void testOutStreamBigAligned()
+            throws Exception {
+
+        try {
+            setUp("testOutStreamBigAligned");
+            int target = (GridFS.DEFAULT_CHUNKSIZE * 4);
+            StringBuilder buf = new StringBuilder(target);
+            while (buf.length() < target) {
+                buf.append("a");
+            }
+            String s = buf.toString();
+            testOutStream(s);
+
+        } finally {
+            tearDown();
+        }
+    }
+
+    @Test
+    public void testMetadata()
+            throws Exception {
+
+        try {
+            setUp("testMetadata");
+            GridFSInputFile in = gridFS.createFile("foo".getBytes(defaultCharset()));
+            in.put("meta", 5);
+            in.save();
+            GridFSDBFile out = gridFS.findOne(new BasicDBObject("_id", in.getId()));
+            assert (out.get("meta").equals(5));
+        } finally {
+            tearDown();
+        }
+    }
+
+    @Test
+    public void testBadChunkSize()
+            throws Exception {
+
+        try {
+            setUp("testBadChunkSize");
+
+            byte[] randomBytes = new byte[256];
+            GridFSInputFile inputFile = gridFS.createFile(randomBytes);
+            inputFile.setFilename("bad_chunk_size.bin");
+            try {
+                inputFile.save(0);
+                fail("should have received an exception about a chunk size being zero");
+            } catch (MongoException e) {
+                // We expect this exception to complain about the chunksize
+                assertTrue(e.toString().contains("chunkSize must be greater than zero"));
+            }
+        } finally {
+            tearDown();
+        }
+    }
+
+    @Test
+    public void testMultipleChunks()
+            throws Exception {
+
+        try {
+
+            setUp("testMultipleChunks");
+
+            int fileSize = 1024 * 128;
+            byte[] randomBytes = new byte[fileSize];
+            for (int idx = 0; idx < fileSize; ++idx) {
+                randomBytes[idx] = (byte) (256 * Math.random());
+            }
+
+            GridFSInputFile inputFile = gridFS.createFile(randomBytes);
+            inputFile.setFilename("bad_chunk_size.bin");
+
+            // For good measure let's save and restore the bytes
+            inputFile.save(1024);
+            GridFSDBFile savedFile = gridFS.findOne(new BasicDBObject("_id", inputFile.getId()));
+            ByteArrayOutputStream savedFileByteStream = new ByteArrayOutputStream();
+            savedFile.writeTo(savedFileByteStream);
+            byte[] savedFileBytes = savedFileByteStream.toByteArray();
+
+            assertArrayEquals(randomBytes, savedFileBytes);
+
+        } finally {
+            tearDown();
+        }
+    }
+
+    @Test
+    public void getBigChunkSize()
+            throws Exception {
+
+        try {
+            setUp("getBigChunkSize");
+            GridFSInputFile file = gridFS.createFile("512kb_bucket");
+            file.setChunkSize(file.getChunkSize() * 2);
+            OutputStream os = file.getOutputStream();
+            for (int i = 0; i < 1024; i++) {
+                os.write(new byte[GridFS.DEFAULT_CHUNKSIZE / 1024 + 1]);
+            }
+            os.close();
+        } finally {
+            tearDown();
+        }
+    }
+
+    @Test
+    public void testInputStreamSkipping()
+            throws Exception {
+
+        try {
+            setUp("testInputStreamSkipping");
+
+            // int chunkSize = 5;
+            int chunkSize = GridFS.DEFAULT_CHUNKSIZE;
+            int fileSize = (int) (7.25 * chunkSize);
+
+            byte[] fileBytes = new byte[fileSize];
+            for (int idx = 0; idx < fileSize; ++idx) {
+                fileBytes[idx] = (byte) (idx % 251);
+            }
+            // Don't want chunks to be aligned at byte position 0
+
+            GridFSInputFile inputFile = gridFS.createFile(fileBytes);
+            inputFile.setFilename("input_stream_skipping.bin");
+            inputFile.save(chunkSize);
+
+            GridFSDBFile savedFile = gridFS.findOne(new BasicDBObject("_id", inputFile.getId()));
+            InputStream inputStream = savedFile.getInputStream();
+
+            // Quick run-through, make sure the file is as expected
+            for (int idx = 0; idx < fileSize; ++idx) {
+                assertEquals((byte) (idx % 251), (byte) inputStream.read());
+            }
+
+            inputStream = savedFile.getInputStream();
+
+            long skipped = inputStream.skip(1);
+            assertEquals(1, skipped);
+            int position = 1;
+            assertEquals((byte) (position++ % 251), (byte) inputStream.read());
+
+            skipped = inputStream.skip(chunkSize);
+            assertEquals(chunkSize, skipped);
+            position += chunkSize;
+            assertEquals((byte) (position++ % 251), (byte) inputStream.read());
+
+            skipped = inputStream.skip(-1);
+            assertEquals(0, skipped);
+            skipped = inputStream.skip(0);
+            assertEquals(0, skipped);
+
+            skipped = inputStream.skip(3 * chunkSize);
+            assertEquals(3 * chunkSize, skipped);
+            position += 3 * chunkSize;
+            assertEquals((byte) (position++ % 251), (byte) inputStream.read());
+
+            // Make sure skipping works when we skip to an exact chunk boundary
+            long toSkip = inputStream.available();
+            skipped = inputStream.skip(toSkip);
+            assertEquals(toSkip, skipped);
+            position += toSkip;
+            assertEquals((byte) (position++ % 251), (byte) inputStream.read());
+
+            skipped = inputStream.skip(2 * fileSize);
+            assertEquals(fileSize - position, skipped);
+            assertEquals(-1, inputStream.read());
+
+        } finally {
+            tearDown();
+        }
+    }
+
+    @Test
+    public void testCustomFileID()
+            throws IOException {
+
+        try {
+            setUp("testCustomFileID");
+
+            int chunkSize = 10;
+            int fileSize = (int) (3.25 * chunkSize);
+
+            byte[] fileBytes = new byte[fileSize];
+            for (int idx = 0; idx < fileSize; ++idx) {
+                fileBytes[idx] = (byte) (idx % 251);
+            }
+
+            GridFSInputFile inputFile = gridFS.createFile(fileBytes);
+            int id = 1;
+            inputFile.setId(id);
+            inputFile.setFilename("custom_file_id.bin");
+            inputFile.save(chunkSize);
+            assertEquals(id, inputFile.getId());
+
+            GridFSDBFile savedFile = gridFS.findOne(new BasicDBObject("_id", id));
+            InputStream inputStream = savedFile.getInputStream();
+
+            for (int idx = 0; idx < fileSize; ++idx) {
+                assertEquals((byte) (idx % 251), (byte) inputStream.read());
+            }
+        } finally {
+            tearDown();
+        }
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void testRemoveWhenObjectIdIsNull() {
+
+        try {
+            setUp("testRemoveWhenObjectIdIsNull");
+
+            ObjectId objectId = null;
+            gridFS.remove(objectId);
+        } finally {
+            tearDown();
+        }
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void testRemoveWhenFileNameIsNull() {
+
+        try {
+            setUp("testRemoveWhenFileNameIsNull");
+            String fileName = null;
+            gridFS.remove(fileName);
+        } finally {
+            tearDown();
+        }
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void testRemoveWhenQueryIsNull() {
+
+        try {
+            setUp("testRemoveWhenQueryIsNull");
+            DBObject dbObjectQuery = null;
+            gridFS.remove(dbObjectQuery);
+        } finally {
+            tearDown();
+        }
+    }
+
+    //
+    // internals
+    // ///////////////////////////
+    public void setUp(String unitTestName) {
+
+        database = mongoClient.getDB("DriverTest-" + unitTestName);
+        database.dropDatabase();
+        database = mongoClient.getDB("DriverTest-" + unitTestName);
+
+        gridFS = new GridFS(database);
+    }
+
+    public void tearDown() {
+
+        // keep them around for now
+        // database.dropDatabase();
     }
 
     void testOutStream(final String s)
@@ -103,189 +404,7 @@ public class GridFSTest {
         int[] end = getCurrentCollectionCounts();
         assertEquals(start[0], end[0]);
         assertEquals(start[1], end[1]);
-    }
 
-    @Test
-    public void testOutStreamSmall()
-            throws Exception {
-
-        testOutStream("this is a simple test");
-    }
-
-    @Test
-    public void testOutStreamBig()
-            throws Exception {
-
-        int target = (int) (GridFS.DEFAULT_CHUNKSIZE * 3.5);
-        StringBuilder buf = new StringBuilder(target);
-        while (buf.length() < target) {
-            buf.append("asdasdkjasldkjasldjlasjdlajsdljasldjlasjdlkasjdlaskjdlaskjdlsakjdlaskjdasldjsad");
-        }
-        String s = buf.toString();
-        testOutStream(s);
-    }
-
-    @Test
-    public void testOutStreamBigAligned()
-            throws Exception {
-
-        int target = (GridFS.DEFAULT_CHUNKSIZE * 4);
-        StringBuilder buf = new StringBuilder(target);
-        while (buf.length() < target) {
-            buf.append("a");
-        }
-        String s = buf.toString();
-        testOutStream(s);
-    }
-
-    @Test
-    public void testMetadata()
-            throws Exception {
-
-        GridFSInputFile in = gridFS.createFile("foo".getBytes(defaultCharset()));
-        in.put("meta", 5);
-        in.save();
-        GridFSDBFile out = gridFS.findOne(new BasicDBObject("_id", in.getId()));
-        assert (out.get("meta").equals(5));
-    }
-
-    @Test
-    public void testBadChunkSize()
-            throws Exception {
-
-        byte[] randomBytes = new byte[256];
-        GridFSInputFile inputFile = gridFS.createFile(randomBytes);
-        inputFile.setFilename("bad_chunk_size.bin");
-        try {
-            inputFile.save(0);
-            fail("should have received an exception about a chunk size being zero");
-        } catch (MongoException e) {
-            // We expect this exception to complain about the chunksize
-            assertTrue(e.toString().contains("chunkSize must be greater than zero"));
-        }
-    }
-
-    @Test
-    public void testMultipleChunks()
-            throws Exception {
-
-        int fileSize = 1024 * 128;
-        byte[] randomBytes = new byte[fileSize];
-        for (int idx = 0; idx < fileSize; ++idx) {
-            randomBytes[idx] = (byte) (256 * Math.random());
-        }
-
-        GridFSInputFile inputFile = gridFS.createFile(randomBytes);
-        inputFile.setFilename("bad_chunk_size.bin");
-
-        // For good measure let's save and restore the bytes
-        inputFile.save(1024);
-        GridFSDBFile savedFile = gridFS.findOne(new BasicDBObject("_id", inputFile.getId()));
-        ByteArrayOutputStream savedFileByteStream = new ByteArrayOutputStream();
-        savedFile.writeTo(savedFileByteStream);
-        byte[] savedFileBytes = savedFileByteStream.toByteArray();
-
-        assertArrayEquals(randomBytes, savedFileBytes);
-    }
-
-    @Test
-    public void getBigChunkSize()
-            throws Exception {
-
-        GridFSInputFile file = gridFS.createFile("512kb_bucket");
-        file.setChunkSize(file.getChunkSize() * 2);
-        OutputStream os = file.getOutputStream();
-        for (int i = 0; i < 1024; i++) {
-            os.write(new byte[GridFS.DEFAULT_CHUNKSIZE / 1024 + 1]);
-        }
-        os.close();
-    }
-
-    @Test
-    public void testInputStreamSkipping()
-            throws Exception {
-
-        // int chunkSize = 5;
-        int chunkSize = GridFS.DEFAULT_CHUNKSIZE;
-        int fileSize = (int) (7.25 * chunkSize);
-
-        byte[] fileBytes = new byte[fileSize];
-        for (int idx = 0; idx < fileSize; ++idx) {
-            fileBytes[idx] = (byte) (idx % 251);
-        }
-        // Don't want chunks to be aligned at byte position 0
-
-        GridFSInputFile inputFile = gridFS.createFile(fileBytes);
-        inputFile.setFilename("input_stream_skipping.bin");
-        inputFile.save(chunkSize);
-
-        GridFSDBFile savedFile = gridFS.findOne(new BasicDBObject("_id", inputFile.getId()));
-        InputStream inputStream = savedFile.getInputStream();
-
-        // Quick run-through, make sure the file is as expected
-        for (int idx = 0; idx < fileSize; ++idx) {
-            assertEquals((byte) (idx % 251), (byte) inputStream.read());
-        }
-
-        inputStream = savedFile.getInputStream();
-
-        long skipped = inputStream.skip(1);
-        assertEquals(1, skipped);
-        int position = 1;
-        assertEquals((byte) (position++ % 251), (byte) inputStream.read());
-
-        skipped = inputStream.skip(chunkSize);
-        assertEquals(chunkSize, skipped);
-        position += chunkSize;
-        assertEquals((byte) (position++ % 251), (byte) inputStream.read());
-
-        skipped = inputStream.skip(-1);
-        assertEquals(0, skipped);
-        skipped = inputStream.skip(0);
-        assertEquals(0, skipped);
-
-        skipped = inputStream.skip(3 * chunkSize);
-        assertEquals(3 * chunkSize, skipped);
-        position += 3 * chunkSize;
-        assertEquals((byte) (position++ % 251), (byte) inputStream.read());
-
-        // Make sure skipping works when we skip to an exact chunk boundary
-        long toSkip = inputStream.available();
-        skipped = inputStream.skip(toSkip);
-        assertEquals(toSkip, skipped);
-        position += toSkip;
-        assertEquals((byte) (position++ % 251), (byte) inputStream.read());
-
-        skipped = inputStream.skip(2 * fileSize);
-        assertEquals(fileSize - position, skipped);
-        assertEquals(-1, inputStream.read());
-    }
-
-    @Test
-    public void testCustomFileID()
-            throws IOException {
-
-        int chunkSize = 10;
-        int fileSize = (int) (3.25 * chunkSize);
-
-        byte[] fileBytes = new byte[fileSize];
-        for (int idx = 0; idx < fileSize; ++idx) {
-            fileBytes[idx] = (byte) (idx % 251);
-        }
-
-        GridFSInputFile inputFile = gridFS.createFile(fileBytes);
-        int id = 1;
-        inputFile.setId(id);
-        inputFile.setFilename("custom_file_id.bin");
-        inputFile.save(chunkSize);
-        assertEquals(id, inputFile.getId());
-
-        GridFSDBFile savedFile = gridFS.findOne(new BasicDBObject("_id", id));
-        InputStream inputStream = savedFile.getInputStream();
-
-        for (int idx = 0; idx < fileSize; ++idx) {
-            assertEquals((byte) (idx % 251), (byte) inputStream.read());
-        }
     }
 
     void testInOut(final String s)
@@ -316,26 +435,5 @@ public class GridFSTest {
         i[0] = gridFS.getFilesCollection().find().count();
         i[1] = gridFS.getChunksCollection().find().count();
         return i;
-    }
-
-    @Test( expected = IllegalArgumentException.class )
-    public void testRemoveWhenObjectIdIsNull() {
-
-        ObjectId objectId = null;
-        gridFS.remove(objectId);
-    }
-
-    @Test( expected = IllegalArgumentException.class )
-    public void testRemoveWhenFileNameIsNull() {
-
-        String fileName = null;
-        gridFS.remove(fileName);
-    }
-
-    @Test( expected = IllegalArgumentException.class )
-    public void testRemoveWhenQueryIsNull() {
-
-        DBObject dbObjectQuery = null;
-        gridFS.remove(dbObjectQuery);
     }
 }

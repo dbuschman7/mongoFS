@@ -1,6 +1,16 @@
 *.class
 
+#Eclipse 
+.project
+.classpath
+.settings/
+
+# Gradle 
+.gradle/
+
 # Package Files #
 *.jar
 *.war
 *.ear
+/bin
+/target

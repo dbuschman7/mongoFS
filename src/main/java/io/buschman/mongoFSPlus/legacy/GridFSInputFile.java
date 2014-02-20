@@ -13,6 +13,8 @@
 
 package io.buschman.mongoFSPlus.legacy;
 
+import io.buschman.mongoFSPlus.GridFS;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,9 +40,9 @@ public class GridFSInputFile extends GridFSFile {
     private final InputStream inputStream;
     private final boolean closeStreamOnPersist;
     private boolean savedChunks = false;
-    private byte[] buffer = null;
-    private int currentChunkNumber = 0;
-    private int currentBufferPosition = 0;
+    byte[] buffer = null;
+    int currentChunkNumber = 0;
+    int currentBufferPosition = 0;
     private long totalBytes = 0;
     private OutputStream outputStream = null;
     private MessageDigest messageDigester = null;
@@ -172,6 +174,14 @@ public class GridFSInputFile extends GridFSFile {
     }
 
     /**
+     * Internal use only!!
+     */
+    void superSave() {
+
+        super.save();
+    }
+
+    /**
      * This method first calls saveChunks(long) if the file data has not been saved yet. Then it persists the file entry to
      * GridFS.
      * 
@@ -266,7 +276,7 @@ public class GridFSInputFile extends GridFSFile {
     public OutputStream getOutputStream() {
 
         if (outputStream == null) {
-            outputStream = new GridFSOutputStream();
+            outputStream = new GridFSOutputStream(this);
         }
         return outputStream;
     }
@@ -279,7 +289,7 @@ public class GridFSInputFile extends GridFSFile {
      *            Write also partial buffers full.
      * @throws MongoException
      */
-    private void dumpBuffer(final boolean writePartial) {
+    void dumpBuffer(final boolean writePartial) {
 
         if ((currentBufferPosition < chunkSize) && !writePartial) {
             // Bail out, chunk not complete yet
@@ -298,7 +308,7 @@ public class GridFSInputFile extends GridFSFile {
 
         DBObject chunk = createChunk(id, currentChunkNumber, writeBuffer);
 
-        fs.getChunksCollection().save(chunk);
+        CollectionsWrapper.getChunksCollection(fs).save(chunk);
 
         currentChunkNumber++;
         totalBytes += writeBuffer.length;
@@ -336,7 +346,7 @@ public class GridFSInputFile extends GridFSFile {
     /**
      * Marks the data as fully written. This needs to be called before super.save()
      */
-    private void finishData() {
+    void finishData() {
 
         if (!savedChunks) {
             md5 = Util.toHex(messageDigester.digest());
@@ -353,57 +363,4 @@ public class GridFSInputFile extends GridFSFile {
         }
     }
 
-    /**
-     * An output stream implementation that can be used to successively write to a GridFS file.
-     * 
-     * @author Guy K. Kloss
-     */
-    private class GridFSOutputStream extends OutputStream {
-
-        @Override
-        public void write(final int b)
-                throws IOException {
-
-            byte[] byteArray = new byte[1];
-            byteArray[0] = (byte) (b & 0xff);
-            write(byteArray, 0, 1);
-        }
-
-        @Override
-        public void write(final byte[] b, final int off, final int len)
-                throws IOException {
-
-            int offset = off;
-            int length = len;
-            int toCopy = 0;
-            while (length > 0) {
-                toCopy = length;
-                if (toCopy > chunkSize - currentBufferPosition) {
-                    toCopy = (int) chunkSize - currentBufferPosition;
-                }
-                System.arraycopy(b, offset, buffer, currentBufferPosition, toCopy);
-                currentBufferPosition += toCopy;
-                offset += toCopy;
-                length -= toCopy;
-                if (currentBufferPosition == chunkSize) {
-                    dumpBuffer(false);
-                }
-            }
-        }
-
-        /**
-         * Processes/saves all data from {@link java.io.InputStream} and closes the potentially present
-         * {@link java.io.OutputStream}. The GridFS file will be persisted afterwards.
-         */
-        @Override
-        public void close() {
-
-            // write last buffer if needed
-            dumpBuffer(true);
-            // finish stream
-            finishData();
-            // save file obj
-            GridFSInputFile.super.save();
-        }
-    }
 }

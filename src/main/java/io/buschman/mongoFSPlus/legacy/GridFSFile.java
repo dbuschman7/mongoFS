@@ -14,6 +14,7 @@
 package io.buschman.mongoFSPlus.legacy;
 
 import static java.util.Arrays.asList;
+import io.buschman.mongoFSPlus.GridFS;
 
 import java.util.Collections;
 import java.util.Date;
@@ -60,7 +61,7 @@ public abstract class GridFSFile implements DBObject {
         if (fs == null) {
             throw new MongoException("need fs");
         }
-        fs.getFilesCollection().save(this);
+        CollectionsWrapper.getFilesCollection(fs).save(this);
     }
 
     /**

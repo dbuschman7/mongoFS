@@ -11,7 +11,7 @@
  * governing permissions and limitations under the License.
  */
 
-package io.buschman.mongoFSPlus.legacy;
+package io.buschman.mongoFSPlus.gridFS;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

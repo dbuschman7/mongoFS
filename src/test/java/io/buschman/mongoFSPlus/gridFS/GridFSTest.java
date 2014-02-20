@@ -11,7 +11,7 @@
  * governing permissions and limitations under the License.
  */
 
-package io.buschman.mongoFSPlus.legacy;
+package io.buschman.mongoFSPlus.gridFS;
 
 import static java.nio.charset.Charset.defaultCharset;
 import static org.junit.Assert.assertArrayEquals;
@@ -20,6 +20,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import io.buschman.mongoFSPlus.GridFS;
 import io.buschman.mongoFSPlus.MongoFSFactory;
+import io.buschman.mongoFSPlus.gridFS.CollectionsWrapper;
+import io.buschman.mongoFSPlus.gridFS.GridFSDBFile;
+import io.buschman.mongoFSPlus.gridFS.GridFSInputFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -11,7 +11,7 @@
  * governing permissions and limitations under the License.
  */
 
-package io.buschman.mongoFSPlus.legacy;
+package io.buschman.mongoFSPlus.gridFS;
 
 import io.buschman.mongoFSPlus.GridFS;
 

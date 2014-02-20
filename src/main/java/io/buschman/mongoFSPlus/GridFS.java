@@ -1,7 +1,7 @@
 package io.buschman.mongoFSPlus;
 
-import io.buschman.mongoFSPlus.legacy.GridFSDBFile;
-import io.buschman.mongoFSPlus.legacy.GridFSInputFile;
+import io.buschman.mongoFSPlus.gridFS.GridFSDBFile;
+import io.buschman.mongoFSPlus.gridFS.GridFSInputFile;
 
 import java.io.File;
 import java.io.IOException;

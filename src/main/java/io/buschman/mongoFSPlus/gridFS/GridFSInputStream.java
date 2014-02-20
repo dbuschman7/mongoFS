@@ -1,4 +1,4 @@
-package io.buschman.mongoFSPlus.legacy;
+package io.buschman.mongoFSPlus.gridFS;
 
 import java.io.IOException;
 import java.io.InputStream;

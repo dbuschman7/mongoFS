@@ -11,7 +11,7 @@ public class MongoFSFactory {
 
     public static final GridFS constructGridFS(DB database, String bucket) {
 
-        return new io.buschman.mongoFSPlus.legacy.GridFS(database, bucket);
+        return new io.buschman.mongoFSPlus.gridFS.GridFS(database, bucket);
     }
 
 }

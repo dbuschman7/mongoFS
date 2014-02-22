@@ -20,7 +20,7 @@ public class BufferedChunksOutputStream extends FilterOutputStream {
     /**
      * The internal buffer where the chunk data is stored.
      */
-    protected byte buf[];
+    protected byte myBuffer[];
 
     /**
      * The number of valid bytes in the buffer. This value is always in the range <tt>0</tt> through <tt>buf.length</tt>; elements
@@ -62,7 +62,7 @@ public class BufferedChunksOutputStream extends FilterOutputStream {
         if (chunkSize <= 0) {
             throw new IllegalArgumentException("Buffer size <= 0");
         }
-        buf = new byte[chunkSize];
+        myBuffer = new byte[chunkSize];
     }
 
     /** Flush the internal buffer */
@@ -70,7 +70,7 @@ public class BufferedChunksOutputStream extends FilterOutputStream {
             throws IOException {
 
         if (currentPosition > 0) {
-            out.write(buf, 0, currentPosition);
+            out.write(myBuffer, 0, currentPosition);
             currentPosition = 0;
         }
     }
@@ -86,10 +86,7 @@ public class BufferedChunksOutputStream extends FilterOutputStream {
     public void write(int b)
             throws IOException {
 
-        if (currentPosition >= this.chunkSize) {
-            flushBuffer();
-        }
-        buf[currentPosition++] = (byte) b;
+        myBuffer[currentPosition++] = (byte) b;
         if (currentPosition >= this.chunkSize) {
             flushBuffer();
         }
@@ -102,46 +99,50 @@ public class BufferedChunksOutputStream extends FilterOutputStream {
      * This method will recurse on itself until the buffer is exhausted to allow for orderly chunk writes to the underlying
      * stream.
      * 
-     * @param b
+     * @param inBuffer
      *            the data.
-     * @param off
+     * @param offset
      *            the start offset in the data.
-     * @param len
+     * @param length
      *            the number of bytes to write.
      * @exception IOException
      *                if an I/O error occurs.
      */
-    public void write(byte b[], int off, int len)
+    public void write(byte inBuffer[], int offset, int length)
             throws IOException {
 
-        if (len <= 0) {
+        if (length <= 0) {
             return;
         }
 
         // if empty buffer and full chunk copy, then send straight to underlying
         // if not-empty buffer and enough to fill, then copy to buffer and flush
         // if not empty and not enough to fill, then copy to buffer and return
-        int toCopy = len;
-        if (toCopy >= this.chunkSize - currentPosition) {
+        int bytesToCopy = length;
+        if (bytesToCopy >= this.chunkSize - currentPosition) {
             if (this.currentPosition == 0) {
-                // write straight to the underlying stream
-                out.write(b, off, this.chunkSize);
-                write(b, off + chunkSize, len - chunkSize); // recurse
+
+                // pull the data here before call the underlying stream
+                System.arraycopy(inBuffer, offset, myBuffer, currentPosition, chunkSize);
+                currentPosition += chunkSize;
+                flushBuffer();
+
+                write(inBuffer, offset + chunkSize, length - chunkSize); // recurse
             } else {
-                // fill the rest of the buffer and flush
-                toCopy = this.chunkSize - currentPosition;
-                System.arraycopy(b, off, buf, currentPosition, toCopy);
-                currentPosition += toCopy;
+                // fill the rest of myBuffer and flush
+                bytesToCopy = this.chunkSize - currentPosition;
+                System.arraycopy(inBuffer, offset, myBuffer, currentPosition, bytesToCopy);
+                currentPosition += bytesToCopy;
                 // test for full buffer
                 assert currentPosition == this.chunkSize;
                 flushBuffer();
-                write(b, off + toCopy, len - toCopy); // recurse
+                write(inBuffer, offset + bytesToCopy, length - bytesToCopy); // recurse
             }
         } else {
             // the last of the buffer
-            if (toCopy > 0) {
-                System.arraycopy(b, off, buf, currentPosition, toCopy);
-                currentPosition += toCopy;
+            if (bytesToCopy > 0) {
+                System.arraycopy(inBuffer, offset, myBuffer, currentPosition, bytesToCopy);
+                currentPosition += bytesToCopy;
             }
         }
     }

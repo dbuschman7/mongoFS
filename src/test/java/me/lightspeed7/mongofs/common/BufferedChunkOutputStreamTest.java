@@ -7,9 +7,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.lightspeed7.mongofs.common.BufferedChunksOutputStream;
-import me.lightspeed7.mongofs.common.BytesCopier;
-
 import org.apache.tools.ant.filters.StringInputStream;
 import org.junit.Test;
 
@@ -46,7 +43,7 @@ public class BufferedChunkOutputStreamTest {
         assertEquals(LOREM_IPSUM.length(), log.total);
         assertEquals(
                 //
-                "total = 32085, commands = [write(b, 0, 5120), write(b, 5120, 5120), write(b, 10240, 5120), write(b, 0, 5120), write(b, 4096, 5120), write(b, 9216, 5120), write(b, 0, 1365), flush, close]",
+                "total = 32085, commands = [write(b, 0, 5120), write(b, 0, 5120), write(b, 0, 5120), write(b, 0, 5120), write(b, 0, 5120), write(b, 0, 5120), write(b, 0, 1365), flush, close]",
                 log.info());
     }
 

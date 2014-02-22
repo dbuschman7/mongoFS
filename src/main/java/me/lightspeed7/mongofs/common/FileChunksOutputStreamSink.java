@@ -47,24 +47,25 @@ public class FileChunksOutputStreamSink extends OutputStream {
     }
 
     @Override
-    public void write(byte[] b, int off, int len)
+    public void write(byte[] buffer, int offset, int length)
             throws IOException {
 
-        byte[] internal = b; // assume whole buffer
+        byte[] internal = buffer; // assume the whole passed in buffer for efficiency
 
         // if partial buffer, then we have to copy the data until serialized
-        if (off != 0 || len != b.length) {
-            internal = new byte[len];
-            System.arraycopy(b, off, internal, 0, len);
+        if (offset != 0 || length != buffer.length) {
+            internal = new byte[length];
+            System.arraycopy(buffer, offset, internal, 0, length);
         }
 
+        // construct the chunk
         BasicDBObject dbObject = new BasicDBObject("files_id", id)//
                 .append("n", currentChunkNumber)//
                 .append("data", internal);
         ++currentChunkNumber;
 
+        // persist it
         collection.save(dbObject);
-
         adapter.collectFromChunk(dbObject);
     }
 

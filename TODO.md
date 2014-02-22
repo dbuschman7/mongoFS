@@ -17,7 +17,6 @@
 * streamline file reading
 * fixed chunking buffering to always use the chunking buffer
 
-
 ##0.5 MongoFile and mongoFS base classes##
 * create mongofile URL and handler to enable external referencing
 * create MongoFSDataStore to front the DBCollections
@@ -31,7 +30,6 @@
 ##0.7 Temporary File Storage
 * Add temporary files generator with TTL collections
 * Allow file to live only for a finite time, minutes, days, weeks.
-
 
 ## Futures ideas
 * auto-grow chunk size as "empty-space" entropy rises, maybe multiple collections 

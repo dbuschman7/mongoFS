@@ -11,15 +11,15 @@
  * governing permissions and limitations under the License.
  */
 
-package io.buschman.mongoFSPlus.gridFS;
-
-import io.buschman.mongoFSPlus.common.MongoFileConstants;
+package me.lightspeed7.mongofs.gridfs;
 
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import me.lightspeed7.mongofs.common.MongoFileConstants;
 
 import org.bson.BSONObject;
 

@@ -1,4 +1,4 @@
-package io.buschman.mongoFSPlus.common;
+package me.lightspeed7.mongofs.common;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -1,10 +1,10 @@
-package io.buschman.mongoFSPlus.gridFS;
-
-import io.buschman.mongoFSPlus.common.ChunksStatisticsAdapter;
-import io.buschman.mongoFSPlus.common.MongoFileConstants;
+package me.lightspeed7.mongofs.gridfs;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+import me.lightspeed7.mongofs.common.ChunksStatisticsAdapter;
+import me.lightspeed7.mongofs.common.MongoFileConstants;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.Util;

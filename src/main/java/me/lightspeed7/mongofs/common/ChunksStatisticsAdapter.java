@@ -1,4 +1,4 @@
-package io.buschman.mongoFSPlus.common;
+package me.lightspeed7.mongofs.common;
 
 import com.mongodb.BasicDBObject;
 

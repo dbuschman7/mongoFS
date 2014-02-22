@@ -1,4 +1,4 @@
-package io.buschman.mongoFSPlus.common;
+package me.lightspeed7.mongofs.common;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import me.lightspeed7.mongofs.common.BufferedChunksOutputStream;
+import me.lightspeed7.mongofs.common.BytesCopier;
 
 import org.apache.tools.ant.filters.StringInputStream;
 import org.junit.Test;

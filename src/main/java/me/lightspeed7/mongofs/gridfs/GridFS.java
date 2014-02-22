@@ -11,7 +11,7 @@
  * governing permissions and limitations under the License.
  */
 
-package io.buschman.mongoFSPlus.gridFS;
+package me.lightspeed7.mongofs.gridfs;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

@@ -1,4 +1,4 @@
-package io.buschman.mongoFSPlus.gridFS;
+package me.lightspeed7.mongofs.gridfs;
 
 import java.io.IOException;
 import java.io.InputStream;

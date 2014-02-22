@@ -1,10 +1,12 @@
-package io.buschman.mongoFSPlus.common;
+package me.lightspeed7.mongofs.common;
 
 import static org.junit.Assert.assertEquals;
-import io.buschman.mongoFSPlus.gridFS.GridFSInputFile;
-import io.buschman.mongoFSPlus.gridFS.GridFSInputFileAdapter;
 
 import java.io.IOException;
+
+import me.lightspeed7.mongofs.common.FileChunksOutputStreamSink;
+import me.lightspeed7.mongofs.gridfs.GridFSInputFile;
+import me.lightspeed7.mongofs.gridfs.GridFSInputFileAdapter;
 
 import org.bson.types.ObjectId;
 import org.junit.Before;

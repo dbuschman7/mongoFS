@@ -11,17 +11,17 @@
  * governing permissions and limitations under the License.
  */
 
-package io.buschman.mongoFSPlus.gridFS;
-
-import io.buschman.mongoFSPlus.common.BufferedChunksOutputStream;
-import io.buschman.mongoFSPlus.common.BytesCopier;
-import io.buschman.mongoFSPlus.common.FileChunksOutputStreamSink;
-import io.buschman.mongoFSPlus.common.MongoFileConstants;
+package me.lightspeed7.mongofs.gridfs;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
+
+import me.lightspeed7.mongofs.common.BufferedChunksOutputStream;
+import me.lightspeed7.mongofs.common.BytesCopier;
+import me.lightspeed7.mongofs.common.FileChunksOutputStreamSink;
+import me.lightspeed7.mongofs.common.MongoFileConstants;
 
 import org.bson.types.ObjectId;
 

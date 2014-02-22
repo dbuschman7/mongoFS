@@ -1,10 +1,12 @@
-package io.buschman.mongoFSPlus.common;
+package me.lightspeed7.mongofs.common;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
+
+import me.lightspeed7.mongofs.common.MongoFileConstants;
 
 import org.junit.Test;
 

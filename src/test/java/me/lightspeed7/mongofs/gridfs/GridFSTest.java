@@ -11,7 +11,7 @@
  * governing permissions and limitations under the License.
  */
 
-package io.buschman.mongoFSPlus.gridFS;
+package me.lightspeed7.mongofs.gridfs;
 
 import static java.nio.charset.Charset.defaultCharset;
 import static org.junit.Assert.assertArrayEquals;
@@ -24,6 +24,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.UnknownHostException;
+
+import me.lightspeed7.mongofs.gridfs.GridFS;
+import me.lightspeed7.mongofs.gridfs.GridFSDBFile;
+import me.lightspeed7.mongofs.gridfs.GridFSInputFile;
 
 import org.bson.types.ObjectId;
 import org.junit.BeforeClass;

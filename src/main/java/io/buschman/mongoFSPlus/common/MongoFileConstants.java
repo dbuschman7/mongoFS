@@ -30,15 +30,14 @@ public enum MongoFileConstants {
     private MongoFileConstants(boolean core) {
 
         this.core = core;
-
     }
 
-    public static Set<String> getCoreFields() {
+    public static Set<String> getCoreFields(boolean mongoFS) {
 
         Set<String> set = new TreeSet<>();
 
         for (MongoFileConstants current : MongoFileConstants.values()) {
-            if (current.core) {
+            if (current.core || mongoFS) {
                 set.add(current.name());
             }
         }
@@ -46,12 +45,12 @@ public enum MongoFileConstants {
         return set;
     }
 
-    public static final Set<String> getExtendedFields() {
+    public static final Set<String> getExtendedFields(boolean mongoFS) {
 
         Set<String> set = new TreeSet<>();
 
         for (MongoFileConstants current : MongoFileConstants.values()) {
-            if (!current.core) {
+            if (!current.core || mongoFS) {
                 set.add(current.name());
             }
         }

@@ -286,8 +286,7 @@ public abstract class GridFSFile implements DBObject {
     public Set<String> keySet() {
 
         Set<String> keys = new HashSet<String>();
-        keys.addAll(MongoFileConstants.getCoreFields());
-        keys.addAll(MongoFileConstants.getExtendedFields());
+        keys.addAll(MongoFileConstants.getCoreFields(false));
         keys.addAll(extra.keySet());
         return keys;
     }

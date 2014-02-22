@@ -48,8 +48,17 @@ import com.mongodb.MongoException;
  * 
  * @mongodb.driver.manual core/gridfs/ GridFS
  */
-@SuppressWarnings( "rawtypes" )
-public class GridFS implements io.buschman.mongoFSPlus.GridFS {
+public class GridFS {
+
+    /**
+     * File's chunk size
+     */
+    public static final int DEFAULT_CHUNKSIZE = 256 * 1024;
+
+    /**
+     * Bucket to use for the collection namespaces
+     */
+    public static final String DEFAULT_BUCKET = "fs";
 
     /**
      * File's max chunk size
@@ -59,6 +68,7 @@ public class GridFS implements io.buschman.mongoFSPlus.GridFS {
      */
     @Deprecated
     public static final long MAX_CHUNKSIZE = (long) (3.5 * 1000 * 1000);
+
     private final DB database;
     private final String bucketName;
 
@@ -114,122 +124,145 @@ public class GridFS implements io.buschman.mongoFSPlus.GridFS {
         filesCollection.setObjectClass(GridFSDBFile.class);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Gets the list of files stored in this gridfs, sorted by filename.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#getFileList()
+     * @return cursor of file objects
      */
-    @Override
     public DBCursor getFileList() {
 
         return filesCollection.find().sort(new BasicDBObject("filename", 1));
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Gets a filtered list of files stored in this gridfs, sorted by filename.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#getFileList(com.mongodb.DBObject)
+     * @param query
+     *            filter to apply
+     * @return cursor of file objects
      */
-    @Override
     public DBCursor getFileList(final DBObject query) {
 
         return filesCollection.find(query).sort(new BasicDBObject("filename", 1));
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Gets a sorted, filtered list of files stored in this gridfs.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#getFileList(com.mongodb.DBObject, com.mongodb.DBObject)
+     * @param query
+     *            filter to apply
+     * @param sort
+     *            sorting to apply
+     * @return cursor of file objects
      */
-    @Override
     public DBCursor getFileList(final DBObject query, final DBObject sort) {
 
         return filesCollection.find(query).sort(sort);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Finds one file matching the given objectId. Equivalent to findOne(objectId).
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#find(org.bson.types.ObjectId)
+     * @param objectId
+     *            the objectId of the file stored on a server
+     * @return a gridfs file
+     * @throws com.mongodb.MongoException
      */
-    @Override
     public GridFSDBFile find(final ObjectId objectId) {
 
         return findOne(objectId);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Finds one file matching the given objectId.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#findOne(org.bson.types.ObjectId)
+     * @param objectId
+     *            the objectId of the file stored on a server
+     * @return a gridfs file
+     * @throws com.mongodb.MongoException
      */
-    @Override
     public GridFSDBFile findOne(final ObjectId objectId) {
 
         return findOne(new BasicDBObject("objectId", objectId));
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Finds one file matching the given filename.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#findOne(java.lang.String)
+     * @param filename
+     *            the name of the file stored on a server
+     * @return the gridfs db file
+     * @throws com.mongodb.MongoException
      */
-    @Override
     public GridFSDBFile findOne(final String filename) {
 
         return findOne(new BasicDBObject("filename", filename));
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Finds one file matching the given query.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#findOne(com.mongodb.DBObject)
+     * @param query
+     *            filter to apply
+     * @return a gridfs file
+     * @throws com.mongodb.MongoException
      */
-    @Override
     public GridFSDBFile findOne(final DBObject query) {
 
         return injectGridFSInstance(filesCollection.findOne(query));
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Finds a list of files matching the given filename.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#find(java.lang.String)
+     * @param filename
+     *            the filename to look for
+     * @return list of gridfs files
+     * @throws com.mongodb.MongoException
      */
-    @Override
     public List<GridFSDBFile> find(final String filename) {
 
         return find(new BasicDBObject("filename", filename));
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Finds a list of files matching the given filename.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#find(java.lang.String, com.mongodb.DBObject)
+     * @param filename
+     *            the filename to look for
+     * @param sort
+     *            the fields to sort with
+     * @return list of gridfs files
+     * @throws com.mongodb.MongoException
      */
-    @Override
     public List<GridFSDBFile> find(final String filename, final DBObject sort) {
 
         return find(new BasicDBObject("filename", filename), sort);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Finds a list of files matching the given query.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#find(com.mongodb.DBObject)
+     * @param query
+     *            the filter to apply
+     * @return list of gridfs files
+     * @throws com.mongodb.MongoException
      */
-    @Override
     public List<GridFSDBFile> find(final DBObject query) {
 
         return find(query, null);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Finds a list of files matching the given query.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#find(com.mongodb.DBObject, com.mongodb.DBObject)
+     * @param query
+     *            the filter to apply
+     * @param sort
+     *            the fields to sort with
+     * @return list of gridfs files
+     * @throws com.mongodb.MongoException
      */
-    @Override
     public List<GridFSDBFile> find(final DBObject query, final DBObject sort) {
 
         List<GridFSDBFile> files = new ArrayList<GridFSDBFile>();
@@ -264,12 +297,13 @@ public class GridFS implements io.buschman.mongoFSPlus.GridFS {
         return f;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Removes the file matching the given id.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#remove(org.bson.types.ObjectId)
+     * @param id
+     *            the id of the file to be removed
+     * @throws com.mongodb.MongoException
      */
-    @Override
     public void remove(final ObjectId id) {
 
         if (id == null) {
@@ -280,12 +314,13 @@ public class GridFS implements io.buschman.mongoFSPlus.GridFS {
         chunksCollection.remove(new BasicDBObject("files_id", id));
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Removes all files matching the given filename.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#remove(java.lang.String)
+     * @param filename
+     *            the name of the file to be removed
+     * @throws com.mongodb.MongoException
      */
-    @Override
     public void remove(final String filename) {
 
         if (filename == null) {
@@ -295,12 +330,13 @@ public class GridFS implements io.buschman.mongoFSPlus.GridFS {
         remove(new BasicDBObject("filename", filename));
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Removes all files matching the given query.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#remove(com.mongodb.DBObject)
+     * @param query
+     *            filter to apply
+     * @throws com.mongodb.MongoException
      */
-    @Override
     public void remove(final DBObject query) {
 
         if (query == null) {
@@ -312,112 +348,129 @@ public class GridFS implements io.buschman.mongoFSPlus.GridFS {
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Creates a file entry. After calling this method, you have to call {@link com.mongodb.gridfs.GridFSInputFile#save()}.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#createFile(byte[])
+     * @param data
+     *            the file's data
+     * @return a gridfs input file
      */
-    @Override
     public GridFSInputFile createFile(final byte[] data) {
 
         return createFile(new ByteArrayInputStream(data), true);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Creates a file entry. After calling this method, you have to call {@link com.mongodb.gridfs.GridFSInputFile#save()}.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#createFile(java.io.File)
+     * @param f
+     *            the file object
+     * @return a gridfs input file
+     * @throws IOException
      */
-    @Override
     public GridFSInputFile createFile(final File f)
             throws IOException {
 
         return createFile(new FileInputStream(f), f.getName(), true);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Creates a file entry. After calling this method, you have to call {@link com.mongodb.gridfs.GridFSInputFile#save()}.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#createFile(java.io.InputStream)
+     * @param in
+     *            an inputstream containing the file's data
+     * @return a gridfs input file
      */
-    @Override
     public GridFSInputFile createFile(final InputStream in) {
 
         return createFile(in, null);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Creates a file entry. After calling this method, you have to call {@link com.mongodb.gridfs.GridFSInputFile#save()}.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#createFile(java.io.InputStream, boolean)
+     * @param in
+     *            an inputstream containing the file's data
+     * @param closeStreamOnPersist
+     *            indicate the passed in input stream should be closed once the data chunk persisted
+     * @return a gridfs input file
      */
-    @Override
     public GridFSInputFile createFile(final InputStream in, final boolean closeStreamOnPersist) {
 
         return createFile(in, null, closeStreamOnPersist);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Creates a file entry. After calling this method, you have to call {@link com.mongodb.gridfs.GridFSInputFile#save()}.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#createFile(java.io.InputStream, java.lang.String)
+     * @param in
+     *            an inputstream containing the file's data
+     * @param filename
+     *            the file name as stored in the db
+     * @return a gridfs input file
      */
-    @Override
     public GridFSInputFile createFile(final InputStream in, final String filename) {
 
         return new GridFSInputFile(this, in, filename);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Creates a file entry. After calling this method, you have to call {@link com.mongodb.gridfs.GridFSInputFile#save()}.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#createFile(java.io.InputStream, java.lang.String, boolean)
+     * @param in
+     *            an inputstream containing the file's data
+     * @param filename
+     *            the file name as stored in the db
+     * @param closeStreamOnPersist
+     *            indicate the passed in input stream should be closed once the data chunk persisted
+     * @return a gridfs input file
      */
-    @Override
     public GridFSInputFile createFile(final InputStream in, final String filename, final boolean closeStreamOnPersist) {
 
         return new GridFSInputFile(this, in, filename, closeStreamOnPersist);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Creates a file entry.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#createFile(java.lang.String)
+     * @param filename
+     *            the file name as stored in the db
+     * @return a gridfs input file
+     * @see GridFS#createFile()
      */
-    @Override
     public GridFSInputFile createFile(final String filename) {
 
         return new GridFSInputFile(this, filename);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * This method creates an empty {@link GridFSInputFile} instance. On this instance an {@link java.io.OutputStream} can be
+     * obtained using the {@link GridFSInputFile#getOutputStream()} method. You can still call
+     * {@link GridFSInputFile#setContentType(String)} and {@link GridFSInputFile#setFilename(String)}. The file will be completely
+     * written and closed after calling the {@link java.io.OutputStream#close()} method on the output stream.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#createFile()
+     * @return GridFS file handle instance.
      */
-    @Override
     public GridFSInputFile createFile() {
 
         return new GridFSInputFile(this);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Gets the bucket name used in the collection's namespace. Default value is 'fs'.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#getBucketName()
+     * @return the name of the file bucket
      */
-    @Override
     public String getBucketName() {
 
         return bucketName;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Gets the database used.
      * 
-     * @see io.buschman.mongoFSPlus.legacy.IGridFS#getDB()
+     * @return the database
      */
-    @Override
     public DB getDB() {
 
         return database;

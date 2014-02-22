@@ -33,6 +33,7 @@ repositories{
 dependencies {
     compile gradleApi()
     compile 'org.mongodb:mongo-java-driver:2.11.4'
+    testCompile 'org.mockito:mockito-all:1.9.5'
 }
 
 task sourcesJar(type: Jar) {

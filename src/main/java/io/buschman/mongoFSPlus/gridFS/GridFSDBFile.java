@@ -28,6 +28,7 @@ import com.mongodb.MongoException;
  * OutputStream - getting each chunk as a byte array - getting an InputStream to stream the data into
  * 
  * @author antoine
+ * @author David Buschman
  */
 public class GridFSDBFile extends GridFSFile {
 
@@ -104,8 +105,7 @@ public class GridFSDBFile extends GridFSFile {
             throw new IllegalStateException("No GridFS instance defined!");
         }
 
-        DBObject chunk = CollectionsWrapper.getChunksCollection(fs)//
-                .findOne(new BasicDBObject("files_id", id).append("n", i));
+        DBObject chunk = fs.getChunksCollection().findOne(new BasicDBObject("files_id", id).append("n", i));
         if (chunk == null) {
             throw new MongoException("Can't find a chunk!  file id: " + id + " chunk: " + i);
         }
@@ -118,8 +118,8 @@ public class GridFSDBFile extends GridFSFile {
      */
     void remove() {
 
-        CollectionsWrapper.getFilesCollection(fs).remove(new BasicDBObject("_id", id));
-        CollectionsWrapper.getChunksCollection(fs).remove(new BasicDBObject("files_id", id));
+        fs.getFilesCollection().remove(new BasicDBObject("_id", id));
+        fs.getChunksCollection().remove(new BasicDBObject("files_id", id));
     }
 
 }

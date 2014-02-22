@@ -13,10 +13,8 @@
 
 package io.buschman.mongoFSPlus.gridFS;
 
-import static java.util.Arrays.asList;
-import io.buschman.mongoFSPlus.GridFS;
+import io.buschman.mongoFSPlus.common.MongoFileConstants;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +24,7 @@ import java.util.Set;
 import org.bson.BSONObject;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
@@ -34,11 +33,9 @@ import com.mongodb.util.JSON;
  * The abstract class representing a GridFS file.
  * 
  * @author antoine
+ * @author David Buschman
  */
 public abstract class GridFSFile implements DBObject {
-
-    private static final Set<String> VALID_FIELDS = Collections.unmodifiableSet(new HashSet<String>(asList("_id",
-            "filename", "contentType", "length", "chunkSize", "uploadDate", "aliases", "md5")));
 
     final DBObject extra = new BasicDBObject();
 
@@ -47,7 +44,7 @@ public abstract class GridFSFile implements DBObject {
     String filename;
     String contentType;
     long length;
-    long chunkSize;
+    int chunkSize;
     Date uploadDate;
     String md5;
 
@@ -61,7 +58,7 @@ public abstract class GridFSFile implements DBObject {
         if (fs == null) {
             throw new MongoException("need fs");
         }
-        CollectionsWrapper.getFilesCollection(fs).save(this);
+        fs.getFilesCollection().save(this);
     }
 
     /**
@@ -151,7 +148,7 @@ public abstract class GridFSFile implements DBObject {
      * 
      * @return the chunkSize
      */
-    public long getChunkSize() {
+    public int getChunkSize() {
 
         return chunkSize;
     }
@@ -208,6 +205,20 @@ public abstract class GridFSFile implements DBObject {
         return md5;
     }
 
+    public long getAsLong(String key) {
+
+        if (key == null) {
+            throw new IllegalArgumentException("key cannot be null");
+        }
+
+        Object value = this.get(key);
+        if (value == null) {
+            return -1;
+        }
+
+        return Long.parseLong(value.toString());
+    }
+
     public Object put(final String key, final Object v) {
 
         if (key == null) {
@@ -221,7 +232,7 @@ public abstract class GridFSFile implements DBObject {
         } else if (key.equals("length")) {
             length = ((Number) v).longValue();
         } else if (key.equals("chunkSize")) {
-            chunkSize = ((Number) v).longValue();
+            chunkSize = ((Number) v).intValue();
         } else if (key.equals("uploadDate")) {
             uploadDate = (Date) v;
         } else if (key.equals("md5")) {
@@ -275,7 +286,8 @@ public abstract class GridFSFile implements DBObject {
     public Set<String> keySet() {
 
         Set<String> keys = new HashSet<String>();
-        keys.addAll(VALID_FIELDS);
+        keys.addAll(MongoFileConstants.getCoreFields());
+        keys.addAll(MongoFileConstants.getExtendedFields());
         keys.addAll(extra.keySet());
         return keys;
     }
@@ -341,5 +353,15 @@ public abstract class GridFSFile implements DBObject {
     public Object removeField(final String key) {
 
         throw new UnsupportedOperationException();
+    }
+
+    public final DBCollection getChunksCollection() {
+
+        return fs.getChunksCollection();
+    }
+
+    public final DBCollection getFilesCollection() {
+
+        return fs.getFilesCollection();
     }
 }

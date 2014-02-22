@@ -13,26 +13,26 @@
 
 package io.buschman.mongoFSPlus.gridFS;
 
-import io.buschman.mongoFSPlus.GridFS;
+import io.buschman.mongoFSPlus.common.BufferedChunksOutputStream;
+import io.buschman.mongoFSPlus.common.BytesCopier;
+import io.buschman.mongoFSPlus.common.FileChunksOutputStreamSink;
+import io.buschman.mongoFSPlus.common.MongoFileConstants;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 import org.bson.types.ObjectId;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
-import com.mongodb.util.Util;
 
 /**
  * This class represents a GridFS file to be written to the database Operations include: - writing data obtained from an
  * InputStream - getting an OutputStream to stream the data out
  * 
+ * @author David Buschman
  * @author Eliot Horowitz and Guy K. Kloss
  */
 public class GridFSInputFile extends GridFSFile {
@@ -40,12 +40,7 @@ public class GridFSInputFile extends GridFSFile {
     private final InputStream inputStream;
     private final boolean closeStreamOnPersist;
     private boolean savedChunks = false;
-    byte[] buffer = null;
-    int currentChunkNumber = 0;
-    int currentBufferPosition = 0;
-    private long totalBytes = 0;
     private OutputStream outputStream = null;
-    private MessageDigest messageDigester = null;
 
     /**
      * Default constructor setting the GridFS file name and providing an input stream containing data to be written to the file.
@@ -70,13 +65,16 @@ public class GridFSInputFile extends GridFSFile {
         this.id = new ObjectId();
         this.chunkSize = GridFS.DEFAULT_CHUNKSIZE;
         this.uploadDate = new Date();
-        try {
-            this.messageDigester = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("No MD5!");
-        }
-        this.messageDigester.reset();
-        this.buffer = new byte[(int) chunkSize];
+    }
+
+    private OutputStream generateOutputStream(final DBCollection collection) {
+
+        GridFSInputFileAdapter adapter = new GridFSInputFileAdapter(this);
+
+        FileChunksOutputStreamSink streamSink = new FileChunksOutputStreamSink(collection, this.id, adapter);
+
+        BufferedChunksOutputStream stream = new BufferedChunksOutputStream(streamSink, this.chunkSize);
+        return stream;
     }
 
     /**
@@ -153,13 +151,12 @@ public class GridFSInputFile extends GridFSFile {
      * @param chunkSize
      *            The size in bytes.
      */
-    public void setChunkSize(final long chunkSize) {
+    public void setChunkSize(final int chunkSize) {
 
         if (outputStream != null || savedChunks) {
             return;
         }
         this.chunkSize = chunkSize;
-        buffer = new byte[(int) this.chunkSize];
     }
 
     /**
@@ -189,7 +186,7 @@ public class GridFSInputFile extends GridFSFile {
      *            Size of chunks for file in bytes.
      * @throws MongoException
      */
-    public void save(final long chunkSize) {
+    public void save(final int chunkSize) {
 
         if (outputStream != null) {
             throw new MongoException("cannot mix OutputStream and regular save()");
@@ -234,7 +231,7 @@ public class GridFSInputFile extends GridFSFile {
      *             on problems reading the new entry's {@link java.io.InputStream}.
      * @throws MongoException
      */
-    public int saveChunks(final long chunkSize)
+    public int saveChunks(final int chunkSize)
             throws IOException {
 
         if (outputStream != null) {
@@ -250,19 +247,18 @@ public class GridFSInputFile extends GridFSFile {
 
         if (this.chunkSize != chunkSize) {
             this.chunkSize = chunkSize;
-            buffer = new byte[(int) this.chunkSize];
         }
 
-        int bytesRead = 0;
-        while (bytesRead >= 0) {
-            currentBufferPosition = 0;
-            bytesRead = _readStream2Buffer();
-            dumpBuffer(true);
+        // new stuff
+        this.outputStream = generateOutputStream(fs.getChunksCollection());
+        try {
+            new BytesCopier(inputStream, this.outputStream, this.closeStreamOnPersist).transfer(false);
+        } finally {
+            this.outputStream.close();
         }
 
-        // only finish data, do not write file, in case one wants to change metadata
-        finishData();
-        return currentChunkNumber;
+        // only write data, do not write file, in case one wants to change metadata
+        return (int) this.getAsLong(MongoFileConstants.chunkCount.name());
     }
 
     /**
@@ -276,91 +272,9 @@ public class GridFSInputFile extends GridFSFile {
     public OutputStream getOutputStream() {
 
         if (outputStream == null) {
-            outputStream = new GridFSOutputStream(this);
+            outputStream = generateOutputStream(fs.getChunksCollection());
         }
         return outputStream;
-    }
-
-    /**
-     * Dumps a new chunk into the chunks collection. Depending on the flag, also partial buffers (at the end) are going to be
-     * written immediately.
-     * 
-     * @param writePartial
-     *            Write also partial buffers full.
-     * @throws MongoException
-     */
-    void dumpBuffer(final boolean writePartial) {
-
-        if ((currentBufferPosition < chunkSize) && !writePartial) {
-            // Bail out, chunk not complete yet
-            return;
-        }
-        if (currentBufferPosition == 0) {
-            // chunk is empty, may be last chunk
-            return;
-        }
-
-        byte[] writeBuffer = buffer;
-        if (currentBufferPosition != chunkSize) {
-            writeBuffer = new byte[currentBufferPosition];
-            System.arraycopy(buffer, 0, writeBuffer, 0, currentBufferPosition);
-        }
-
-        DBObject chunk = createChunk(id, currentChunkNumber, writeBuffer);
-
-        CollectionsWrapper.getChunksCollection(fs).save(chunk);
-
-        currentChunkNumber++;
-        totalBytes += writeBuffer.length;
-        messageDigester.update(writeBuffer);
-        currentBufferPosition = 0;
-    }
-
-    protected DBObject createChunk(final Object id, final int currentChunkNumber, final byte[] writeBuffer) {
-
-        return new BasicDBObject("files_id", id).append("n", currentChunkNumber).append("data", writeBuffer);
-    }
-
-    /**
-     * Reads a buffer full from the {@link java.io.InputStream}.
-     * 
-     * @return Number of bytes read from stream.
-     * @throws IOException
-     *             if the reading from the stream fails.
-     */
-    private int _readStream2Buffer()
-            throws IOException {
-
-        int bytesRead = 0;
-        while (currentBufferPosition < chunkSize && bytesRead >= 0) {
-            bytesRead = inputStream.read(buffer, currentBufferPosition, (int) chunkSize - currentBufferPosition);
-            if (bytesRead > 0) {
-                currentBufferPosition += bytesRead;
-            } else if (bytesRead == 0) {
-                throw new RuntimeException("i'm doing something wrong");
-            }
-        }
-        return bytesRead;
-    }
-
-    /**
-     * Marks the data as fully written. This needs to be called before super.save()
-     */
-    void finishData() {
-
-        if (!savedChunks) {
-            md5 = Util.toHex(messageDigester.digest());
-            messageDigester = null;
-            length = totalBytes;
-            savedChunks = true;
-            try {
-                if (inputStream != null && closeStreamOnPersist) {
-                    inputStream.close();
-                }
-            } catch (IOException e) {
-                // ignore
-            }
-        }
     }
 
 }

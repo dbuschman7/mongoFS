@@ -18,11 +18,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import io.buschman.mongoFSPlus.GridFS;
-import io.buschman.mongoFSPlus.MongoFSFactory;
-import io.buschman.mongoFSPlus.gridFS.CollectionsWrapper;
-import io.buschman.mongoFSPlus.gridFS.GridFSDBFile;
-import io.buschman.mongoFSPlus.gridFS.GridFSInputFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -378,7 +373,7 @@ public class GridFSTest {
         database.dropDatabase();
         database = mongoClient.getDB("DriverTest-" + unitTestName);
 
-        gridFS = MongoFSFactory.constructGridFS(database);
+        gridFS = new GridFS(database);
     }
 
     public void tearDown() {
@@ -438,8 +433,8 @@ public class GridFSTest {
 
         int[] i = new int[2];
 
-        i[0] = CollectionsWrapper.getFilesCollection(gridFS).find().count();
-        i[1] = CollectionsWrapper.getChunksCollection(gridFS).find().count();
+        i[0] = gridFS.getFilesCollection().find().count();
+        i[1] = gridFS.getChunksCollection().find().count();
         return i;
     }
 }

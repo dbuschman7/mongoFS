@@ -35,6 +35,7 @@ dependencies {
     compile gradleApi()
     compile 'org.mongodb:mongo-java-driver:2.11.4'
     testCompile 'org.mockito:mockito-all:1.9.5'
+    testCompile 'com.google.guava:guava:16.0.1'    
 }
 
 task sourcesJar(type: Jar) {

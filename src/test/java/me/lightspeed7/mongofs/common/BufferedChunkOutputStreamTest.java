@@ -7,6 +7,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.lightspeed7.mongofs.util.BytesCopier;
+
 import org.apache.tools.ant.filters.StringInputStream;
 import org.junit.Test;
 

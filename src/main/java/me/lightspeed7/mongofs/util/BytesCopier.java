@@ -1,4 +1,4 @@
-package me.lightspeed7.mongofs.common;
+package me.lightspeed7.mongofs.util;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,6 +1,7 @@
 import org.gradle.api.artifacts.maven.MavenDeployment
 
 /*
+ * Copyright (c) 2014 - David Buschman
  * Copyright (c) 2008 - 2013 10gen, Inc. <http://10gen.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +22,7 @@ apply plugin: 'signing'
 apply plugin: 'eclipse'
 
 group = 'io.buschman'
-version = '0.1-SNAPSHOT'
+version = '0.2-SNAPSHOT'
 
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'

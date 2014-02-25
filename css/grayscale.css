@@ -48,7 +48,7 @@ a {
 a:hover,
 a:focus {
     text-decoration: none;
-    background-color: rgba(60,40,23,.4);
+    background-color: rgb(60,40,23);
 }
 
 .light {
@@ -57,7 +57,7 @@ a:focus {
 
 .navbar {
     margin-bottom: 0;
-    border-bottom: 1px solid rgba(255,255,255,.3);
+    border-bottom: 1px solid rgb(60,40,23);
     text-transform: uppercase;
     font-family: Montserrat,"Helvetica Neue",Helvetica,Arial,sans-serif;
     background-color: #000;
@@ -85,7 +85,7 @@ a:focus {
 .navbar-custom .nav li a:focus,
 .navbar-custom .nav li.active {
     outline: 0;
-    background-color: rgba(60,40,23,.4);
+    background-color: rgb(60,40,23);
 }
 
 .navbar-toggle {
@@ -101,7 +101,7 @@ a:focus {
 
 @media(min-width:767px) {
     .navbar {
-        padding: 20px 0;
+        padding: 0px 0;
         border-bottom: 0;
         letter-spacing: 1px;
         background: 0 0;
@@ -116,7 +116,7 @@ a:focus {
     }
 
     .navbar-custom.top-nav-collapse {
-        border-bottom: 1px solid rgba(255,255,255,.3);
+        border-bottom: 1px solid rgb(60,40,23);
     }
 }
 
@@ -196,7 +196,7 @@ h1 small  {
 .btn-circle:focus {
     outline: 0;
     color: #fff;
-    background: rgba(255,255,255,.1);
+    background: rgba(60,40,23);
 }
 
 .page-scroll .btn-circle i.animated {
@@ -341,13 +341,13 @@ h1 small  {
 ::-moz-selection {
     text-shadow: none;
     background: #fcfcfc;
-    background: rgba(255,255,255,.2);
+    background: rgba(60,40,23,.4);
 }
 
 ::selection {
     text-shadow: none;
     background: #fcfcfc;
-    background: rgba(255,255,255,.2);
+    background: rgba(60,40,23,.4);
 }
 
 img::selection {

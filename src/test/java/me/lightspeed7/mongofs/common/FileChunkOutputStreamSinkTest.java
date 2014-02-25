@@ -1,55 +1,76 @@
 package me.lightspeed7.mongofs.common;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 
-import me.lightspeed7.mongofs.common.FileChunksOutputStreamSink;
+import me.lightspeed7.mongofs.MongoTestConfig;
+import me.lightspeed7.mongofs.gridfs.GridFS;
 import me.lightspeed7.mongofs.gridfs.GridFSInputFile;
 import me.lightspeed7.mongofs.gridfs.GridFSInputFileAdapter;
 
 import org.bson.types.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
-import com.mongodb.DummyCollection;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
 
 public class FileChunkOutputStreamSinkTest {
 
-    private DummyCollection collection;
+    private static final String DB_NAME = "MongoFS-FileChunkOutputStreamSink";
+
+    private DB database;
     private ObjectId id;
-    private GridFSInputFileAdapter adapter;
+
+    private MongoClient mongoClient;
+
+    private GridFS gridFS;
+
+    private String bucketName;
+
+    // private DBCollection filesCollection;
+
+    private DBCollection chunksCollection;
 
     @Before
     public void before() {
 
-        DB mockDB = Mockito.mock(DB.class);
-        Mockito.when(mockDB.getName()).thenReturn("foobar");
+        mongoClient = MongoTestConfig.constructMongoClient();
 
-        collection = new DummyCollection(mockDB, "foo");
+        database = mongoClient.getDB(DB_NAME);
+        gridFS = new GridFS(database);
+        bucketName = "buffer";
+        // filesCollection = database.getCollection(bucketName + ".files");
+        chunksCollection = database.getCollection(bucketName + ".chunks");
+
         id = new ObjectId();
-        adapter = new GridFSInputFileAdapter(Mockito.mock(GridFSInputFile.class));
     }
 
     @Test
     public void testFullBufferWrite()
             throws IOException {
 
-        try (FileChunksOutputStreamSink sink = new FileChunksOutputStreamSink(collection, id, adapter)) {
+        GridFSInputFile file = gridFS.createFile("foo");
+        GridFSInputFileAdapter adapter = new GridFSInputFileAdapter(file);
+
+        try (FileChunksOutputStreamSink sink = new FileChunksOutputStreamSink(chunksCollection, file.getId(), adapter)) {
             byte[] array = "This is a test".getBytes();
             sink.write(array, 0, array.length);
         }
 
         // assert
-        assertEquals(//
-                String.format("{ \"files_id\" : { \"$oid\" : \"%s\"} , \"n\" : 0 , \"data\" : <Binary Data>}",//
-                        id.toString()//
-                ),//
-                collection.list.get(0).toString());
+        DBObject found = chunksCollection.findOne(new BasicDBObject("files_id", file.getId()));
 
-        byte[] bytes = (byte[]) collection.list.get(0).get("data");
+        assertNotNull(found.get("files_id"));
+        assertEquals(file.getId(), found.get("files_id"));
+
+        assertNotNull(found.get("data"));
+        byte[] bytes = (byte[]) found.get("data");
         assertEquals(14, bytes.length);
         assertEquals("This is a test", new String(bytes, "UTF-8"));
 
@@ -59,19 +80,22 @@ public class FileChunkOutputStreamSinkTest {
     public void testPartialBufferWrite()
             throws IOException {
 
-        try (FileChunksOutputStreamSink sink = new FileChunksOutputStreamSink(collection, id, adapter)) {
+        GridFSInputFile file = gridFS.createFile("bar");
+        GridFSInputFileAdapter adapter = new GridFSInputFileAdapter(file);
+
+        try (FileChunksOutputStreamSink sink = new FileChunksOutputStreamSink(chunksCollection, file.getId(), adapter)) {
             byte[] array = "This is a test".getBytes();
             sink.write(array, 10, 4);
         }
 
         // assert
-        assertEquals(//
-                String.format("{ \"files_id\" : { \"$oid\" : \"%s\"} , \"n\" : 0 , \"data\" : <Binary Data>}",//
-                        id.toString()//
-                ),//
-                collection.list.get(0).toString());
+        DBObject found = chunksCollection.findOne(new BasicDBObject("files_id", file.getId()));
 
-        byte[] bytes = (byte[]) collection.list.get(0).get("data");
+        assertNotNull(found.get("files_id"));
+        assertEquals(file.getId(), found.get("files_id"));
+
+        assertNotNull(found.get("data"));
+        byte[] bytes = (byte[]) found.get("data");
         assertEquals(4, bytes.length);
 
         assertEquals("test", new String(bytes, "UTF-8"));

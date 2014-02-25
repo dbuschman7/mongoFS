@@ -20,6 +20,7 @@ import java.util.Date;
 
 import me.lightspeed7.mongofs.common.BufferedChunksOutputStream;
 import me.lightspeed7.mongofs.common.FileChunksOutputStreamSink;
+import me.lightspeed7.mongofs.common.InputFile;
 import me.lightspeed7.mongofs.common.MongoFileConstants;
 import me.lightspeed7.mongofs.util.BytesCopier;
 
@@ -35,7 +36,7 @@ import com.mongodb.MongoException;
  * @author David Buschman
  * @author Eliot Horowitz and Guy K. Kloss
  */
-public class GridFSInputFile extends GridFSFile {
+public class GridFSInputFile extends GridFSFile implements InputFile {
 
     private final InputStream inputStream;
     private final boolean closeStreamOnPersist;
@@ -173,7 +174,7 @@ public class GridFSInputFile extends GridFSFile {
     /**
      * Internal use only!!
      */
-    void superSave() {
+    final void superSave() {
 
         super.save();
     }
@@ -261,14 +262,6 @@ public class GridFSInputFile extends GridFSFile {
         return (int) this.getAsLong(MongoFileConstants.chunkCount.name());
     }
 
-    /**
-     * After retrieving this {@link java.io.OutputStream}, this object will be capable of accepting successively written data to
-     * the output stream. To completely persist this GridFS object, you must finally call the {@link java.io.OutputStream#close()}
-     * method on the output stream. Note that calling the save() and saveChunks() methods will throw Exceptions once you obtained
-     * the OutputStream.
-     * 
-     * @return Writable stream object.
-     */
     public OutputStream getOutputStream() {
 
         if (outputStream == null) {

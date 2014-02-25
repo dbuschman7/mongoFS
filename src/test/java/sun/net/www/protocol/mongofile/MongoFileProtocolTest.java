@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import me.lightspeed7.mongofs.MongoFile;
+import me.lightspeed7.mongofs.MongoFileUrl;
 
 import org.junit.Test;
 
@@ -21,7 +21,7 @@ public class MongoFileProtocolTest {
     public void testKnown() {
 
         MongoFileURLStreamHandlerFactory factory = new MongoFileURLStreamHandlerFactory();
-        URLStreamHandler x = factory.createURLStreamHandler(MongoFile.PROTOCOL);
+        URLStreamHandler x = factory.createURLStreamHandler(MongoFileUrl.PROTOCOL);
         assertNotNull(x);
         assertEquals(x.getClass().getName(), sun.net.www.protocol.mongofile.Handler.class.getName());
     }
@@ -38,7 +38,7 @@ public class MongoFileProtocolTest {
     public void testHandlerOpenConnection()
             throws IOException {
 
-        MongoFile url = MongoFile.construct("id", "fileName.pdf", MediaType.PDF.toString());
+        MongoFileUrl url = MongoFileUrl.construct("id", "fileName.pdf", MediaType.PDF.toString());
         URLConnection connection = url.getUrl().openConnection();
 
         fail("This test should throw an exception");
@@ -49,7 +49,7 @@ public class MongoFileProtocolTest {
     public void testHandlerGetContent()
             throws IOException {
 
-        MongoFile url = MongoFile.construct("id", "fileName.pdf", MediaType.PDF.toString());
+        MongoFileUrl url = MongoFileUrl.construct("id", "fileName.pdf", MediaType.PDF.toString());
         Object object = url.getUrl().getContent();
 
         fail("This test should throw an exception");

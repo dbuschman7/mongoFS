@@ -1,4 +1,4 @@
-package me.lightspeed7.mongofs.gridfs;
+package me.lightspeed7.mongofs;
 
 import me.lightspeed7.mongofs.common.ChunksStatisticsAdapter;
 
@@ -8,11 +8,11 @@ import me.lightspeed7.mongofs.common.ChunksStatisticsAdapter;
  * @author David Buschman
  * 
  */
-public class GridFSInputFileAdapter extends ChunksStatisticsAdapter {
+public class MongoFileWriterAdapter extends ChunksStatisticsAdapter {
 
-    private GridFSInputFile file;
+    private MongoFile file;
 
-    public GridFSInputFileAdapter(GridFSInputFile file) {
+    public MongoFileWriterAdapter(MongoFile file) {
 
         super(file);
         this.file = file;
@@ -22,6 +22,6 @@ public class GridFSInputFileAdapter extends ChunksStatisticsAdapter {
     public void close() {
 
         super.close();
-        file.superSave();
+        file.save();
     }
 }

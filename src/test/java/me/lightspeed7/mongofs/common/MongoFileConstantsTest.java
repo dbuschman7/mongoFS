@@ -6,11 +6,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
-import me.lightspeed7.mongofs.common.MongoFileConstants;
-
 import org.junit.Test;
 
-public class MongoFilerConstantsTest {
+public class MongoFileConstantsTest {
 
     @Test
     public void testCoreGridFSList() {
@@ -23,7 +21,7 @@ public class MongoFilerConstantsTest {
         assertTrue(coreFields.contains(MongoFileConstants.md5.name()));
         assertTrue(coreFields.contains(MongoFileConstants.chunkSize.name()));
         assertTrue(coreFields.contains(MongoFileConstants.contentType.name()));
-        assertTrue(coreFields.contains(MongoFileConstants.alias.name()));
+        assertTrue(coreFields.contains(MongoFileConstants.aliases.name()));
         assertTrue(coreFields.contains(MongoFileConstants.length.name()));
         assertTrue(coreFields.contains(MongoFileConstants.uploadDate.name()));
     }
@@ -33,18 +31,18 @@ public class MongoFilerConstantsTest {
 
         Set<String> coreFields = MongoFileConstants.getCoreFields(true);
         assertNotNull(coreFields);
-        assertEquals(11, coreFields.size());
+        assertEquals(12, coreFields.size());
         assertTrue(coreFields.contains(MongoFileConstants._id.name()));
         assertTrue(coreFields.contains(MongoFileConstants.filename.name()));
         assertTrue(coreFields.contains(MongoFileConstants.md5.name()));
         assertTrue(coreFields.contains(MongoFileConstants.chunkSize.name()));
         assertTrue(coreFields.contains(MongoFileConstants.contentType.name()));
-        assertTrue(coreFields.contains(MongoFileConstants.alias.name()));
+        assertTrue(coreFields.contains(MongoFileConstants.aliases.name()));
         assertTrue(coreFields.contains(MongoFileConstants.length.name()));
         assertTrue(coreFields.contains(MongoFileConstants.uploadDate.name()));
 
         assertTrue(coreFields.contains(MongoFileConstants.chunkCount.name()));
         assertTrue(coreFields.contains(MongoFileConstants.compressionRatio.name()));
-        assertTrue(coreFields.contains(MongoFileConstants.uncompressedLength.name()));
+        assertTrue(coreFields.contains(MongoFileConstants.compressedLength.name()));
     }
 }

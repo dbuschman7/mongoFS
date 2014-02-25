@@ -1,203 +1,346 @@
 package me.lightspeed7.mongofs;
 
-import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import me.lightspeed7.mongofs.util.FileUtil;
-import sun.net.www.protocol.mongofile.Handler;
-import sun.net.www.protocol.mongofile.Parser;
+import me.lightspeed7.mongofs.common.InputFile;
+import me.lightspeed7.mongofs.common.MongoFileConstants;
 
-/**
- * 
- * mongoFile:fileName.pdf?id#application/pdf
- * 
- * and is mapped to the following URL fields
- * 
- * protocol:path?query#ref
- * 
- * @author David Buschman
- * 
- */
-public class MongoFile {
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+import com.mongodb.MongoException;
+import com.mongodb.util.JSON;
 
-    public static final String PROTOCOL = "mongofile";
-    public static final String GZ = "gz";
+public class MongoFile implements InputFile {
 
-    private URL url;
+    private static final String METADATA = "metadata";
 
-    // factories and helpers
-    public static final MongoFile construct(String id, String fileName, String mediaType)
-            throws MalformedURLException {
-
-        return construct(Parser.construct(id, fileName, mediaType));
-    }
-
-    public static final MongoFile construct(String spec)
-            throws MalformedURLException {
-
-        return construct(Parser.construct(spec));
-    }
+    BasicDBObject surrogate;
+    DBCollection filesCollection;
 
     /**
-     * Construct a MogoFile object from the given URL, it will be tested from validity
+     * Construct a MongoFile object for reading data
      * 
-     * @param url
-     * @return a MongoFile object for this URL
+     * @param collection
+     * @param obj
      */
-    public static final MongoFile construct(URL url) {
+    MongoFile(DBCollection collection, MongoFileUrl url, BasicDBObject obj) {
 
-        if (url == null) {
-            throw new IllegalArgumentException("url cannot be null");
-        }
-
-        if (!url.getProtocol().equals(PROTOCOL)) {
-            throw new IllegalStateException(String.format("Only %s protocal is valid to be wrapped", PROTOCOL));
-        }
-        return new MongoFile(url);
+        this.filesCollection = collection;
+        this.surrogate = obj;
     }
 
     /**
-     * Is the given spec a valid MongoFile URL
+     * Construct a MongoFile object for writing data
      * 
-     * @param spec
+     * @param collection
+     * @param url
+     */
+    MongoFile(DBCollection collection, MongoFileUrl url, int chunkSize) {
+
+        this.filesCollection = collection;
+        this.surrogate = new BasicDBObject(10);
+
+        this.surrogate.put(MongoFileConstants._id.toString(), url.getMongoFileId());
+
+        this.surrogate.put(MongoFileConstants.chunkSize.toString(), chunkSize);
+        this.surrogate.put(MongoFileConstants.filename.toString(), url.getFilePath());
+        this.surrogate.put(MongoFileConstants.contentType.toString(), url.getMediaType());
+        this.surrogate.put(MongoFileConstants.compressionFormat.toString(), url.getCompresionFormat());
+    }
+
+    private String getBucketName() {
+
+        return this.filesCollection.getName().split("\\.")[0];
+
+    }
+
+    /**
+     * Saves the file entry to the files collection
+     * 
+     * @throws MongoException
+     */
+    public void save() {
+
+        filesCollection.save(surrogate);
+    }
+
+    /**
+     * Verifies that the MD5 matches between the database and the local file. This should be called after transferring a file.
+     * 
+     * @throws MongoException
+     */
+    public void validate() {
+
+        String md5key = MongoFileConstants.md5.toString();
+        String md5 = surrogate.getString(md5key);
+        if (md5 == null) {
+            throw new MongoException("no md5 stored");
+        }
+
+        DBObject cmd = new BasicDBObject("filemd5", surrogate.get(MongoFileConstants._id.toString()));
+        cmd.put("root", getBucketName());
+        DBObject res = filesCollection.getDB().command(cmd);
+        if (res != null && res.containsField(md5key)) {
+            String m = res.get(md5key).toString();
+            if (m.equals(md5)) {
+                return;
+            }
+            throw new MongoException("md5 differ.  mine [" + md5 + "] theirs [" + m + "]");
+        }
+
+        // no md5 from the server
+        throw new MongoException("no md5 returned from server: " + res);
+
+    }
+
+    public MongoFileUrl getURL()
+            throws MalformedURLException {
+
+        return MongoFileUrl.construct(this.getId().toString(), this.getFilename(), this.getContentType(),
+                (String) this.get(MongoFileConstants.compressionFormat.toString()));
+    }
+
+    /**
+     * Returns the number of chunks that store the file data.
+     * 
+     * @return number of chunks
+     */
+    public int getChunkCount() {
+
+        return surrogate.getInt(MongoFileConstants.chunkCount.toString());
+    }
+
+    /**
+     * Gets the id.
+     * 
+     * @return the id of the file.
+     */
+    public Object getId() {
+
+        return surrogate.get("_id");
+    }
+
+    /**
+     * Gets the filename.
+     * 
+     * @return the name of the file
+     */
+    public String getFilename() {
+
+        return surrogate.getString(MongoFileConstants.filename.toString());
+    }
+
+    /**
+     * Gets the content type.
+     * 
+     * @return the content type
+     */
+    public String getContentType() {
+
+        return surrogate.getString(MongoFileConstants.contentType.toString());
+    }
+
+    /**
+     * Gets the file's length.
+     * 
+     * @return the length of the file
+     */
+    public long getLength() {
+
+        return surrogate.getLong(MongoFileConstants.length.toString());
+    }
+
+    /**
+     * Gets the size of a chunk.
+     * 
+     * @return the chunkSize
+     */
+    public int getChunkSize() {
+
+        return surrogate.getInt(MongoFileConstants.chunkSize.toString());
+    }
+
+    /**
+     * Gets the upload date.
+     * 
+     * @return the date
+     */
+    public Date getUploadDate() {
+
+        return (Date) surrogate.get(MongoFileConstants.uploadDate.toString());
+    }
+
+    /**
+     * Gets the aliases from the metadata. note: to set aliases, call put( "aliases" , List<String> )
+     * 
+     * @return list of aliases
+     */
+    @SuppressWarnings( "unchecked" )
+    public List<String> getAliases() {
+
+        return (List<String>) surrogate.get(MongoFileConstants.aliases.toString());
+    }
+
+    /**
+     * Gets the file metadata.
+     * 
+     * @return the metadata
+     */
+    public DBObject getMetaData() {
+
+        return (DBObject) surrogate.get(METADATA);
+    }
+
+    /**
+     * Gets the file metadata.
+     * 
+     * @param metadata
+     *            metadata to be set
+     */
+    public void setMetaData(final DBObject metadata) {
+
+        surrogate.put(METADATA, metadata);
+    }
+
+    /**
+     * Add an object to the metadata subclass
+     * 
+     * @param key
+     * @param value
+     */
+    public Object setInMetaData(String key, Object value) {
+
+        DBObject object = (DBObject) surrogate.get(METADATA);
+        if (object == null) {
+            object = new BasicDBObject();
+            surrogate.put(METADATA, object);
+        }
+        return object.put(key, value);
+    }
+
+    /**
+     * Gets the observed MD5 during transfer
+     * 
+     * @return md5
+     */
+    public String getMD5() {
+
+        return surrogate.getString(MongoFileConstants.md5.toString());
+    }
+
+    /**
+     * Put a value into the object for a given key
+     * 
+     * @param key
+     * @param value
+     * @return the previous value
+     */
+    public Object put(final String key, final Object v) {
+
+        if (key == null) {
+            throw new RuntimeException("key should never be null");
+        }
+
+        return surrogate.put(key, v);
+    }
+
+    /**
+     * Get an the value on any attribute in the system
+     * 
+     * @param key
+     * @return the current value
+     */
+    public Object get(final String key) {
+
+        if (key == null) {
+            throw new IllegalArgumentException("Key should never be null");
+        }
+        return surrogate.get(key);
+    }
+
+    /**
+     * Return the value for the given key as a string
+     * 
+     * @param key
+     * 
+     * @return the string value
+     */
+    public String getString(String key) {
+
+        return (String) surrogate.get(key);
+    }
+
+    /**
+     * Return the value for the given key as a integer
+     * 
+     * @param key
+     * 
      * @return
      */
-    public static final boolean isValidUrl(String spec) {
+    public int getInt(String key) {
 
-        try {
-            return (null != construct(spec));
-        } catch (Throwable t) {
-            return false;
+        if (key == null) {
+            throw new IllegalArgumentException("key cannot be null");
         }
 
+        Object value = surrogate.get(key);
+        if (value == null) {
+            return -1;
+        }
+
+        return Integer.parseInt(value.toString());
     }
 
-    // CTOR - not visible, use construct methods above
-    /* package */MongoFile(String spec)
-            throws MalformedURLException {
+    /**
+     * Return the value for the given key as a long
+     * 
+     * @param key
+     * 
+     * @return the value as a long
+     */
+    public long getLong(String key) {
 
-        this.url = new URL(null, spec, new Handler());
+        if (key == null) {
+            throw new IllegalArgumentException("key cannot be null");
+        }
+
+        Object value = surrogate.get(key);
+        if (value == null) {
+            return -1;
+        }
+
+        return Long.parseLong(value.toString());
     }
 
-    // CTOR- not visible, use construct methods above
-    /* package */MongoFile(URL url) {
+    /**
+     * Does a key exist in the object
+     * 
+     * @param key
+     * 
+     * @return true if it exists
+     */
+    public boolean containsField(final String key) {
 
-        this.url = url;
+        return keySet().contains(key);
     }
 
-    // toString
+    public Set<String> keySet() {
+
+        Set<String> keys = new HashSet<String>();
+        keys.addAll(MongoFileConstants.getCoreFields(true));
+        keys.addAll(surrogate.keySet());
+        return keys;
+    }
+
     @Override
     public String toString() {
 
-        return this.url.toString();
+        return JSON.serialize(surrogate);
     }
 
-    // getters
-
-    /**
-     * Returns the 'attachment' protocol string
-     * 
-     * @return the protocol
-     */
-    public String getProtocol() {
-
-        return url.getProtocol();
-    }
-
-    /**
-     * Returns the full URL object
-     * 
-     * @return the URL object
-     */
-    public URL getUrl() {
-
-        return this.url;
-    }
-
-    /**
-     * Returns the lookup(Storage) Id from the URL
-     * 
-     * @return the primary key to the mongoFS system
-     */
-    public String getAttachmentId() {
-
-        return url.getQuery();
-    }
-
-    /**
-     * Returns the full path specified in the URL
-     * 
-     * @return the full file path
-     */
-    public String getFilePath() {
-
-        return url.getPath();
-    }
-
-    /**
-     * Return just the last segment in the file path
-     * 
-     * @return just the filename
-     */
-    public String getFileName() {
-
-        return new File(url.getPath()).getName();
-    }
-
-    /**
-     * Returns the extension on the filename
-     * 
-     * @return the extension on the filename
-     */
-    public String getExtension() {
-
-        String temp = FileUtil.getExtension(new File(url.getPath()));
-        if (temp == null) {
-            return null;
-        }
-        return temp.toLowerCase();
-    }
-
-    /**
-     * Returns the mime type specified on the URL
-     * 
-     * @return the media type for the file
-     */
-    public String getMediaType() {
-
-        return url.getRef();
-    }
-
-    /**
-     * Is the data stored in the file compressed in the datastore
-     * 
-     * @return true if compressed, false otherwise
-     */
-    public boolean isStoredCompressed() {
-
-        if (url.getHost() != null && url.getHost().equals(GZ))
-            return true;
-
-        return false;
-    }
-
-    /**
-     * Is the data compressible based on the media type of the file. This may differ from what is stored in the datasstore
-     * 
-     * @return
-     */
-    public boolean isDataCompressed() {
-
-        return !CompressionMediaTypes.isCompressable(getMediaType());
-    }
-
-    public boolean isSupportedProtocol(String protocol) {
-
-        if (url.getProtocol().equals(PROTOCOL))
-            return true;
-
-        // unknown
-        return false;
-    }
 }

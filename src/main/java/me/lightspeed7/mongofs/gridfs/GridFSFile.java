@@ -24,7 +24,6 @@ import me.lightspeed7.mongofs.common.MongoFileConstants;
 import org.bson.BSONObject;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
@@ -309,26 +308,26 @@ public abstract class GridFSFile implements DBObject {
         return JSON.serialize(this);
     }
 
-    /**
-     * Sets the GridFS associated with this file.
-     * 
-     * @param fs
-     *            gridFS instance
-     */
-    protected void setGridFS(final GridFS fs) {
-
-        this.fs = fs;
-    }
-
-    /**
-     * Gets the GridFS associated with this file
-     * 
-     * @return gridFS instance
-     */
-    protected GridFS getGridFS() {
-
-        return this.fs;
-    }
+    // /**
+    // * Sets the GridFS associated with this file.
+    // *
+    // * @param fs
+    // * gridFS instance
+    // */
+    // protected void setGridFS(final GridFS fs) {
+    //
+    // this.fs = fs;
+    // }
+    //
+    // /**
+    // * Gets the GridFS associated with this file
+    // *
+    // * @return gridFS instance
+    // */
+    // protected GridFS getGridFS() {
+    //
+    // return this.fs;
+    // }
 
     @Override
     public void putAll(final BSONObject o) {
@@ -354,13 +353,4 @@ public abstract class GridFSFile implements DBObject {
         throw new UnsupportedOperationException();
     }
 
-    public final DBCollection getChunksCollection() {
-
-        return fs.getChunksCollection();
-    }
-
-    public final DBCollection getFilesCollection() {
-
-        return fs.getFilesCollection();
-    }
 }

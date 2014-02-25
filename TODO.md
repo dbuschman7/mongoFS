@@ -20,12 +20,16 @@
 ##0.5 MongoFile and mongoFS base classes##
 * create mongofile URL and handler to enable external referencing
 * create MongoFSDataStore to front the DBCollections
-* create MongoFile class to hold the 
-
-##0.6 Initial compression support##
+* create MongoFile class to hold the state 
 * Add in CompressedOutputStream object with tests
 * Add in CompressedInputSteam object with tests
 * Add in mongofile:gz protocol to handle regular and gzip storage
+
+##0.6 Finish compression support##
+* enable find* methods, handle DBCursors and pagination
+* enable toggling on compression on a per file basis
+* add configuration support to toggle feature
+* verify mongoFS find* on top of pre-existing GridFS collections.
 
 ##0.7 Temporary File Storage
 * Add temporary files generator with TTL collections
@@ -34,5 +38,5 @@
 ## Futures ideas
 * auto-grow chunk size as "empty-space" entropy rises, maybe multiple collections 
 * migrate to NIO for better streaming performance
-* Optional archival strategy for saving off files.
+* archival strategy for saving off files.
 * full zip file support with searchable manifests

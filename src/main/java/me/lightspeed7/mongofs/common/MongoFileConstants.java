@@ -16,11 +16,12 @@ public enum MongoFileConstants {
     chunkSize(true),
     length(true),
     uploadDate(true),
-    alias(true),
+    aliases(true),
     md5(true),
     chunkCount(false),
-    uncompressedLength(false),
-    compressionRatio(false)
+    compressedLength(false),
+    compressionRatio(false),
+    compressionFormat(false)
 
     //
     ;
@@ -45,16 +46,4 @@ public enum MongoFileConstants {
         return set;
     }
 
-    public static final Set<String> getExtendedFields(boolean mongoFS) {
-
-        Set<String> set = new TreeSet<>();
-
-        for (MongoFileConstants current : MongoFileConstants.values()) {
-            if (!current.core || mongoFS) {
-                set.add(current.name());
-            }
-        }
-
-        return set;
-    }
 }

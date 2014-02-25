@@ -23,11 +23,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.UnknownHostException;
 
-import me.lightspeed7.mongofs.gridfs.GridFS;
-import me.lightspeed7.mongofs.gridfs.GridFSDBFile;
-import me.lightspeed7.mongofs.gridfs.GridFSInputFile;
+import me.lightspeed7.mongofs.MongoTestConfig;
 
 import org.bson.types.ObjectId;
 import org.junit.BeforeClass;
@@ -37,7 +34,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
 
 public class GridFSTest {
@@ -51,13 +47,7 @@ public class GridFSTest {
     @BeforeClass
     public static void initial() {
 
-        MongoClientURI mongoURI = new MongoClientURI("mongodb://cayman-vm:27017");
-        try {
-            mongoClient = new MongoClient(mongoURI);
-        } catch (UnknownHostException e) {
-            throw new IllegalArgumentException("Invalid Mongo URI: " + mongoURI.getURI(), e);
-        }
-
+        mongoClient = MongoTestConfig.constructMongoClient();
     }
 
     //

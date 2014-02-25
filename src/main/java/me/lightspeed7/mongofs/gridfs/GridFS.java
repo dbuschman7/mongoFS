@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import me.lightspeed7.mongofs.common.InputFile;
+
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
@@ -111,11 +113,11 @@ public class GridFS {
         // ensure standard indexes as long as collections are small
         try {
             if (filesCollection.count() < 1000) {
-                filesCollection.createIndex(new BasicDBObject("filename", 1).append("uploadDate", 1));
+                filesCollection.ensureIndex(new BasicDBObject("filename", 1).append("uploadDate", 1));
             }
             if (chunksCollection.count() < 1000) {
-                chunksCollection.createIndex(new BasicDBObject("files_id", 1).append("n", 1), new BasicDBObject(
-                        "unique", true));
+                chunksCollection.ensureIndex(new BasicDBObject("files_id", 1).append("n", 1), //
+                        new BasicDBObject("unique", true));
             }
         } catch (MongoException e) {
             // TODO: Logging
@@ -368,7 +370,7 @@ public class GridFS {
      * @return a gridfs input file
      * @throws IOException
      */
-    public GridFSInputFile createFile(final File f)
+    public InputFile createFile(final File f)
             throws IOException {
 
         return createFile(new FileInputStream(f), f.getName(), true);
@@ -381,7 +383,7 @@ public class GridFS {
      *            an inputstream containing the file's data
      * @return a gridfs input file
      */
-    public GridFSInputFile createFile(final InputStream in) {
+    public InputFile createFile(final InputStream in) {
 
         return createFile(in, null);
     }
@@ -409,7 +411,7 @@ public class GridFS {
      *            the file name as stored in the db
      * @return a gridfs input file
      */
-    public GridFSInputFile createFile(final InputStream in, final String filename) {
+    public InputFile createFile(final InputStream in, final String filename) {
 
         return new GridFSInputFile(this, in, filename);
     }

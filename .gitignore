@@ -1,0 +1,20 @@
+*.class
+
+#Eclipse 
+.project
+.classpath
+.settings/
+
+# Gradle 
+.gradle/
+build/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+/bin
+/target
+
+#GFM viewer support 
+*.md.html

@@ -30,10 +30,12 @@
 * enable toggling on compression on a per file basis
 * add configuration support to toggle feature
 * verify mongoFS find* on top of pre-existing GridFS collections.
+* create initial github pages for project
 
 ##0.7 Temporary File Storage
 * Add temporary files generator with TTL collections
 * Allow file to live only for a finite time, minutes, days, weeks.
+* finish out github pages project
 
 ## Futures ideas
 * auto-grow chunk size as "empty-space" entropy rises, maybe multiple collections 

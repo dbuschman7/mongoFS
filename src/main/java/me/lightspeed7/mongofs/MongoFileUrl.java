@@ -27,17 +27,23 @@ public class MongoFileUrl {
     private URL url;
 
     // factories and helpers
-
-    public static final MongoFileUrl construct(String id, String fileName, String mediaType)
+    public static final MongoFileUrl construct(String id, String fileName, String mediaType, boolean compress)
             throws MalformedURLException {
 
-        return construct(id, fileName, mediaType, null);
+        return construct(Parser.construct(id, fileName, mediaType, null, compress));
     }
 
     public static final MongoFileUrl construct(String id, String fileName, String mediaType, String compressionFormat)
             throws MalformedURLException {
 
-        return construct(Parser.construct(id, fileName, mediaType, compressionFormat));
+        return construct(id, fileName, mediaType, compressionFormat, true);
+    }
+
+    public static final MongoFileUrl construct(String id, String fileName, String mediaType, String compressionFormat,
+            boolean compress)
+            throws MalformedURLException {
+
+        return construct(Parser.construct(id, fileName, mediaType, compressionFormat, compress));
     }
 
     public static final MongoFileUrl construct(String spec)

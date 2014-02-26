@@ -9,6 +9,7 @@ import java.util.List;
 
 import me.lightspeed7.mongofs.LoremIpsum;
 import me.lightspeed7.mongofs.util.BytesCopier;
+import me.lightspeed7.mongofs.writing.BufferedChunksOutputStream;
 
 import org.apache.tools.ant.filters.StringInputStream;
 import org.junit.Test;

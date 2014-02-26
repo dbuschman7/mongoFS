@@ -9,6 +9,7 @@ import me.lightspeed7.mongofs.MongoTestConfig;
 import me.lightspeed7.mongofs.gridfs.GridFS;
 import me.lightspeed7.mongofs.gridfs.GridFSInputFile;
 import me.lightspeed7.mongofs.gridfs.GridFSInputFileAdapter;
+import me.lightspeed7.mongofs.writing.FileChunksOutputStreamSink;
 
 import org.bson.types.ObjectId;
 import org.junit.Before;

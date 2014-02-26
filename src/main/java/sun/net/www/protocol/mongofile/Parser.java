@@ -8,15 +8,15 @@ import me.lightspeed7.mongofs.MongoFileUrl;
 
 public class Parser {
 
-    public static final URL construct(String id, String fileName, String mediaType, String compressionFormat)
+    public static final URL construct(String id, String fileName, String mediaType, String compressionFormat,
+            boolean compress)
             throws MalformedURLException {
 
         String protocol = MongoFileUrl.PROTOCOL;
-        String append = "";
         if (compressionFormat != null) {
             protocol += ":" + compressionFormat;
         } else {
-            if (CompressionMediaTypes.isCompressable(mediaType)) {
+            if (compress && CompressionMediaTypes.isCompressable(mediaType)) {
                 protocol += ":" + MongoFileUrl.GZ;
             }
         }

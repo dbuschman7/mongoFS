@@ -1,8 +1,11 @@
 package me.lightspeed7.mongofs;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
 
-import com.mongodb.gridfs.GridFSDBFile;
+import me.lightspeed7.mongofs.reading.CountingInputStream;
+import me.lightspeed7.mongofs.reading.FileChunksInputStreamSource;
 
 /**
  * Class for encapsulate the reader of data from a MongoFile
@@ -12,23 +15,45 @@ import com.mongodb.gridfs.GridFSDBFile;
  */
 public class MongoFileReader {
 
-    private final MongoFileUrl mongoFile;
-    private final GridFSDBFile file;
+    private final MongoFile file;
+    private MongoFileStore store;
 
-    /* package */MongoFileReader(MongoFileUrl mongoFile, GridFSDBFile file) {
+    public MongoFileReader(MongoFileStore store, MongoFile mongoFile) {
 
-        this.mongoFile = mongoFile;
-        this.file = file;
+        if (store == null) {
+            throw new IllegalArgumentException("store cannot be null");
+        }
+        if (mongoFile == null) {
+            throw new IllegalArgumentException("mongoFile cannot be null");
+        }
+
+        this.store = store;
+        this.file = mongoFile;
+
     }
 
     /**
      * Create an input stream reader to pull the data from the
      * 
      * @return an InputStream ready for reading
+     * @throws IOException
      */
-    public final InputStream getInputStream() {
+    public final InputStream getInputStream()
+            throws IOException {
 
-        return this.file.getInputStream();
+        // returned <- counting <- chunks
+        //
+        // or
+        //
+        // returned <- gzip <- counting <- chunks
+        InputStream returned = new FileChunksInputStreamSource(store, file);
+        returned = new CountingInputStream(returned);
+
+        if (file.getURL().isStoredCompressed()) {
+            returned = new GZIPInputStream(returned);
+        }
+
+        return returned;
     }
 
     /**
@@ -36,9 +61,9 @@ public class MongoFileReader {
      * 
      * @return MongoFile
      */
-    public MongoFileUrl getMongoFile() {
+    public MongoFile getMongoFile() {
 
-        return mongoFile;
+        return file;
     }
 
 }

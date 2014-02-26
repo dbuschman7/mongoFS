@@ -1,6 +1,7 @@
 package me.lightspeed7.mongofs;
 
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -8,9 +9,10 @@ import java.util.Set;
 
 import me.lightspeed7.mongofs.common.InputFile;
 import me.lightspeed7.mongofs.common.MongoFileConstants;
+import me.lightspeed7.mongofs.util.DBObjectWrapper;
+import sun.net.www.protocol.mongofile.Parser;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
@@ -19,19 +21,22 @@ public class MongoFile implements InputFile {
 
     private static final String METADATA = "metadata";
 
-    BasicDBObject surrogate;
-    DBCollection filesCollection;
+    DBObject surrogate;
+
+    private MongoFileStore store;
+
+    private boolean compress = true;
 
     /**
      * Construct a MongoFile object for reading data
      * 
-     * @param collection
-     * @param obj
+     * @param store
+     * @param o
      */
-    MongoFile(DBCollection collection, MongoFileUrl url, BasicDBObject obj) {
+    /* package */MongoFile(MongoFileStore store, DBObject o) {
 
-        this.filesCollection = collection;
-        this.surrogate = obj;
+        this.store = store;
+        this.surrogate = o;
     }
 
     /**
@@ -40,9 +45,10 @@ public class MongoFile implements InputFile {
      * @param collection
      * @param url
      */
-    MongoFile(DBCollection collection, MongoFileUrl url, int chunkSize) {
+    /* package */MongoFile(MongoFileStore store, MongoFileUrl url, int chunkSize, boolean compress) {
 
-        this.filesCollection = collection;
+        this.store = store;
+        this.compress = compress;
         this.surrogate = new BasicDBObject(10);
 
         this.surrogate.put(MongoFileConstants._id.toString(), url.getMongoFileId());
@@ -55,8 +61,7 @@ public class MongoFile implements InputFile {
 
     private String getBucketName() {
 
-        return this.filesCollection.getName().split("\\.")[0];
-
+        return this.store.filesCollection.getName().split("\\.")[0];
     }
 
     /**
@@ -66,7 +71,7 @@ public class MongoFile implements InputFile {
      */
     public void save() {
 
-        filesCollection.save(surrogate);
+        this.store.filesCollection.save(surrogate);
     }
 
     /**
@@ -77,14 +82,14 @@ public class MongoFile implements InputFile {
     public void validate() {
 
         String md5key = MongoFileConstants.md5.toString();
-        String md5 = surrogate.getString(md5key);
+        String md5 = new DBObjectWrapper(surrogate).getString(md5key);
         if (md5 == null) {
             throw new MongoException("no md5 stored");
         }
 
         DBObject cmd = new BasicDBObject("filemd5", surrogate.get(MongoFileConstants._id.toString()));
         cmd.put("root", getBucketName());
-        DBObject res = filesCollection.getDB().command(cmd);
+        DBObject res = this.store.filesCollection.getDB().command(cmd);
         if (res != null && res.containsField(md5key)) {
             String m = res.get(md5key).toString();
             if (m.equals(md5)) {
@@ -101,8 +106,13 @@ public class MongoFile implements InputFile {
     public MongoFileUrl getURL()
             throws MalformedURLException {
 
+        if (surrogate != null) {
+            URL url = Parser.construct(this.getId().toString(), this.getFilename(), this.getContentType(),
+                    (String) this.get(MongoFileConstants.compressionFormat.toString()), false);
+            return MongoFileUrl.construct(url);
+        }
         return MongoFileUrl.construct(this.getId().toString(), this.getFilename(), this.getContentType(),
-                (String) this.get(MongoFileConstants.compressionFormat.toString()));
+                (String) this.get(MongoFileConstants.compressionFormat.toString()), compress);
     }
 
     /**
@@ -112,7 +122,10 @@ public class MongoFile implements InputFile {
      */
     public int getChunkCount() {
 
-        return surrogate.getInt(MongoFileConstants.chunkCount.toString());
+        if (surrogate == null) {
+            throw new IllegalArgumentException("Cannot get chunk count before data is written");
+        }
+        return new DBObjectWrapper(surrogate).getInt(MongoFileConstants.chunkCount.toString());
     }
 
     /**
@@ -132,7 +145,7 @@ public class MongoFile implements InputFile {
      */
     public String getFilename() {
 
-        return surrogate.getString(MongoFileConstants.filename.toString());
+        return new DBObjectWrapper(surrogate).getString(MongoFileConstants.filename.toString());
     }
 
     /**
@@ -142,7 +155,7 @@ public class MongoFile implements InputFile {
      */
     public String getContentType() {
 
-        return surrogate.getString(MongoFileConstants.contentType.toString());
+        return new DBObjectWrapper(surrogate).getString(MongoFileConstants.contentType.toString());
     }
 
     /**
@@ -152,7 +165,7 @@ public class MongoFile implements InputFile {
      */
     public long getLength() {
 
-        return surrogate.getLong(MongoFileConstants.length.toString());
+        return new DBObjectWrapper(surrogate).getLong(MongoFileConstants.length.toString());
     }
 
     /**
@@ -162,7 +175,7 @@ public class MongoFile implements InputFile {
      */
     public int getChunkSize() {
 
-        return surrogate.getInt(MongoFileConstants.chunkSize.toString());
+        return new DBObjectWrapper(surrogate).getInt(MongoFileConstants.chunkSize.toString());
     }
 
     /**
@@ -230,7 +243,7 @@ public class MongoFile implements InputFile {
      */
     public String getMD5() {
 
-        return surrogate.getString(MongoFileConstants.md5.toString());
+        return new DBObjectWrapper(surrogate).getString(MongoFileConstants.md5.toString());
     }
 
     /**

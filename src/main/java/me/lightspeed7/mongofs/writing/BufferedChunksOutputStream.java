@@ -1,4 +1,4 @@
-package me.lightspeed7.mongofs.common;
+package me.lightspeed7.mongofs.writing;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;

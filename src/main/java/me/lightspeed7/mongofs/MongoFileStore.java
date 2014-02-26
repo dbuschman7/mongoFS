@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.logging.Logger;
 
+import me.lightspeed7.mongofs.common.MongoFileConstants;
+
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
@@ -23,8 +25,8 @@ public class MongoFileStore {
 
     public static final int DEFAULT_CHUNKSIZE = 256 * 1024;
 
-    private DBCollection filesCollection;
-    private DBCollection chunksCollection;
+    final DBCollection filesCollection;
+    final DBCollection chunksCollection;
 
     private int chunkSize = DEFAULT_CHUNKSIZE;
 
@@ -38,7 +40,7 @@ public class MongoFileStore {
      * NOTE: Uses a write concern of NORMAL
      * 
      * @param database
-     *            the mongo database to look for the collections in.
+     *            the MongoDB database to look for the collections in.
      * @param bucket
      *            - the mane of the bucket for these files.
      */
@@ -51,7 +53,7 @@ public class MongoFileStore {
      * CTOR
      * 
      * @param database
-     *            the mongo database to look for the collections in
+     *            the MongoDB database to look for the collections in
      * @param bucket
      *            the mane of the bucket for these files
      * @param writeConcern
@@ -99,6 +101,8 @@ public class MongoFileStore {
     /**
      * Create a new file entry in the datastore, then a MongoFile object to start writing to it.
      * 
+     * NOTE : the system will determine if compression is needed
+     * 
      * @param filename
      *            the name of the new file
      * @param mediaType
@@ -114,6 +118,32 @@ public class MongoFileStore {
     public MongoFileWriter createNew(String filename, String mediaType)
             throws IOException, IllegalArgumentException {
 
+        return createNew(filename, mediaType, true);
+    }
+
+    /**
+     * Create a new file entry in the datastore, then a MongoFile object to start writing to it.
+     * 
+     * NOTE : if compress = false and the media type is compressible, the file will not be stored compressed in the store
+     * 
+     * @param filename
+     *            the name of the new file
+     * @param mediaType
+     *            the media type of the data
+     * 
+     * @param compress
+     *            should use compression if the mime type allows ( zip files will not be compressed even compress = true )
+     * 
+     * @return a writer to write datq to for this file
+     * 
+     * @throws IOException
+     *             if an error occurs during reading and/or writing
+     * @throws IllegalArgumentException
+     *             if required parameters are null
+     */
+    public MongoFileWriter createNew(String filename, String mediaType, boolean compress)
+            throws IOException, IllegalArgumentException {
+
         if (filename == null) {
             throw new IllegalArgumentException("filename cannot be null");
         }
@@ -122,8 +152,10 @@ public class MongoFileStore {
         }
 
         // send wrapper object
-        MongoFileUrl url = MongoFileUrl.construct(new ObjectId().toString(), filename, mediaType);
-        return new MongoFileWriter(url, new MongoFile(filesCollection, url, this.chunkSize), chunksCollection);
+        MongoFileUrl mongoFileUrl = MongoFileUrl//
+                .construct(new ObjectId().toString(), filename, mediaType, null, compress);
+        return new MongoFileWriter(mongoFileUrl, //
+                new MongoFile(this, mongoFileUrl, this.chunkSize, compress), chunksCollection);
     }
 
     /**
@@ -146,6 +178,31 @@ public class MongoFileStore {
     public MongoFile upload(File file, String mediaType)
             throws IOException, IllegalArgumentException {
 
+        return upload(file.toPath().toString(), mediaType, true, new FileInputStream(file));
+    }
+
+    /**
+     * Upload a file to the datastore from the filesystem
+     * 
+     * @param file
+     *            - the file object to get the data from
+     * @param mediaType
+     *            the media type of the data
+     * @param compress
+     *            allow compression to be used if applicable
+     * 
+     * @return the MongoFile object created for this file object
+     * 
+     * @throws IOException
+     *             if an error occurs during reading and/or writing
+     * @throws IllegalArgumentException
+     *             if required parameters are null
+     * @throws FileNotFoundException
+     *             if the file does not exist or cannot be read
+     */
+    public MongoFile upload(File file, String mediaType, boolean compress)
+            throws IOException, IllegalArgumentException {
+
         if (file == null) {
             throw new IllegalArgumentException("passed in file cannot be null");
         }
@@ -154,7 +211,7 @@ public class MongoFileStore {
             throw new FileNotFoundException("File does not exist or cannot be read by this library");
         }
 
-        return upload(file.toPath().toString(), mediaType, new FileInputStream(file));
+        return upload(file.toPath().toString(), mediaType, compress, new FileInputStream(file));
     }
 
     /**
@@ -175,6 +232,32 @@ public class MongoFileStore {
      *             if required parameters are null
      */
     public MongoFile upload(String filename, String mediaType, InputStream is)
+            throws IOException, IllegalArgumentException {
+
+        return upload(filename, mediaType, true, is);
+
+    }
+
+    /**
+     * Upload a file to the datastore from any InputStream
+     * 
+     * @param filename
+     *            the name of the file to use
+     * @param mediaType
+     *            the media type of the data
+     * @param inputStream
+     *            the stream object to read the data from
+     * @param compress
+     *            allow compression to be used if applicable
+     * 
+     * @return the MongoFile object created for this file object
+     * 
+     * @throws IOException
+     *             if an error occurs during reading and/or writing
+     * @throws IllegalArgumentException
+     *             if required parameters are null
+     */
+    public MongoFile upload(String filename, String mediaType, boolean compress, InputStream is)
             throws IOException, IllegalArgumentException {
 
         return createNew(filename, mediaType).write(is);
@@ -217,9 +300,10 @@ public class MongoFileStore {
         if (url == null) {
             throw new IllegalArgumentException("url cannot be null");
         }
-        BasicDBObject file = (BasicDBObject) filesCollection.findOne(new ObjectId(url.getMongoFileId()));
+        BasicDBObject file = (BasicDBObject) filesCollection.findOne(//
+                BasicDBObjectBuilder.start(MongoFileConstants._id.toString(), url.getMongoFileId()).get());
 
-        return new MongoFile(filesCollection, url, file);
+        return file == null ? null : new MongoFile(this, file);
     }
 
     /**
@@ -237,7 +321,8 @@ public class MongoFileStore {
         if (url == null) {
             throw new IllegalArgumentException("mongoFile cannot be null");
         }
-        BasicDBObject file = (BasicDBObject) filesCollection.findOne(new ObjectId(url.getMongoFileId()));
+        BasicDBObject file = (BasicDBObject) filesCollection.findOne(//
+                BasicDBObjectBuilder.start(MongoFileConstants._id.toString(), url.getMongoFileId()).get());
         return file != null;
     }
 
@@ -261,24 +346,61 @@ public class MongoFileStore {
     }
 
     /**
-     * Remove a file from the datastore identified by the given MongoFile
+     * Remove a file from the database identified by the given MongoFile
      * 
      * @param mongoFile
+     * @throws IllegalArgumentException
+     * @throws MongoException
+     * @throws IOException
+     */
+    public void remove(MongoFile mongoFile)
+            throws IllegalArgumentException, MongoException, IOException {
+
+        if (mongoFile == null) {
+            throw new IllegalArgumentException("mongoFile cannot be null");
+        }
+        remove(mongoFile.getURL());
+    }
+
+    /**
+     * Remove a file from the datastore identified by the given MongoFileUrl
+     * 
+     * @param MongoFileUrl
      * 
      * @throws IOException
      *             if an error occurs during reading and/or writing
      * @throws IllegalArgumentException
      *             if required parameters are null
      */
-    public void remove(MongoFileUrl mongoFile)
+    public void remove(MongoFileUrl url)
             throws IllegalArgumentException, MongoException {
 
-        if (mongoFile == null) {
-            throw new IllegalArgumentException("mongoFile cannot be null");
+        if (url == null) {
+            throw new IllegalArgumentException("mongoFileUrl cannot be null");
         }
 
-        filesCollection.remove(new BasicDBObject("_id", mongoFile.getMongoFileId()));
-        chunksCollection.remove(new BasicDBObject("files_id", mongoFile.getMongoFileId()));
+        filesCollection.remove(new BasicDBObject("_id", url.getMongoFileId()));
+        chunksCollection.remove(new BasicDBObject("files_id", url.getMongoFileId()));
+    }
+
+    /**
+     * The underlying MongoDB collection object for files
+     * 
+     * @return the DBCollection object
+     */
+    public DBCollection getFilesCollection() {
+
+        return filesCollection;
+    }
+
+    /**
+     * The underlying MongoDB collection object
+     * 
+     * @return the DBCollection object
+     */
+    public DBCollection getChunksCollection() {
+
+        return chunksCollection;
     }
 
 }

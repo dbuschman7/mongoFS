@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import me.lightspeed7.mongofs.common.BufferedChunksOutputStream;
-import me.lightspeed7.mongofs.common.FileChunksOutputStreamSink;
 import me.lightspeed7.mongofs.common.MongoFileConstants;
-import me.lightspeed7.mongofs.compression.CountingOutputStream;
-import me.lightspeed7.mongofs.compression.MongoGZipOutputStream;
 import me.lightspeed7.mongofs.util.BytesCopier;
+import me.lightspeed7.mongofs.writing.BufferedChunksOutputStream;
+import me.lightspeed7.mongofs.writing.CountingOutputStream;
+import me.lightspeed7.mongofs.writing.FileChunksOutputStreamSink;
+import me.lightspeed7.mongofs.writing.MongoGZipOutputStream;
 
 import com.mongodb.DBCollection;
 

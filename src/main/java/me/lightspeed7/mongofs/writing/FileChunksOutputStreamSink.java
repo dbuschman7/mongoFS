@@ -1,4 +1,4 @@
-package me.lightspeed7.mongofs.common;
+package me.lightspeed7.mongofs.writing;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -60,8 +60,10 @@ public class FileChunksOutputStreamSink extends OutputStream {
 
         // construct the chunk
         BasicDBObject dbObject = new BasicDBObject("files_id", id)//
-                .append("n", currentChunkNumber)//
-                .append("data", internal);
+                .append("n", currentChunkNumber)// Sequence number of the chunk in the file
+                .append("sz", length)// length of the chunk data portion on the chunk
+                .append("data", internal)// the data encoded
+        ;
         ++currentChunkNumber;
 
         // persist it

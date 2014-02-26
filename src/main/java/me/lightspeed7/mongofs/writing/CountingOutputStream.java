@@ -1,4 +1,4 @@
-package me.lightspeed7.mongofs.compression;
+package me.lightspeed7.mongofs.writing;
 
 import java.io.IOException;
 import java.io.OutputStream;

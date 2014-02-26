@@ -1,7 +1,10 @@
-package me.lightspeed7.mongofs.common;
+package me.lightspeed7.mongofs.writing;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+import me.lightspeed7.mongofs.common.InputFile;
+import me.lightspeed7.mongofs.common.MongoFileConstants;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.Util;

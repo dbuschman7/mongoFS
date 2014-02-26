@@ -1,4 +1,4 @@
-package me.lightspeed7.mongofs.compression;
+package me.lightspeed7.mongofs.writing;
 
 import static org.junit.Assert.assertTrue;
 
@@ -8,6 +8,7 @@ import java.io.IOException;
 import me.lightspeed7.mongofs.LoremIpsum;
 import me.lightspeed7.mongofs.common.InputFile;
 import me.lightspeed7.mongofs.common.MongoFileConstants;
+import me.lightspeed7.mongofs.writing.CountingOutputStream;
 
 import org.junit.Test;
 import org.mockito.Mockito;

@@ -21,8 +21,8 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'eclipse'
 
-group = 'io.buschman'
-version = '0.6-SNAPSHOT'
+group = 'me.lightspeed7'
+version = '0.6.0'
 
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
@@ -74,36 +74,25 @@ install {
 }
 
 uploadArchives {
-    project.mavenDeployers << repositories.mavenDeployer {
-        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-        def sonatypeCredentials = [
-                userName: project.properties.sonatypeUsername,
-                password: project.properties.sonatypePassword
-        ]
-
-        snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots') {
-            authentication(sonatypeCredentials)
-        }
-        repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
-            authentication(sonatypeCredentials)
-        }
+	repositories.mavenDeployer {
+        repository(url: "file:///Users/dbusch/dev/dbuschman7/mvn-repo/")
     }
 }
 
 pom {
     project {
 
-        name 'MongoFSPlus'
+        name 'MongoFS'
         description =
         '''
         An extension to the MongoDB Java Driver library that goes beyond what the GridFS feature supports.
         Compressed file storage, zip files, temporary files
         '''
-        url 'http://github.com/dbuschman7/mongoFSPlus'
+        url 'http://github.com/dbuschman7/mongoFS'
         scm {
-            url 'git@github.com:dbuschman7/mongoFSPlus.git'
-            connection 'scm:git:git@github.com:dbuschman7/mongoFSPlus.git'
-            developerConnection 'scm:git:git@github.com:dbuschman7/mongoFSPlus.git'
+            url 'git@github.com:dbuschman7/mongoFS.git'
+            connection 'scm:git:git@github.com:dbuschman7/mongoFS.git'
+            developerConnection 'scm:git:git@github.com:dbuschman7/mongoFS.git'
 
         }
 

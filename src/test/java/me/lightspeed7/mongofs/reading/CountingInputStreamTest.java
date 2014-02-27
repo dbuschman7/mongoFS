@@ -35,4 +35,5 @@ public class CountingInputStreamTest implements LoremIpsum {
         assertEquals("3fb3f7a485c87f6be4c8fb6f4d34c5c8", in.getDigest());
 
     }
+
 }

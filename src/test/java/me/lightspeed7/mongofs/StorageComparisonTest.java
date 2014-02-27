@@ -2,6 +2,7 @@ package me.lightspeed7.mongofs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
@@ -144,12 +145,12 @@ public class StorageComparisonTest implements LoremIpsum {
             throws IOException {
 
         String bucket = "mongofs";
-        MongoFileStore store = new MongoFileStore(database, bucket);
+        MongoFileStore store = new MongoFileStore(database, new MongoFileStoreConfig(bucket));
         MongoFileWriter writer = store.createNew("mongoFS.txt", "text/plain");
         MongoFile file = writer.getMongoFile();
 
         file.put("aliases", Arrays.asList("one", "two", "three"));
-        file.setMetaData(new BasicDBObject("key", "value"));
+        file.setInMetaData("key", "value");
 
         writer.write(new ByteArrayInputStream(LOREM_IPSUM.getBytes()));
 
@@ -172,14 +173,18 @@ public class StorageComparisonTest implements LoremIpsum {
 
         assertEquals(store.getChunkSize(), file.getChunkSize());
         assertEquals(1, file.getChunkCount());
+        assertNotNull(file.getUploadDate());
 
-        // me.lightspeed7.mongofs.gridfs.GridFSDBFile findOne = store.findOne(BasicDBObjectBuilder.start("_id",
-        // file.getId()).get());
-        // assertNotNull(findOne);
-        //
-        // ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
-        // new BytesCopier(findOne.getInputStream(), out).transfer(true);
-        // assertEquals(LOREM_IPSUM, out.toString());
+        // the id is always a generated UUID, thus test for everything else to be correct
+        assertTrue(file.getURL().toString().startsWith("mongofile:gz:mongoFS.txt?"));
+        assertTrue(file.getURL().toString().endsWith("#text/plain"));
+
+        MongoFile findOne = new MongoFileQuery(store).findOne(BasicDBObjectBuilder.start("_id", file.getId()).get());
+        assertNotNull(findOne);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
+        store.read(findOne, out, true);
+        assertEquals(LOREM_IPSUM, out.toString());
 
     }
 

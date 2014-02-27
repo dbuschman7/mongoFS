@@ -56,8 +56,8 @@ public class MongoFile implements InputFile {
         this.store = store;
         this.compress = compress;
         this.surrogate = new BasicDBObject(10);
-
         this.surrogate.put(MongoFileConstants._id.toString(), url.getMongoFileId());
+        this.surrogate.put(MongoFileConstants.uploadDate.toString(), new Date());
 
         this.surrogate.put(MongoFileConstants.chunkSize.toString(), chunkSize);
         this.surrogate.put(MongoFileConstants.filename.toString(), url.getFilePath());
@@ -67,7 +67,7 @@ public class MongoFile implements InputFile {
 
     private String getBucketName() {
 
-        return this.store.filesCollection.getName().split("\\.")[0];
+        return this.store.getFilesCollection().getName().split("\\.")[0];
     }
 
     /**
@@ -77,7 +77,7 @@ public class MongoFile implements InputFile {
      */
     public void save() {
 
-        this.store.filesCollection.save(surrogate);
+        this.store.getFilesCollection().save(surrogate);
     }
 
     /**
@@ -95,7 +95,7 @@ public class MongoFile implements InputFile {
 
         DBObject cmd = new BasicDBObject("filemd5", surrogate.get(MongoFileConstants._id.toString()));
         cmd.put("root", getBucketName());
-        DBObject res = this.store.filesCollection.getDB().command(cmd);
+        DBObject res = this.store.getFilesCollection().getDB().command(cmd);
         if (res != null && res.containsField(md5key)) {
             String m = res.get(md5key).toString();
             if (m.equals(md5)) {
@@ -131,7 +131,13 @@ public class MongoFile implements InputFile {
         if (surrogate == null) {
             throw new IllegalArgumentException("Cannot get chunk count before data is written");
         }
-        return new DBObjectWrapper(surrogate).getInt(MongoFileConstants.chunkCount.toString());
+
+        // for compatibility with legacy GridFS implementations, if -1 comes back, then legacy file
+        int chunkCount = new DBObjectWrapper(surrogate).getInt(MongoFileConstants.chunkCount.toString(), -1);
+        if (chunkCount == -1) {
+            chunkCount = (int) Math.ceil((double) this.getLength() / this.getChunkSize());
+        }
+        return chunkCount;
     }
 
     /**
@@ -237,7 +243,7 @@ public class MongoFile implements InputFile {
         DBObject object = (DBObject) surrogate.get(METADATA);
         if (object == null) {
             object = new BasicDBObject();
-            surrogate.put(METADATA, object);
+            setMetaData(object);
         }
         return object.put(key, value);
     }

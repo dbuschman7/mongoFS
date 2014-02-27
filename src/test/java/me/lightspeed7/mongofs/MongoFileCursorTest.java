@@ -7,18 +7,20 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
 public class MongoFileCursorTest implements LoremIpsum {
 
     private static final String DB_NAME = "MongoFSTest-cursor";
-    private static final String BUCKET = "mongoFs-cursor";
+    private static final String BUCKET = "cursor";
 
     private static DB database;
 
@@ -35,8 +37,7 @@ public class MongoFileCursorTest implements LoremIpsum {
         mongoClient.dropDatabase(DB_NAME);
         database = mongoClient.getDB(DB_NAME);
 
-        store = new MongoFileStore(database, BUCKET);
-        store.setChunkSize(MongoFileStore.DEFAULT_CHUNKSIZE); // small files
+        store = new MongoFileStore(database, new MongoFileStoreConfig(BUCKET));
 
         createFile(store, "/foo/bar1.txt", "text/plain");
         createFile(store, "/foo/bar4.txt", "text/plain");
@@ -93,6 +94,38 @@ public class MongoFileCursorTest implements LoremIpsum {
         assertEquals("/foo/bar4.txt", fileList.next().getFilename());
 
         assertFalse(fileList.hasNext());
+    }
+
+    @Test
+    public void testSortedFilteredList()
+            throws IllegalArgumentException, IOException {
+
+        store.getFilesCollection().ensureIndex(BasicDBObjectBuilder.start("md5", 1).get());
+        MongoFileQuery query = new MongoFileQuery(store);
+
+        DBObject q = BasicDBObjectBuilder.start("filename", "/foo/bar1.txt").get();
+        DBObject s = BasicDBObjectBuilder.start("filename", "1").get();
+        MongoFileCursor fileList = query.getFileList(q, s);
+
+        assertTrue(fileList.hasNext());
+        assertEquals("/foo/bar1.txt", fileList.next().getFilename());
+
+        assertTrue(fileList.hasNext());
+        assertEquals("/foo/bar1.txt", fileList.next().getFilename());
+
+        assertFalse(fileList.hasNext());
+    }
+
+    @Test
+    public void testFindList()
+            throws IllegalArgumentException, IOException {
+
+        MongoFileQuery query = new MongoFileQuery(store);
+        List<MongoFile> fileList = query.find("/foo/bar1.txt").toList();
+
+        assertEquals(2, fileList.size());
+        assertEquals("/foo/bar1.txt", fileList.get(0).getFilename());
+        assertEquals("/foo/bar1.txt", fileList.get(1).getFilename());
     }
 
     //

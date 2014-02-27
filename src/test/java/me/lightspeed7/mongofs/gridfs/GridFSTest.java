@@ -373,7 +373,7 @@ public class GridFSTest {
     public void tearDown() {
 
         // keep them around for now
-        // database.dropDatabase();
+        database.dropDatabase();
     }
 
     void testOutStream(final String s)

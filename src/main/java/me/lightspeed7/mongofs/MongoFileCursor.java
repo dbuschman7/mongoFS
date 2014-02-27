@@ -1,6 +1,7 @@
 package me.lightspeed7.mongofs;
 
 import java.io.Closeable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -244,6 +245,26 @@ public class MongoFileCursor implements Iterator<MongoFile>, Iterable<MongoFile>
     public DBDecoderFactory getDecoderFactory() {
 
         return cursor.getDecoderFactory();
+    }
+
+    /**
+     * This method will iterate the cursor a return all of the object from the cursor
+     * 
+     * @return a List<MongoFile> objects
+     */
+    public List<MongoFile> toList() {
+
+        List<MongoFile> files = new ArrayList<MongoFile>();
+        try {
+            while (cursor.hasNext()) {
+                files.add(new MongoFile(store, cursor.next()));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return files;
     }
 
     //

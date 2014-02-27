@@ -5,10 +5,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.logging.Logger;
 
 import me.lightspeed7.mongofs.common.MongoFileConstants;
+import me.lightspeed7.mongofs.util.BytesCopier;
 
 import org.bson.types.ObjectId;
 
@@ -17,7 +19,6 @@ import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
-import com.mongodb.WriteConcern;
 
 public class MongoFileStore {
 
@@ -25,29 +26,10 @@ public class MongoFileStore {
 
     public static final int DEFAULT_CHUNKSIZE = 256 * 1024;
 
-    final DBCollection filesCollection;
-    final DBCollection chunksCollection;
+    private final DBCollection filesCollection;
+    private final DBCollection chunksCollection;
 
-    private int chunkSize = DEFAULT_CHUNKSIZE;
-
-    private String bucket;
-
-    /**
-     * CTOR
-     * 
-     * NOTE: be sure to set the correct write concern on this database object to MonogFS to use.
-     * 
-     * NOTE: Uses a write concern of NORMAL
-     * 
-     * @param database
-     *            the MongoDB database to look for the collections in.
-     * @param bucket
-     *            - the mane of the bucket for these files.
-     */
-    public MongoFileStore(DB database, String bucket) {
-
-        this(database, bucket, WriteConcern.NORMAL);
-    }
+    private MongoFileStoreConfig config;
 
     /**
      * CTOR
@@ -59,15 +41,17 @@ public class MongoFileStore {
      * @param writeConcern
      *            the writeConcern that should be used for both collections
      */
-    public MongoFileStore(DB database, String bucket, WriteConcern writeConcern) {
+    public MongoFileStore(DB database, MongoFileStoreConfig config) {
 
-        this.bucket = bucket;
-        filesCollection = database.getCollection(bucket + ".files");
-        filesCollection.setWriteConcern(writeConcern);
+        this.config = config;
+        filesCollection = database.getCollection(config.getBucket() + ".files");
+        filesCollection.setWriteConcern(config.getWriteConcern());
+        filesCollection.setReadPreference(config.getReadPreference());
         filesCollection.setObjectClass(BasicDBObject.class);
 
-        chunksCollection = database.getCollection(bucket + ".chunks");
-        chunksCollection.setWriteConcern(writeConcern);
+        chunksCollection = database.getCollection(config.getBucket() + ".chunks");
+        chunksCollection.setWriteConcern(config.getWriteConcern());
+        chunksCollection.setReadPreference(config.getReadPreference());
 
         // ensure standard indexes as long as collections are small
         try {
@@ -90,12 +74,7 @@ public class MongoFileStore {
 
     public int getChunkSize() {
 
-        return chunkSize;
-    }
-
-    public void setChunkSize(int chunkSize) {
-
-        this.chunkSize = chunkSize;
+        return config.getChunkSize();
     }
 
     /**
@@ -155,7 +134,7 @@ public class MongoFileStore {
         MongoFileUrl mongoFileUrl = MongoFileUrl//
                 .construct(new ObjectId().toString(), filename, mediaType, null, compress);
         return new MongoFileWriter(mongoFileUrl, //
-                new MongoFile(this, mongoFileUrl, this.chunkSize, compress), chunksCollection);
+                new MongoFile(this, mongoFileUrl, config.getChunkSize(), compress), chunksCollection);
     }
 
     /**
@@ -337,12 +316,59 @@ public class MongoFileStore {
             throws MongoException {
 
         try {
-            String command = String.format("{ touch: \"%s\", data: false, index: true }", this.bucket + ".files");
+            String command = String
+                    .format("{ touch: \"%s\", data: false, index: true }", config.getBucket() + ".files");
             filesCollection.getDB().command(command).throwOnError();
             return true;
         } catch (Exception e) {
             throw new MongoException("Unable to run command on server", e);
         }
+    }
+
+    /**
+     * Return an input stream to read the file content data from
+     * 
+     * @param file
+     *            the MongoFile object
+     * 
+     * @return an input stream to read from
+     * 
+     * @throws IOException
+     */
+    public InputStream read(MongoFile file)
+            throws IOException {
+
+        return new MongoFileReader(this, file).getInputStream();
+    }
+
+    /**
+     * Return a dynamic query object to do ad-hoc file lookups
+     * 
+     * @return a query object
+     */
+    public MongoFileQuery query() {
+
+        return new MongoFileQuery(this);
+    }
+
+    /**
+     * Copy the content to the given output stream
+     * 
+     * @param file
+     *            the MongoFile to lookup
+     * 
+     * @param out
+     *            the output stream to write to
+     * 
+     * @param flush
+     *            should the output stream be flush when all the data has been written.
+     * 
+     * @throws IOException
+     */
+    public void read(MongoFile file, OutputStream out, boolean flush)
+            throws IOException {
+
+        new BytesCopier(new MongoFileReader(this, file).getInputStream(), out).transfer(flush);
     }
 
     /**
@@ -406,8 +432,8 @@ public class MongoFileStore {
     @Override
     public String toString() {
 
-        return String.format("MongoFileStore [filesCollection=%s, chunksCollection=%s, chunkSize=%s]", filesCollection,
-                chunksCollection, chunkSize);
+        return String.format("MongoFileStore [filesCollection=%s, chunksCollection=%s,\n  config=%s\n]",
+                filesCollection, chunksCollection, config.toString());
     }
 
 }

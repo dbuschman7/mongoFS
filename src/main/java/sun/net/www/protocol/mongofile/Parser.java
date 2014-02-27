@@ -20,7 +20,8 @@ public class Parser {
                 protocol += ":" + MongoFileUrl.GZ;
             }
         }
-        return construct(String.format("%s:%s?%s#%s", protocol, fileName, id, mediaType.toString()));
+        return construct(String.format("%s:%s?%s#%s", protocol, fileName, id,
+                mediaType == null ? "" : mediaType.toString()));
     }
 
     public static URL construct(String spec)

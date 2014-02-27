@@ -1,8 +1,5 @@
 package me.lightspeed7.mongofs;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
@@ -75,7 +72,7 @@ public class MongoFileQuery {
      */
     public MongoFile findOne(DBObject query) {
 
-        return _fix(store.filesCollection.findOne(query));
+        return _fix(store.getFilesCollection().findOne(query));
     }
 
     /**
@@ -85,7 +82,7 @@ public class MongoFileQuery {
      * @return
      * @throws MongoException
      */
-    public List<MongoFile> find(String filename) {
+    public MongoFileCursor find(String filename) {
 
         return find(filename, null);
     }
@@ -98,7 +95,7 @@ public class MongoFileQuery {
      * @return
      * @throws MongoException
      */
-    public List<MongoFile> find(String filename, DBObject sort) {
+    public MongoFileCursor find(String filename, DBObject sort) {
 
         return find(new BasicDBObject("filename", filename), sort);
     }
@@ -110,7 +107,7 @@ public class MongoFileQuery {
      * @return
      * @throws MongoException
      */
-    public List<MongoFile> find(DBObject query) {
+    public MongoFileCursor find(DBObject query) {
 
         return find(query, null);
     }
@@ -123,25 +120,13 @@ public class MongoFileQuery {
      * @return
      * @throws MongoException
      */
-    public List<MongoFile> find(DBObject query, DBObject sort) {
+    public MongoFileCursor find(DBObject query, DBObject sort) {
 
-        List<MongoFile> files = new ArrayList<MongoFile>();
-
-        DBCursor c = null;
-        try {
-            c = store.filesCollection.find(query);
-            if (sort != null) {
-                c.sort(sort);
-            }
-            while (c.hasNext()) {
-                files.add(_fix(c.next()));
-            }
-        } finally {
-            if (c != null) {
-                c.close();
-            }
+        DBCursor c = store.getFilesCollection().find(query);
+        if (sort != null) {
+            c.sort(sort);
         }
-        return files;
+        return new MongoFileCursor(store, c);
     }
 
     /**
@@ -151,11 +136,7 @@ public class MongoFileQuery {
      */
     public MongoFileCursor getFileList() {
 
-        DBCollection coll = store.filesCollection;
-
-        DBCursor cursor = new DBCursor(coll, null, null, coll.getReadPreference());
-
-        return new MongoFileCursor(store, cursor);
+        return getFileList(null);
     }
 
     /**
@@ -167,7 +148,7 @@ public class MongoFileQuery {
      */
     public MongoFileCursor getFileList(final DBObject query) {
 
-        DBCollection coll = store.filesCollection;
+        DBCollection coll = store.getFilesCollection();
 
         DBCursor cursor = new DBCursor(coll, query, null, coll.getReadPreference());
 
@@ -185,7 +166,7 @@ public class MongoFileQuery {
      */
     public MongoFileCursor getFileList(final DBObject query, final DBObject sort) {
 
-        DBCollection coll = store.filesCollection;
+        DBCollection coll = store.getFilesCollection();
 
         @SuppressWarnings( "resource" )
         DBCursor cursor = new DBCursor(coll, query, null, coll.getReadPreference());

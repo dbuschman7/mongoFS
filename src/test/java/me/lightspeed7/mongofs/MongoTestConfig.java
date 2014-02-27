@@ -7,14 +7,17 @@ import com.mongodb.MongoClientURI;
 
 public class MongoTestConfig {
 
-    public static final MongoClient constructMongoClient() {
+    public static final MongoClient construct() {
 
-        MongoClientURI mongoURI = new MongoClientURI("mongodb://cayman-vm:27017");
         try {
-            return new MongoClient(mongoURI);
+            return new MongoClient(new MongoClientURI("mongodb://cayman-vm:27017"));
         } catch (UnknownHostException e) {
-            throw new IllegalArgumentException("Invalid Mongo URI: " + mongoURI.getURI(), e);
+            System.out.println("Cayman-vm unavailabel, trying localhost");
+            try {
+                return new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
+            } catch (UnknownHostException ex) {
+                throw new IllegalArgumentException("Unable to connect a mongoDB instance", ex);
+            }
         }
-
     }
 }

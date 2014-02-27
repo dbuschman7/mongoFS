@@ -8,7 +8,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.UnknownHostException;
 
 import me.lightspeed7.mongofs.util.BytesCopier;
 
@@ -17,7 +16,6 @@ import org.junit.Test;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
 
 public class MongoFileStoreTest implements LoremIpsum {
 
@@ -31,12 +29,8 @@ public class MongoFileStoreTest implements LoremIpsum {
     @BeforeClass
     public static void initial() {
 
-        MongoClientURI mongoURI = new MongoClientURI("mongodb://cayman-vm:27017");
-        try {
-            mongoClient = new MongoClient(mongoURI);
-        } catch (UnknownHostException e) {
-            throw new IllegalArgumentException("Invalid Mongo URI: " + mongoURI.getURI(), e);
-        }
+        mongoClient = MongoTestConfig.construct();
+
         mongoClient.dropDatabase(DB_NAME);
         database = mongoClient.getDB(DB_NAME);
     }

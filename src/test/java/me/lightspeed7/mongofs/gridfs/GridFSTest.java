@@ -47,7 +47,7 @@ public class GridFSTest {
     @BeforeClass
     public static void initial() {
 
-        mongoClient = MongoTestConfig.constructMongoClient();
+        mongoClient = MongoTestConfig.construct();
     }
 
     //

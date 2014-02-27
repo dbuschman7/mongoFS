@@ -41,7 +41,7 @@ public class FileChunkOutputStreamSinkTest {
     @Before
     public void before() {
 
-        mongoClient = MongoTestConfig.constructMongoClient();
+        mongoClient = MongoTestConfig.construct();
 
         database = mongoClient.getDB(DB_NAME);
         gridFS = new GridFS(database);

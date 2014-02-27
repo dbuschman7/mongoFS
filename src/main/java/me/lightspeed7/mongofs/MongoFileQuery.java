@@ -6,6 +6,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
@@ -142,6 +143,59 @@ public class MongoFileQuery {
         }
         return files;
     }
+
+    /**
+     * Gets the list of files stored in this mongoFS, sorted by filename.
+     * 
+     * @return cursor of file objects
+     */
+    public MongoFileCursor getFileList() {
+
+        DBCollection coll = store.filesCollection;
+
+        DBCursor cursor = new DBCursor(coll, null, null, coll.getReadPreference());
+
+        return new MongoFileCursor(store, cursor);
+    }
+
+    /**
+     * Gets a filtered list of files stored in this mongoFS, sorted by filename.
+     * 
+     * @param query
+     *            filter to apply
+     * @return cursor of file objects
+     */
+    public MongoFileCursor getFileList(final DBObject query) {
+
+        DBCollection coll = store.filesCollection;
+
+        DBCursor cursor = new DBCursor(coll, query, null, coll.getReadPreference());
+
+        return new MongoFileCursor(store, cursor);
+    }
+
+    /**
+     * Gets a sorted, filtered list of files stored in this mongoFS.
+     * 
+     * @param query
+     *            filter to apply
+     * @param sort
+     *            sorting to apply
+     * @return cursor of file objects
+     */
+    public MongoFileCursor getFileList(final DBObject query, final DBObject sort) {
+
+        DBCollection coll = store.filesCollection;
+
+        @SuppressWarnings( "resource" )
+        DBCursor cursor = new DBCursor(coll, query, null, coll.getReadPreference());
+
+        return new MongoFileCursor(store, cursor.sort(sort));
+    }
+
+    //
+    // internal
+    // //////////////
 
     protected MongoFile _fix(Object o) {
 

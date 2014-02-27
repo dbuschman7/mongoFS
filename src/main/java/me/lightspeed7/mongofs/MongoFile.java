@@ -17,6 +17,12 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
 
+/**
+ * Object to hold the state of the file's metatdata. To persist this outside of MongoFS, use the getURL() and persist that.
+ * 
+ * @author David Buschman
+ * 
+ */
 public class MongoFile implements InputFile {
 
     private static final String METADATA = "metadata";

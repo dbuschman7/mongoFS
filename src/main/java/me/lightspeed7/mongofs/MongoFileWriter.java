@@ -80,4 +80,10 @@ public class MongoFileWriter {
         return file;
     }
 
+    @Override
+    public String toString() {
+
+        return String.format("MongoFileWriter [chunksCollection=%s, url=%s]", chunksCollection, url);
+    }
+
 }

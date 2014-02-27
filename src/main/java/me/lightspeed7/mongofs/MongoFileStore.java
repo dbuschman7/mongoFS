@@ -403,4 +403,11 @@ public class MongoFileStore {
         return chunksCollection;
     }
 
+    @Override
+    public String toString() {
+
+        return String.format("MongoFileStore [filesCollection=%s, chunksCollection=%s, chunkSize=%s]", filesCollection,
+                chunksCollection, chunkSize);
+    }
+
 }

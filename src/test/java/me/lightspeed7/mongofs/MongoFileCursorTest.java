@@ -49,7 +49,7 @@ public class MongoFileCursorTest implements LoremIpsum {
     public void testSimpleList()
             throws IllegalArgumentException, IOException {
 
-        MongoFileQuery query = new MongoFileQuery(store);
+        MongoFileQuery query = store.query();
         MongoFileCursor fileList = query.getFileList();
         int count = 0;
         for (MongoFile mongoFile : fileList) {
@@ -63,8 +63,7 @@ public class MongoFileCursorTest implements LoremIpsum {
     public void testFilterFileNameList()
             throws IllegalArgumentException, IOException {
 
-        MongoFileQuery query = new MongoFileQuery(store);
-        MongoFileCursor fileList = query.getFileList(BasicDBObjectBuilder.start("filename", "/foo/bar1.txt").get());
+        MongoFileCursor fileList = store.query().find("/foo/bar1.txt");
         int count = 0;
         for (MongoFile mongoFile : fileList) {
             ++count;
@@ -78,8 +77,7 @@ public class MongoFileCursorTest implements LoremIpsum {
     public void testSortedList()
             throws IllegalArgumentException, IOException {
 
-        MongoFileQuery query = new MongoFileQuery(store);
-        MongoFileCursor fileList = query.getFileList().sort(BasicDBObjectBuilder.start("filename", "1").get());
+        MongoFileCursor fileList = store.query().getFileList().sort(BasicDBObjectBuilder.start("filename", "1").get());
 
         assertTrue(fileList.hasNext());
         assertEquals("/baz/bar3.txt", fileList.next().getFilename());
@@ -101,11 +99,10 @@ public class MongoFileCursorTest implements LoremIpsum {
             throws IllegalArgumentException, IOException {
 
         store.getFilesCollection().ensureIndex(BasicDBObjectBuilder.start("md5", 1).get());
-        MongoFileQuery query = new MongoFileQuery(store);
-
         DBObject q = BasicDBObjectBuilder.start("filename", "/foo/bar1.txt").get();
         DBObject s = BasicDBObjectBuilder.start("filename", "1").get();
-        MongoFileCursor fileList = query.getFileList(q, s);
+
+        MongoFileCursor fileList = store.query().getFileList(q, s);
 
         assertTrue(fileList.hasNext());
         assertEquals("/foo/bar1.txt", fileList.next().getFilename());

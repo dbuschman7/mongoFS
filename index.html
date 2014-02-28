@@ -67,7 +67,7 @@
                     <div class="col-md-8 col-md-offset-2">
                         <h1 class="brand-heading"><i><small class="green">mongo</small><span class="beige" >FS</span></i></h1>
                         <p class="intro-text">An enhanced file storage implementation in MongoDB that extends the GridFS functionality</p>
-                        <div class="page-scroll">
+                        <div class="page-scroll .hidden-xs">
                             <a href="#about" class="btn btn-circle">
                                 <i class="fa fa-angle-double-down animated"></i>
                             </a>
@@ -83,8 +83,8 @@
             <div class="col-lg-8 col-lg-offset-2">
                 <h2>About <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
                 <p>This project came out of a need in my company to extend the current GridFS functionality to include compression of file data. After spending a day or so trying to work with the existing implementation. I determined that the existing implementation was not going to be extendible due to the current use of inner classes and heavy cross-class collusion. So I decided to re-write the existing implementation in order to extend it.</p>
-				<p>This project is currently under development, stay tuned. I should have a usable version available shortly. Check out my task list under the <a href="https://github.com/dbuschman7/mongoFS/blob/master/TODO.md" >TODO</a> to check the progress. I need to have this code into production by end of March so keep checking back to see the progress.</p>
-                <div class="page-scroll">
+				<p>This project is currently under development, stay tuned. I have version 0.6.1 out and available. Goto the <a href="#download" >downloads</a> section to see how to get it. Check out my task list under the <a href="https://github.com/dbuschman7/mongoFS/blob/master/TODO.md" >TODO</a> to check the progress. I need to have this code into production by end of March so keep checking back to see the progress.</p>
+                <div class="page-scroll hidden-xs">
                     <a href="#download" class="btn btn-circle">
                         <i class="fa fa-angle-double-down animated"></i>
                     </a>
@@ -98,10 +98,19 @@
             <div class="container">
                 <div class="col-lg-8 col-lg-offset-2">
                     <h2>Download <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
-                    <p>You cannot download <i><small class="green">mongo</small><span class="beige" >FS</span></i> as an artifact yet, coming soon</p> 
-                    <p>You can get the source code directly from GitHub for right now.</p>
+                    <p>My maven based repo is hosted on GitHub, repo url is https://github.com/dbuschman7/mvn-repo/raw/master</p>
+                    <pre class="">
+<code>
+&lt;dependency>
+	&lt;groupId&gt;me.lightspeed7&lt;/groupId&gt;
+	&lt;artifactId&gt;mongoFS&lt;/artifactId&gt;
+	&lt;version&gt;0.6.1&lt;/version&gt;
+&lt;/dependency&gt;
+</code>
+                    </pre> 
+                    <p>Download manually <a href="https://github.com/dbuschman7/mvn-repo/tree/master/me/lightspeed7/mongoFS" >here</a>. You can get the source code directly from GitHub.</p>
                     <a href="https://github.com/dbuschman7/mongoFS" target="_blank" class="btn btn-default btn-lg">Visit Github Page</a>
-                    <div class="page-scroll">
+                    <div class="page-scroll hidden-xs">
 	                    <a href="#contact" class="btn btn-circle">
 	                        <i class="fa fa-angle-double-down animated"></i>
 	                    </a>

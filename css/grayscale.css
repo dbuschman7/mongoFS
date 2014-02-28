@@ -279,7 +279,7 @@ h1 small  {
     }
 
     .download-section {
-        padding: 100px 0;
+        padding: 25px 0;
     }
 
     #map {
@@ -365,4 +365,10 @@ body {
 
 .page-height {
 		height : 100%;	
+}
+
+pre { 
+    background: rgba(60,40,23,.4);
+	color: #56ae47;
+	text-align: left;
 }

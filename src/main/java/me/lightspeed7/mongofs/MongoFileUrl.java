@@ -74,7 +74,7 @@ public class MongoFileUrl {
      * Is the given spec a valid MongoFile URL
      * 
      * @param spec
-     * @return
+     * @return true if the spec is a valid URL
      */
     public static final boolean isValidUrl(String spec) {
 
@@ -212,7 +212,7 @@ public class MongoFileUrl {
     /**
      * Is the data compressible based on the media type of the file. This may differ from what is stored in the datasstore
      * 
-     * @return
+     * @return true if the data is already compressed based on its media-type
      */
     public boolean isDataCompressed() {
 

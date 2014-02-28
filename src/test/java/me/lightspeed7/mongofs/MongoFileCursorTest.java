@@ -6,8 +6,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+
+import me.lightspeed7.mongofs.util.BytesCopier;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -63,14 +67,19 @@ public class MongoFileCursorTest implements LoremIpsum {
     public void testFilterFileNameList()
             throws IllegalArgumentException, IOException {
 
-        MongoFileCursor fileList = store.query().find("/foo/bar1.txt");
+        ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
+
+        MongoFileCursor cursor = store.query().find("/foo/bar1.txt");
         int count = 0;
-        for (MongoFile mongoFile : fileList) {
+        for (MongoFile mongoFile : cursor) {
             ++count;
             assertNotNull(mongoFile.getURL());
             assertEquals("/foo/bar1.txt", mongoFile.getFilename());
+            InputStream in = store.read(mongoFile);
+            new BytesCopier(in, out).transfer(true); // append more than one file together
         }
         assertEquals(2, count);
+        assertEquals(LOREM_IPSUM.length() * 2, out.toString().length());
     }
 
     @Test

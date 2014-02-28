@@ -52,21 +52,21 @@ public class MongoFileStoreTest implements LoremIpsum {
     public void testLotsOfChunksUncompressedRoundTrip()
             throws IllegalArgumentException, IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", 4 * 1024, false);
+        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false);
     }
 
     @Test
     public void testLotsOfChunksCompressedRoundTrip()
             throws IllegalArgumentException, IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", 4 * 1024, true);
+        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true);
     }
 
     //
     // internal
     // /////////////////
 
-    private void doRoundTrip(String bucket, String filename, int chunkSize, boolean compress)
+    private void doRoundTrip(String bucket, String filename, ChunkSize chunkSize, boolean compress)
             throws IOException, MalformedURLException {
 
         MongoFileStoreConfig config = new MongoFileStoreConfig(bucket);

@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import me.lightspeed7.mongofs.common.MongoFileConstants;
@@ -18,13 +20,14 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 
 public class MongoFileStore {
 
     private static final Logger LOGGER = Logger.getLogger("me.davidbuschman.mongofs");
 
-    public static final int DEFAULT_CHUNKSIZE = 256 * 1024;
+    public static final ChunkSize DEFAULT_CHUNKSIZE = ChunkSize.medium_256K;
 
     private final DBCollection filesCollection;
     private final DBCollection chunksCollection;
@@ -36,10 +39,8 @@ public class MongoFileStore {
      * 
      * @param database
      *            the MongoDB database to look for the collections in
-     * @param bucket
-     *            the mane of the bucket for these files
-     * @param writeConcern
-     *            the writeConcern that should be used for both collections
+     * @param config
+     *            the configuration for this file store
      */
     public MongoFileStore(DB database, MongoFileStoreConfig config) {
 
@@ -52,6 +53,7 @@ public class MongoFileStore {
         chunksCollection = database.getCollection(config.getBucket() + ".chunks");
         chunksCollection.setWriteConcern(config.getWriteConcern());
         chunksCollection.setReadPreference(config.getReadPreference());
+        checkForPOwerOf2Sizes(chunksCollection);
 
         // ensure standard indexes as long as collections are small
         try {
@@ -61,11 +63,24 @@ public class MongoFileStore {
             if (chunksCollection.count() < 1000) {
                 chunksCollection.ensureIndex(BasicDBObjectBuilder.start().add("files_id", 1).add("n", 1).get(),
                         BasicDBObjectBuilder.start().add("unique", true).get());
+
             }
         } catch (MongoException e) {
             LOGGER.info(String.format("Unable to ensure indices on GridFS collections in database %s", //
                     filesCollection.getDB().getName()));
         }
+    }
+
+    private void checkForPOwerOf2Sizes(DBCollection coll) {
+
+        boolean isSet = false;
+
+        if (!isSet) {
+            DBObject command = BasicDBObjectBuilder//
+                    .start("collMod", coll.getName()).append("usePowerOf2Sizes", Boolean.TRUE.booleanValue()).get();
+            coll.getDB().command(command);
+        }
+
     }
 
     //
@@ -210,10 +225,10 @@ public class MongoFileStore {
      * @throws IllegalArgumentException
      *             if required parameters are null
      */
-    public MongoFile upload(String filename, String mediaType, InputStream is)
+    public MongoFile upload(String filename, String mediaType, InputStream inputStream)
             throws IOException, IllegalArgumentException {
 
-        return upload(filename, mediaType, true, is);
+        return upload(filename, mediaType, true, inputStream);
 
     }
 
@@ -236,10 +251,10 @@ public class MongoFileStore {
      * @throws IllegalArgumentException
      *             if required parameters are null
      */
-    public MongoFile upload(String filename, String mediaType, boolean compress, InputStream is)
+    public MongoFile upload(String filename, String mediaType, boolean compress, InputStream inputStream)
             throws IOException, IllegalArgumentException {
 
-        return createNew(filename, mediaType).write(is);
+        return createNew(filename, mediaType).write(inputStream);
     }
 
     /**
@@ -371,6 +386,10 @@ public class MongoFileStore {
         new BytesCopier(new MongoFileReader(this, file).getInputStream(), out).transfer(flush);
     }
 
+    //
+    // remove methods
+    // ////////////////////
+
     /**
      * Remove a file from the database identified by the given MongoFile
      * 
@@ -391,7 +410,8 @@ public class MongoFileStore {
     /**
      * Remove a file from the datastore identified by the given MongoFileUrl
      * 
-     * @param MongoFileUrl
+     * @param url
+     *            - the MongoFileUrl
      * 
      * @throws IOException
      *             if an error occurs during reading and/or writing
@@ -408,6 +428,35 @@ public class MongoFileStore {
         filesCollection.remove(new BasicDBObject("_id", url.getMongoFileId()));
         chunksCollection.remove(new BasicDBObject("files_id", url.getMongoFileId()));
     }
+
+    /**
+     * Delete all files that match the given criteria
+     * 
+     * This code was taken from -- https://github.com/mongodb/mongo-java-driver/pull/171
+     * 
+     * @param query
+     *            the selection criteria
+     */
+    public void remove(DBObject query) {
+
+        if (query == null) {
+            throw new IllegalArgumentException("query can not be null");
+        }
+        // can't remove chunks without files_id thus keep them
+        List<ObjectId> filesIds = new ArrayList<ObjectId>();
+        for (MongoFile f : query().find(query)) {
+            filesIds.add((ObjectId) f.getId());
+        }
+
+        // remove files from bucket
+        getFilesCollection().remove(query);
+        // then remove chunks
+        getChunksCollection().remove(new BasicDBObject("files_id", new BasicDBObject("$in", filesIds)));
+    }
+
+    //
+    // collection getters
+    // /////////////////////////
 
     /**
      * The underlying MongoDB collection object for files

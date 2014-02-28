@@ -265,13 +265,13 @@ public class MongoFile implements InputFile {
      * @param value
      * @return the previous value
      */
-    public Object put(final String key, final Object v) {
+    public Object put(final String key, final Object value) {
 
         if (key == null) {
             throw new RuntimeException("key should never be null");
         }
 
-        return surrogate.put(key, v);
+        return surrogate.put(key, value);
     }
 
     /**
@@ -305,7 +305,7 @@ public class MongoFile implements InputFile {
      * 
      * @param key
      * 
-     * @return
+     * @return the key's value as an integer
      */
     public int getInt(String key) {
 

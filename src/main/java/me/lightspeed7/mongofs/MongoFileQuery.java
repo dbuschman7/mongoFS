@@ -31,7 +31,7 @@ public class MongoFileQuery {
      * finds one file matching the given id. Equivalent to findOne(id)
      * 
      * @param id
-     * @return
+     * @return the MongoFile object
      * @throws MongoException
      */
     public MongoFile find(ObjectId id) {
@@ -43,7 +43,7 @@ public class MongoFileQuery {
      * finds one file matching the given id.
      * 
      * @param id
-     * @return
+     * @return the MongoFile object
      * @throws MongoException
      */
     public MongoFile findOne(ObjectId id) {
@@ -55,7 +55,7 @@ public class MongoFileQuery {
      * finds one file matching the given filename
      * 
      * @param filename
-     * @return
+     * @return the MongoFile object
      * @throws MongoException
      */
     public MongoFile findOne(String filename) {
@@ -67,7 +67,7 @@ public class MongoFileQuery {
      * finds one file matching the given query
      * 
      * @param query
-     * @return
+     * @return the MongoFile object
      * @throws MongoException
      */
     public MongoFile findOne(DBObject query) {
@@ -79,7 +79,7 @@ public class MongoFileQuery {
      * finds a list of files matching the given filename
      * 
      * @param filename
-     * @return
+     * @return the MongoFileCursor object
      * @throws MongoException
      */
     public MongoFileCursor find(String filename) {
@@ -92,7 +92,7 @@ public class MongoFileQuery {
      * 
      * @param filename
      * @param sort
-     * @return
+     * @return the MongoFileCursor object
      * @throws MongoException
      */
     public MongoFileCursor find(String filename, DBObject sort) {
@@ -104,7 +104,7 @@ public class MongoFileQuery {
      * finds a list of files matching the given query
      * 
      * @param query
-     * @return
+     * @return the MongoFileCursor object
      * @throws MongoException
      */
     public MongoFileCursor find(DBObject query) {
@@ -117,7 +117,7 @@ public class MongoFileQuery {
      * 
      * @param query
      * @param sort
-     * @return
+     * @return the MongoFileCursor object
      * @throws MongoException
      */
     public MongoFileCursor find(DBObject query, DBObject sort) {
@@ -132,7 +132,7 @@ public class MongoFileQuery {
     /**
      * Gets the list of files stored in this mongoFS, sorted by filename.
      * 
-     * @return cursor of file objects
+     * @return the MongoFileCursor object
      */
     public MongoFileCursor getFileList() {
 
@@ -144,7 +144,7 @@ public class MongoFileQuery {
      * 
      * @param query
      *            filter to apply
-     * @return cursor of file objects
+     * @return the MongoFileCursor object
      */
     public MongoFileCursor getFileList(final DBObject query) {
 
@@ -162,7 +162,7 @@ public class MongoFileQuery {
      *            filter to apply
      * @param sort
      *            sorting to apply
-     * @return cursor of file objects
+     * @return the MongoFileCursor object
      */
     public MongoFileCursor getFileList(final DBObject query, final DBObject sort) {
 

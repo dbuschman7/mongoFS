@@ -16,7 +16,7 @@ public interface InputFile {
      * Returns the value of a field on the object
      * 
      * @param string
-     * @return
+     * @return the value object from the given key
      */
     public Object get(String string);
 

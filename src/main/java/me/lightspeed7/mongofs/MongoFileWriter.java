@@ -73,7 +73,7 @@ public class MongoFileWriter {
     /**
      * The the MongoFile object to write to
      * 
-     * @return
+     * @return the MongoFile object
      */
     public MongoFile getMongoFile() {
 

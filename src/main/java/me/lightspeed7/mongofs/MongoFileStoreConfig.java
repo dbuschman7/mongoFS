@@ -9,7 +9,7 @@ public class MongoFileStoreConfig {
     private WriteConcern writeConcern = WriteConcern.NORMAL;
     private ReadPreference readPreference = ReadPreference.primary();
     private boolean enableCompression = true;
-    private int chunkSize = MongoFileStore.DEFAULT_CHUNKSIZE;
+    private ChunkSize chunkSize = MongoFileStore.DEFAULT_CHUNKSIZE;
 
     public MongoFileStoreConfig(String bucket) {
 
@@ -58,10 +58,15 @@ public class MongoFileStoreConfig {
 
     public int getChunkSize() {
 
-        return chunkSize;
+        return chunkSize.getChunkSize();
     }
 
-    public void setChunkSize(int chunkSize) {
+    /**
+     * Specifies the chunk size to use for data chunks
+     * 
+     * @param chunkSize
+     */
+    public void setChunkSize(ChunkSize chunkSize) {
 
         this.chunkSize = chunkSize;
     }

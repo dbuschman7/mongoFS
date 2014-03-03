@@ -7,7 +7,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
+
+import me.lightspeed7.mongofs.util.BytesCopier;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -75,7 +78,10 @@ public class MongoFileStoreTest implements LoremIpsum {
         MongoFileStore store = new MongoFileStore(database, config);
 
         MongoFileWriter writer = store.createNew(filename, "text/plain", null, compress);
-        writer.write(new ByteArrayInputStream(LOREM_IPSUM.getBytes()));
+        ByteArrayInputStream in = new ByteArrayInputStream(LOREM_IPSUM.getBytes());
+        try (OutputStream out = writer.getOutputStream()) {
+            new BytesCopier(in, out).transfer(true);
+        }
 
         // verify it exists
         MongoFile file = writer.getMongoFile();

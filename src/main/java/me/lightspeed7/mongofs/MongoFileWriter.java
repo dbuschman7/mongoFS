@@ -42,16 +42,8 @@ public class MongoFileWriter {
             throw new IllegalArgumentException("passed inputStream cannot be null");
         }
 
-        // set up the chunk writing
-        MongoFileWriterAdapter adapter = new MongoFileWriterAdapter(file);
-
-        FileChunksOutputStreamSink chunks = new FileChunksOutputStreamSink(//
-                chunksCollection, file.getId(), adapter, file.getExpiresAt());
-
-        OutputStream sink = new BufferedChunksOutputStream(chunks, file.getChunkSize());
-
         // transfer the data
-        try (OutputStream out = determineTopOutputStream(sink)) {
+        try (OutputStream out = getOutputStream()) {
             new BytesCopier(in, out).transfer(true);
         }
 
@@ -60,11 +52,23 @@ public class MongoFileWriter {
 
         // return the file object
         return file;
-
     }
 
-    private OutputStream determineTopOutputStream(OutputStream sink)
+    /**
+     * Returns an output stream to write data to
+     * 
+     * @return an OutputStream
+     * @throws IOException
+     */
+    public OutputStream getOutputStream()
             throws IOException {
+
+        MongoFileWriterAdapter adapter = new MongoFileWriterAdapter(file);
+
+        FileChunksOutputStreamSink chunks = new FileChunksOutputStreamSink(//
+                chunksCollection, file.getId(), adapter, file.getExpiresAt());
+
+        OutputStream sink = new BufferedChunksOutputStream(chunks, file.getChunkSize());
 
         if (url.isStoredCompressed()) {
             return new MongoGZipOutputStream(file, sink);

@@ -48,7 +48,6 @@ import com.mongodb.MongoException;
  * having to load the entire file into memory. For more information on the indications of GridFS, see MongoDB official
  * documentation.
  * 
- * @mongodb.driver.manual core/gridfs/ GridFS
  */
 public class GridFS {
 
@@ -351,7 +350,7 @@ public class GridFS {
     }
 
     /**
-     * Creates a file entry. After calling this method, you have to call {@link com.mongodb.gridfs.GridFSInputFile#save()}.
+     * Creates a file entry. After calling this method, you have to call save to persist the file object.
      * 
      * @param data
      *            the file's data
@@ -363,7 +362,7 @@ public class GridFS {
     }
 
     /**
-     * Creates a file entry. After calling this method, you have to call {@link com.mongodb.gridfs.GridFSInputFile#save()}.
+     * Creates a file entry. After calling this method, you have to call save to persist the file object.
      * 
      * @param f
      *            the file object
@@ -377,7 +376,7 @@ public class GridFS {
     }
 
     /**
-     * Creates a file entry. After calling this method, you have to call {@link com.mongodb.gridfs.GridFSInputFile#save()}.
+     * Creates a file entry. After calling this method, you have to call save to persist the file object.
      * 
      * @param in
      *            an inputstream containing the file's data
@@ -389,7 +388,7 @@ public class GridFS {
     }
 
     /**
-     * Creates a file entry. After calling this method, you have to call {@link com.mongodb.gridfs.GridFSInputFile#save()}.
+     * Creates a file entry. After calling this method, you have to call save to persist the file object.
      * 
      * @param in
      *            an inputstream containing the file's data
@@ -403,7 +402,7 @@ public class GridFS {
     }
 
     /**
-     * Creates a file entry. After calling this method, you have to call {@link com.mongodb.gridfs.GridFSInputFile#save()}.
+     * Creates a file entry. After calling this method, you have to call save to persist the file object.
      * 
      * @param in
      *            an inputstream containing the file's data
@@ -417,7 +416,7 @@ public class GridFS {
     }
 
     /**
-     * Creates a file entry. After calling this method, you have to call {@link com.mongodb.gridfs.GridFSInputFile#save()}.
+     * Creates a file entry. After calling this method, you have to call save to persist the file object.
      * 
      * @param in
      *            an inputstream containing the file's data

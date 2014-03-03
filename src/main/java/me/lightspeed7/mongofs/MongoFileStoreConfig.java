@@ -10,6 +10,7 @@ public class MongoFileStoreConfig {
     private ReadPreference readPreference = ReadPreference.primary();
     private boolean enableCompression = true;
     private ChunkSize chunkSize = MongoFileStore.DEFAULT_CHUNKSIZE;
+    private boolean asyncDeletes = true;
 
     public MongoFileStoreConfig(String bucket) {
 
@@ -69,6 +70,27 @@ public class MongoFileStoreConfig {
     public void setChunkSize(ChunkSize chunkSize) {
 
         this.chunkSize = chunkSize;
+    }
+
+    /**
+     * Are async deletes allowed
+     * 
+     * @return true if allowed
+     */
+    public boolean isAsyncDeletes() {
+
+        return asyncDeletes;
+    }
+
+    /**
+     * Should async deletes be allowed
+     * 
+     * @param asyncDeletes
+     *            true is the default
+     */
+    public void setAsyncDeletes(boolean asyncDeletes) {
+
+        this.asyncDeletes = asyncDeletes;
     }
 
     @Override

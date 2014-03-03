@@ -13,9 +13,9 @@ public class MongoFileConstantsTest {
     @Test
     public void testCoreGridFSList() {
 
-        Set<String> coreFields = MongoFileConstants.getCoreFields(false);
+        Set<String> coreFields = MongoFileConstants.getFields(false);
         assertNotNull(coreFields);
-        assertEquals(8, coreFields.size());
+        assertEquals(9, coreFields.size());
         assertTrue(coreFields.contains(MongoFileConstants._id.name()));
         assertTrue(coreFields.contains(MongoFileConstants.filename.name()));
         assertTrue(coreFields.contains(MongoFileConstants.md5.name()));
@@ -24,14 +24,15 @@ public class MongoFileConstantsTest {
         assertTrue(coreFields.contains(MongoFileConstants.aliases.name()));
         assertTrue(coreFields.contains(MongoFileConstants.length.name()));
         assertTrue(coreFields.contains(MongoFileConstants.uploadDate.name()));
+        assertTrue(coreFields.contains(MongoFileConstants.metadata.name()));
     }
 
     @Test
     public void testCoreMongoFSList() {
 
-        Set<String> coreFields = MongoFileConstants.getCoreFields(true);
+        Set<String> coreFields = MongoFileConstants.getFields(true);
         assertNotNull(coreFields);
-        assertEquals(12, coreFields.size());
+        assertEquals(15, coreFields.size());
         assertTrue(coreFields.contains(MongoFileConstants._id.name()));
         assertTrue(coreFields.contains(MongoFileConstants.filename.name()));
         assertTrue(coreFields.contains(MongoFileConstants.md5.name()));
@@ -40,9 +41,13 @@ public class MongoFileConstantsTest {
         assertTrue(coreFields.contains(MongoFileConstants.aliases.name()));
         assertTrue(coreFields.contains(MongoFileConstants.length.name()));
         assertTrue(coreFields.contains(MongoFileConstants.uploadDate.name()));
+        assertTrue(coreFields.contains(MongoFileConstants.metadata.name()));
 
         assertTrue(coreFields.contains(MongoFileConstants.chunkCount.name()));
         assertTrue(coreFields.contains(MongoFileConstants.compressionRatio.name()));
         assertTrue(coreFields.contains(MongoFileConstants.compressedLength.name()));
+        assertTrue(coreFields.contains(MongoFileConstants.expireAt.name()));
+        assertTrue(coreFields.contains(MongoFileConstants.deleted.name()));
+
     }
 }

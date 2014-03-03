@@ -1,11 +1,12 @@
 mongofile:usage:/how/to/use/this.lib
 =======
-This library use a different approach to accessing files and is more Java centric that GridFS is in the mongo-java-driver. I made the decision to prefer static compile time type-checking and simplified object APIs over what is currently available from GridFS(2.11.4). 
+This library use a different approach to accessing files and is more Java centric than the GridFS implementation is in the mongo-java-driver. Rather than having to cast the file objects, I made the decision to prefer static compile time type-checking and simplified object APIs over what is currently available from GridFS(2.11.4). 
 
 The reading, writing, and query functions are separated from the main store code to keep usage more simple for the most common read and writes. 
 
-Also gzip compression is automatically detected basedon media type of the file unless turned off in the configuration. Most media types will be stored compressed to save bytes ( even whole chunks ) in the store. This is handled transparently and the user does not need to know when compression is involved.
+Gzip compression is automatically detected based on media type of the file unless turned off in the configuration. Most media types will be stored compressed to save bytes ( even whole chunks ) in the store. This is handled transparently and the user does not need to know when compression is involved.
 
+Also TTL expiration ( deletion ) will allow for usage as a cache to store objects that have a finite lifespan.
 
 ## URL 
 A mongofile URL protocol has also been implemented to allow a single string to to represent all the info need to fetch the file back as well as give some metadata to the user wihtout having to query the store for basic metadata. Several examples look like this 

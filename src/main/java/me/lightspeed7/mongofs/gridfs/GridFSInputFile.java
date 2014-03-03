@@ -72,7 +72,7 @@ public class GridFSInputFile extends GridFSFile implements InputFile {
 
         GridFSInputFileAdapter adapter = new GridFSInputFileAdapter(this);
 
-        FileChunksOutputStreamSink streamSink = new FileChunksOutputStreamSink(collection, this.id, adapter);
+        FileChunksOutputStreamSink streamSink = new FileChunksOutputStreamSink(collection, this.id, adapter, null);
 
         BufferedChunksOutputStream stream = new BufferedChunksOutputStream(streamSink, this.chunkSize);
         return stream;
@@ -161,7 +161,7 @@ public class GridFSInputFile extends GridFSFile implements InputFile {
     }
 
     /**
-     * calls {@link GridFSInputFile#save(long)} with the existing chunk size.
+     * calls save with the existing chunk size.
      * 
      * @throws MongoException
      */
@@ -213,7 +213,6 @@ public class GridFSInputFile extends GridFSFile implements InputFile {
      * @throws IOException
      *             on problems reading the new entry's {@link java.io.InputStream}.
      * @throws MongoException
-     * @see com.mongodb.gridfs.GridFSInputFile#saveChunks(long)
      */
     public int saveChunks()
             throws IOException {

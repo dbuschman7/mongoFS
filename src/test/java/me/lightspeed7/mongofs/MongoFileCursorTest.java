@@ -140,7 +140,7 @@ public class MongoFileCursorTest implements LoremIpsum {
     private static void createFile(MongoFileStore store, String filename, String mediaType)
             throws IOException {
 
-        MongoFileWriter writer = store.createNew(filename, mediaType, true);
+        MongoFileWriter writer = store.createNew(filename, mediaType, null, true);
         writer.write(new ByteArrayInputStream(LOREM_IPSUM.getBytes()));
     }
 }

@@ -2,6 +2,9 @@ package me.lightspeed7.mongofs.writing;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Date;
+
+import me.lightspeed7.mongofs.common.MongoFileConstants;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
@@ -20,12 +23,15 @@ public class FileChunksOutputStreamSink extends OutputStream {
     private DBCollection collection;
     private int currentChunkNumber = 0;
     private ChunksStatisticsAdapter adapter;
+    private Date expiresAt;
 
-    public FileChunksOutputStreamSink(DBCollection collection, Object fileId, ChunksStatisticsAdapter adapter) {
+    public FileChunksOutputStreamSink(DBCollection collection, Object fileId, ChunksStatisticsAdapter adapter,
+            Date expiresAt) {
 
         this.collection = collection;
         this.id = fileId;
         this.adapter = adapter;
+        this.expiresAt = expiresAt;
     }
 
     @Override
@@ -64,6 +70,9 @@ public class FileChunksOutputStreamSink extends OutputStream {
                 .append("sz", length)// length of the chunk data portion on the chunk
                 .append("data", internal)// the data encoded
         ;
+        if (expiresAt != null) {
+            dbObject.put(MongoFileConstants.expireAt.toString(), expiresAt);
+        }
         ++currentChunkNumber;
 
         // persist it

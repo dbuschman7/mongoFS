@@ -74,7 +74,7 @@ public class MongoFileStoreTest implements LoremIpsum {
         config.setWriteConcern(WriteConcern.SAFE);
         MongoFileStore store = new MongoFileStore(database, config);
 
-        MongoFileWriter writer = store.createNew(filename, "text/plain", compress);
+        MongoFileWriter writer = store.createNew(filename, "text/plain", null, compress);
         writer.write(new ByteArrayInputStream(LOREM_IPSUM.getBytes()));
 
         // verify it exists
@@ -91,11 +91,10 @@ public class MongoFileStoreTest implements LoremIpsum {
         assertEquals(LOREM_IPSUM, out.toString());
 
         // remove a file
-        store.remove(mongoFile);
+        store.remove(mongoFile, true); // flag delete
 
         // verify it does not exist
         assertFalse(store.exists(mongoFile.getURL()));
-
     }
 
 }

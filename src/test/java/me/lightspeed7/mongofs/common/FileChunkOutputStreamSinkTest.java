@@ -59,7 +59,8 @@ public class FileChunkOutputStreamSinkTest {
         GridFSInputFile file = gridFS.createFile("foo");
         GridFSInputFileAdapter adapter = new GridFSInputFileAdapter(file);
 
-        try (FileChunksOutputStreamSink sink = new FileChunksOutputStreamSink(chunksCollection, file.getId(), adapter)) {
+        try (FileChunksOutputStreamSink sink = new FileChunksOutputStreamSink(//
+                chunksCollection, file.getId(), adapter, null)) {
             byte[] array = "This is a test".getBytes();
             sink.write(array, 0, array.length);
         }
@@ -84,7 +85,8 @@ public class FileChunkOutputStreamSinkTest {
         GridFSInputFile file = gridFS.createFile("bar");
         GridFSInputFileAdapter adapter = new GridFSInputFileAdapter(file);
 
-        try (FileChunksOutputStreamSink sink = new FileChunksOutputStreamSink(chunksCollection, file.getId(), adapter)) {
+        try (FileChunksOutputStreamSink sink = new FileChunksOutputStreamSink(//
+                chunksCollection, file.getId(), adapter, null)) {
             byte[] array = "This is a test".getBytes();
             sink.write(array, 10, 4);
         }

@@ -44,7 +44,10 @@ public class MongoFileWriter {
 
         // set up the chunk writing
         MongoFileWriterAdapter adapter = new MongoFileWriterAdapter(file);
-        FileChunksOutputStreamSink chunks = new FileChunksOutputStreamSink(chunksCollection, file.getId(), adapter);
+
+        FileChunksOutputStreamSink chunks = new FileChunksOutputStreamSink(//
+                chunksCollection, file.getId(), adapter, file.getExpiresAt());
+
         OutputStream sink = new BufferedChunksOutputStream(chunks, file.getChunkSize());
 
         // transfer the data

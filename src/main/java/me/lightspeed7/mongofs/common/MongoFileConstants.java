@@ -18,10 +18,13 @@ public enum MongoFileConstants {
     uploadDate(true),
     aliases(true),
     md5(true),
+    metadata(true),
     chunkCount(false),
     compressedLength(false),
     compressionRatio(false),
-    compressionFormat(false)
+    compressionFormat(false),
+    expireAt(false),
+    deleted(false),
 
     //
     ;
@@ -33,7 +36,7 @@ public enum MongoFileConstants {
         this.core = core;
     }
 
-    public static Set<String> getCoreFields(boolean mongoFS) {
+    public static Set<String> getFields(boolean mongoFS) {
 
         Set<String> set = new TreeSet<>();
 

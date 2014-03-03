@@ -51,6 +51,9 @@
                         <a href="#features">Features</a>
                     </li>
                     <li class="page-scroll">
+                        <a href="#migration">Migration</a>
+                    </li>
+                    <li class="page-scroll">
                         <a href="#download">Download</a>
                     </li>
                     <li class="page-scroll">
@@ -85,8 +88,8 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2">
                 <h2>About <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
-                <p>This project came out of a need in my company to extend the current GridFS functionality to include compression of file data. After spending a day or so trying to work with the existing implementation. I determined that the existing implementation was not going to be extendible due to the current use of inner classes and heavy cross-class collusion. So I decided to re-write the existing implementation in order to extend it.</p>
-				<p>This project is currently under development, stay tuned. I have version 0.7.0 out and available. Goto the <a href="#download" >downloads</a> section to see how to get it. Check out my task list under the <a href="https://github.com/dbuschman7/mongoFS/blob/master/TODO.md" >TODO</a> to check the progress. I need to have this code into production by end of March so keep checking back to see the progress.</p>
+                <p>This project came out of a need in my company to extend the current GridFS functionality to include compression of file data. After spending a day or so trying to work with the existing implementation, I determined that the existing implementation was not going to be extendible due to the current use of inner classes and heavy cross-class collusion. So I decided to re-write the existing implementation in order to extend it and publish those enhancements for anyone else who will like to make use of it.</p>
+				<p>I have version 0.7.0 published and available. Goto the <a href="#download" >downloads</a> section to see how to get it. Check out my task list under the <a href="https://github.com/dbuschman7/mongoFS/blob/master/TODO.md" >TODO</a> to check the progress. I need to have this code into production by end of March so keep checking back to see my progress.</p>
                 <div class="page-scroll hidden-xs">
                     <a href="#features" class="btn btn-circle">
                         <i class="fa fa-angle-double-down animated"></i>
@@ -101,8 +104,8 @@
                 <h2>Comparing <i><small class="green">mongo</small><span class="beige" >FS</span></i> to G<small>rid</small>FS</h2>
 				<table class="table table-striped table-condensed " >
 					<tr>
-					<th>Features</th>
-					<th>GridFS( 2.11.4)</th>
+					<th>Feature</th>
+					<th>GridFS ( 2.11.4 )</th>
 					<th><i><small class="green">mongo</small><span class="beige" >FS</span></i> ( 0.7.x )</th> </tr>
 					
 					<tr><td>Built into the MongoDB driver</td><td><i class="fa fa-check" ></i></td><td>&nbsp;</td> </tr>
@@ -112,12 +115,27 @@
 					<tr><td>Available in other languages</td><td><i class="fa fa-check" ></i></td><td>Not Yet</i></td> </tr>
 					<tr><td>Optimized for usePowerOf2Sizes storage</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>Background deletes ( asynchronous )</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
-					<tr><td>Temporary file storage</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
+					<tr><td>Temporary file storage ( expiration )</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>Provides URL for easy file refrence</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>Space saving data compression ( gzip )</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>ZIP archives and serachable manifests</td><td>&nbsp;</td><td>Coming ( 0.8.x )</td> </tr>
 				
 				</table>
+                <div class="page-scroll hidden-xs">
+                    <a href="#migration" class="btn btn-circle">
+                        <i class="fa fa-angle-double-down animated"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="migration" class="container migration-section text-center page-height">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2>Migrating a G<small>rid</small>FS store to <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
+				<p><i><small class="green">mongo</small><span class="beige" >FS</span></i> was built to be compatible with an existing GridFS collections. There is even an implementation of GridFS inside of <i><small class="green">mongo</small><span class="beige" >FS</span></i> that has been refactored to use some <i><small class="green">mongo</small><span class="beige" >FS</span></i> classes underneath.</p>
+				<p>Simply point MongoFileStore to the existing GridFS collections and gain the new compression and URL functionality. </p><p><strong>NOTE:</strong> This is a one-way process. Once <i><small class="green">mongo</small><span class="beige" >FS</span></i> starts writing compressed file chunks, the data read from GridFS will be a Gzip compressed stream that you will have to handle to get the raw data back. Also, <i><small class="green">mongo</small><span class="beige" >FS</span></i> adds fields to the documents that help it know what to do with the file and chunk data in the DB collections.</p>  
+				
                 <div class="page-scroll hidden-xs">
                     <a href="#download" class="btn btn-circle">
                         <i class="fa fa-angle-double-down animated"></i>
@@ -127,21 +145,23 @@
         </div>
     </section>
 
+
     <section id="download" class="content-section text-center">
         <div class="download-section">
             <div class="container">
                 <div class="col-lg-8 col-lg-offset-2">
                     <h2>Download <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
-                    <p>My maven based repo is hosted on GitHub, repo url is https://github.com/dbuschman7/mvn-repo/raw/master</p>
-                    <pre class="">
-<code>
-&lt;dependency>
+                    <p>My maven based repo is hosted on GitHub, repo url is <br/>https://github.com/dbuschman7/mvn-repo/raw/master</p>
+                    <div class="row">
+                    <div class="col-xs-12 col-sm-offset-2 col-sm-8 col-md-offset-3 col-md-6 col-lg-offset-3 col-lg-6" >
+<pre class=""><code>&lt;dependency>
 	&lt;groupId&gt;me.lightspeed7&lt;/groupId&gt;
 	&lt;artifactId&gt;mongoFS&lt;/artifactId&gt;
 	&lt;version&gt;0.7.0&lt;/version&gt;
 &lt;/dependency&gt;
-</code>
-                    </pre> 
+</code></pre> 
+                    </div>
+					</div>
                     <p>Download manually <a href="https://github.com/dbuschman7/mvn-repo/tree/master/me/lightspeed7/mongoFS" >here</a>. You can get the source code directly from GitHub.</p>
                     <a href="https://github.com/dbuschman7/mongoFS" target="_blank" class="btn btn-default btn-lg">Visit Github Page</a>
                     <div class="page-scroll hidden-xs">

@@ -164,7 +164,7 @@ public class MongoFileStore {
 
         // send wrapper object
         MongoFileUrl mongoFileUrl = MongoFileUrl//
-                .construct(new ObjectId().toString(), filename, mediaType, null, compress);
+                .construct(new ObjectId(), filename, mediaType, null, compress);
 
         MongoFile mongoFile = new MongoFile(this, mongoFileUrl, config.getChunkSize(), compress);
         mongoFile.setExpiresAt(expiresAt);

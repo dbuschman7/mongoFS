@@ -11,6 +11,7 @@ import java.net.URLStreamHandler;
 
 import me.lightspeed7.mongofs.MongoFileUrl;
 
+import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import com.google.common.net.MediaType;
@@ -38,7 +39,8 @@ public class MongoFileProtocolTest {
     public void testHandlerOpenConnection()
             throws IOException {
 
-        MongoFileUrl url = MongoFileUrl.construct("id", "fileName.pdf", MediaType.PDF.toString(), true);
+        ObjectId id = new ObjectId();
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", MediaType.PDF.toString(), true);
         URLConnection connection = url.getUrl().openConnection();
 
         fail("This test should throw an exception");
@@ -49,7 +51,8 @@ public class MongoFileProtocolTest {
     public void testHandlerGetContent()
             throws IOException {
 
-        MongoFileUrl url = MongoFileUrl.construct("id", "fileName.pdf", MediaType.PDF.toString(), true);
+        ObjectId id = new ObjectId();
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", MediaType.PDF.toString(), true);
         Object object = url.getUrl().getContent();
 
         fail("This test should throw an exception");

@@ -117,11 +117,11 @@ public class MongoFile implements InputFile {
             throws MalformedURLException {
 
         if (surrogate != null) {
-            URL url = Parser.construct(this.getId().toString(), this.getFilename(), this.getContentType(),
+            URL url = Parser.construct(this.getId(), this.getFilename(), this.getContentType(),
                     (String) this.get(MongoFileConstants.compressionFormat.toString()), false);
             return MongoFileUrl.construct(url);
         }
-        return MongoFileUrl.construct(this.getId().toString(), this.getFilename(), this.getContentType(),
+        return MongoFileUrl.construct(this.getId(), this.getFilename(), this.getContentType(),
                 (String) this.get(MongoFileConstants.compressionFormat.toString()), compress);
     }
 
@@ -173,9 +173,9 @@ public class MongoFile implements InputFile {
      * 
      * @return the id of the file.
      */
-    public Object getId() {
+    public ObjectId getId() {
 
-        return surrogate.get("_id");
+        return (ObjectId) surrogate.get("_id");
     }
 
     /**

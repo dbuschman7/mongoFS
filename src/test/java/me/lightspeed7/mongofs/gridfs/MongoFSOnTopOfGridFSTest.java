@@ -38,8 +38,7 @@ public class MongoFSOnTopOfGridFSTest implements LoremIpsum {
 
     private static final String DB_NAME = "MongoFSTest-onTop";
 
-    private static DBObject ID = BasicDBObjectBuilder.start(MongoFileConstants._id.toString(),
-            new ObjectId().toString()).get();
+    private static DBObject ID = BasicDBObjectBuilder.start(MongoFileConstants._id.toString(), new ObjectId()).get();
 
     private static DB database;
 

@@ -5,6 +5,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import me.lightspeed7.mongofs.util.FileUtil;
+
+import org.bson.types.ObjectId;
+
 import sun.net.www.protocol.mongofile.Handler;
 import sun.net.www.protocol.mongofile.Parser;
 
@@ -27,20 +30,20 @@ public class MongoFileUrl {
     private URL url;
 
     // factories and helpers
-    public static final MongoFileUrl construct(String id, String fileName, String mediaType, boolean compress)
+    public static final MongoFileUrl construct(ObjectId id, String fileName, String mediaType, boolean compress)
             throws MalformedURLException {
 
         return construct(Parser.construct(id, fileName, mediaType, null, compress));
     }
 
-    public static final MongoFileUrl construct(String id, String fileName, String mediaType, String compressionFormat)
+    public static final MongoFileUrl construct(ObjectId id, String fileName, String mediaType, String compressionFormat)
             throws MalformedURLException {
 
         return construct(id, fileName, mediaType, compressionFormat, true);
     }
 
-    public static final MongoFileUrl construct(String id, String fileName, String mediaType, String compressionFormat,
-            boolean compress)
+    public static final MongoFileUrl construct(ObjectId id, String fileName, String mediaType,
+            String compressionFormat, boolean compress)
             throws MalformedURLException {
 
         return construct(Parser.construct(id, fileName, mediaType, compressionFormat, compress));
@@ -133,9 +136,9 @@ public class MongoFileUrl {
      * 
      * @return the primary key to the mongoFS system
      */
-    public String getMongoFileId() {
+    public ObjectId getMongoFileId() {
 
-        return url.getQuery();
+        return new ObjectId(url.getQuery());
     }
 
     /**

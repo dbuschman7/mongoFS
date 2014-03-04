@@ -6,9 +6,11 @@ import java.net.URL;
 import me.lightspeed7.mongofs.CompressionMediaTypes;
 import me.lightspeed7.mongofs.MongoFileUrl;
 
+import org.bson.types.ObjectId;
+
 public class Parser {
 
-    public static final URL construct(String id, String fileName, String mediaType, String compressionFormat,
+    public static final URL construct(ObjectId id, String fileName, String mediaType, String compressionFormat,
             boolean compress)
             throws MalformedURLException {
 
@@ -20,8 +22,8 @@ public class Parser {
                 protocol += ":" + MongoFileUrl.GZ;
             }
         }
-        return construct(String.format("%s:%s?%s#%s", protocol, fileName, id,
-                mediaType == null ? "" : mediaType.toString()));
+        return construct(String.format("%s:%s?%s#%s", protocol, fileName, id.toString(), mediaType == null ? ""
+                : mediaType.toString()));
     }
 
     public static URL construct(String spec)

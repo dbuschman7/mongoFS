@@ -73,7 +73,7 @@ install {
     project.mavenDeployers << repositories.mavenInstaller
 }
 
-publish {
+uploadArchives {
 	repositories.mavenDeployer {
         repository(url: "file:///Users/dbusch/dev/dbuschman7/mvn-repo/")
     }

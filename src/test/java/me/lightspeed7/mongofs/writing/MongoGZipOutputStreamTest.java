@@ -5,9 +5,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import me.lightspeed7.mongofs.LoremIpsum;
-import me.lightspeed7.mongofs.common.InputFile;
+import me.lightspeed7.mongofs.MongoFile;
 import me.lightspeed7.mongofs.common.MongoFileConstants;
-import me.lightspeed7.mongofs.writing.MongoGZipOutputStream;
 
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -18,7 +17,7 @@ public class MongoGZipOutputStreamTest implements LoremIpsum {
     public void test()
             throws IOException {
 
-        InputFile mock = Mockito.mock(InputFile.class);
+        MongoFile mock = Mockito.mock(MongoFile.class);
         Mockito.when(mock.get(MongoFileConstants.length.toString())).thenReturn(Integer.valueOf(100));
         Mockito.when(mock.get(MongoFileConstants.compressedLength.toString())).thenReturn(Integer.valueOf(50));
 

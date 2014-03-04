@@ -167,7 +167,9 @@ public class MongoFileStore {
                 .construct(new ObjectId(), filename, mediaType, null, compress);
 
         MongoFile mongoFile = new MongoFile(this, mongoFileUrl, config.getChunkSize(), compress);
-        mongoFile.setExpiresAt(expiresAt);
+        if (expiresAt != null) {
+            mongoFile.setExpiresAt(expiresAt);
+        }
 
         return new MongoFileWriter(mongoFileUrl, mongoFile, chunksCollection);
     }

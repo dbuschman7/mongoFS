@@ -63,7 +63,9 @@ public class MongoFile implements InputFile {
         this.surrogate.put(MongoFileConstants.chunkSize.toString(), chunkSize);
         this.surrogate.put(MongoFileConstants.filename.toString(), url.getFilePath());
         this.surrogate.put(MongoFileConstants.contentType.toString(), url.getMediaType());
-        this.surrogate.put(MongoFileConstants.compressionFormat.toString(), url.getCompresionFormat());
+        if (url.getCompressionFormat() != null) {
+            this.surrogate.put(MongoFileConstants.compressionFormat.toString(), url.getCompressionFormat());
+        }
     }
 
     //

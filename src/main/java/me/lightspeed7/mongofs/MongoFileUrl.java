@@ -190,7 +190,7 @@ public class MongoFileUrl {
      * 
      * @return the compression format
      */
-    public String getCompresionFormat() {
+    public String getCompressionFormat() {
 
         return url.getHost();
     }

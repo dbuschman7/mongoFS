@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
-import me.lightspeed7.mongofs.common.InputFile;
+import me.lightspeed7.mongofs.MongoFile;
 import me.lightspeed7.mongofs.common.MongoFileConstants;
 
 /**
@@ -14,10 +14,10 @@ import me.lightspeed7.mongofs.common.MongoFileConstants;
  */
 public class MongoGZipOutputStream extends OutputStream {
 
-    private InputFile inputFile;
+    private MongoFile inputFile;
     private OutputStream surrogate;
 
-    public MongoGZipOutputStream(InputFile inputFile, OutputStream given)
+    public MongoGZipOutputStream(MongoFile inputFile, OutputStream given)
             throws IOException {
 
         // This chain is : me -> before -> compression -> after -> given
@@ -78,6 +78,7 @@ public class MongoGZipOutputStream extends OutputStream {
             }
 
             inputFile.put(MongoFileConstants.compressionRatio.toString(), ratio);
+            inputFile.save();
         }
     }
 }

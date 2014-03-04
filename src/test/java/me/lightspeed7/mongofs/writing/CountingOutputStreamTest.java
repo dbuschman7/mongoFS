@@ -6,9 +6,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import me.lightspeed7.mongofs.LoremIpsum;
-import me.lightspeed7.mongofs.common.InputFile;
+import me.lightspeed7.mongofs.MongoFile;
 import me.lightspeed7.mongofs.common.MongoFileConstants;
-import me.lightspeed7.mongofs.writing.CountingOutputStream;
 
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -19,7 +18,7 @@ public class CountingOutputStreamTest implements LoremIpsum {
     public void test()
             throws IOException {
 
-        InputFile mock = Mockito.mock(InputFile.class);
+        MongoFile mock = Mockito.mock(MongoFile.class);
         ByteArrayOutputStream out = new ByteArrayOutputStream(1024 * 1024);
 
         try (CountingOutputStream stream = new CountingOutputStream(MongoFileConstants.chunkSize, mock, out)) {

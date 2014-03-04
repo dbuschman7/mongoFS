@@ -3,17 +3,17 @@ package me.lightspeed7.mongofs.writing;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import me.lightspeed7.mongofs.common.InputFile;
+import me.lightspeed7.mongofs.MongoFile;
 import me.lightspeed7.mongofs.common.MongoFileConstants;
 
 public class CountingOutputStream extends OutputStream {
 
     long count = 0;
     private MongoFileConstants key;
-    private InputFile inputFile;
+    private MongoFile inputFile;
     private OutputStream out;
 
-    public CountingOutputStream(MongoFileConstants key, InputFile inputFile, OutputStream out) {
+    public CountingOutputStream(MongoFileConstants key, MongoFile inputFile, OutputStream out) {
 
         this.key = key;
         this.inputFile = inputFile;
@@ -43,5 +43,6 @@ public class CountingOutputStream extends OutputStream {
         out.close();
 
         inputFile.put(key.toString(), count);
+        inputFile.save();
     }
 }

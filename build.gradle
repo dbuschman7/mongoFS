@@ -79,6 +79,15 @@ uploadArchives {
     }
 }
 
+test {
+        include "**/*Test.class"
+
+        beforeTest { descriptor ->
+        logger.lifecycle("Running test: " + descriptor)
+        }
+}
+
+
 pom {
     project {
 

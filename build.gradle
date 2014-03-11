@@ -22,7 +22,7 @@ apply plugin: 'signing'
 apply plugin: 'eclipse'
 
 group = 'me.lightspeed7'
-version = '0.7.4'
+version = '0.7.5'
 
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'

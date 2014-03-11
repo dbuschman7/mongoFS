@@ -23,7 +23,5 @@ public class MongoFileWriterAdapter extends ChunksStatisticsAdapter {
 
         super.close();
         file.save();
-
-        file.validate();
     }
 }

@@ -48,5 +48,7 @@ public class TestHarness {
 
         MongoFile mongoFile = store.upload(file, "application/xml");
         assertNotNull(mongoFile);
+
+        mongoFile.validate();
     }
 }

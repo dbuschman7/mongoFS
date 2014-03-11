@@ -67,10 +67,12 @@ public class MongoGZipOutputStream extends OutputStream {
         // flush and close the streams
         try {
             this.surrogate.close();
+        } catch (Exception e) {
+            throw e; // re-throw it
         } finally {
 
-            int length = Integer.parseInt(inputFile.get(MongoFileConstants.length.toString()).toString());
-            int compressed = Integer.parseInt(inputFile.get(MongoFileConstants.compressedLength.toString()).toString());
+            int length = inputFile.getInt(MongoFileConstants.length, 0);
+            int compressed = inputFile.getInt(MongoFileConstants.compressedLength, 0);
 
             double ratio = 0.0d;
             if (length > 0) {

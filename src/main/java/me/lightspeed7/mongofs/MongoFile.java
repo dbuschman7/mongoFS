@@ -1,5 +1,6 @@
 package me.lightspeed7.mongofs;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
@@ -125,6 +126,19 @@ public class MongoFile implements InputFile {
         }
         return MongoFileUrl.construct(this.getId(), this.getFilename(), this.getContentType(),
                 (String) this.get(MongoFileConstants.compressionFormat.toString()), compress);
+    }
+
+    /**
+     * Return an input stream to read the file content data from
+     * 
+     * @return an input stream to read from
+     * 
+     * @throws IOException
+     */
+    public MongoFileReader read()
+            throws IllegalStateException, IOException {
+
+        return new MongoFileReader(store, this);
     }
 
     //

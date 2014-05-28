@@ -449,7 +449,7 @@ public class MongoFileStore {
     public void read(MongoFile file, OutputStream out, boolean flush)
             throws IOException {
 
-        new BytesCopier(new MongoFileReader(this, file).getInputStream(), out).transfer(flush);
+        new BytesCopier(file.read().getInputStream(), out).transfer(flush);
     }
 
     //

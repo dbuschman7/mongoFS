@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
+import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
 
 public class TestHarness {
@@ -41,7 +42,7 @@ public class TestHarness {
 
         MongoFileStoreConfig config = new MongoFileStoreConfig("xml");
         config.setWriteConcern(WriteConcern.SAFE);
-
+        config.setReadPreference(ReadPreference.primary());
         MongoFileStore store = new MongoFileStore(database, config);
 
         File file = new File("/Users/dbusch/Documents/Gasplant", "GasStatementData_J24_20131101_20131001_4_1.xml");

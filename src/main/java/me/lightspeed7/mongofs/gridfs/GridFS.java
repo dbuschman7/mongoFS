@@ -54,7 +54,7 @@ public class GridFS {
     /**
      * File's chunk size
      */
-    public static final int DEFAULT_CHUNKSIZE = 256 * 1024;
+    public static final int DEFAULT_CHUNKSIZE = 255 * 1024;
 
     /**
      * Bucket to use for the collection namespaces
@@ -112,15 +112,16 @@ public class GridFS {
         // ensure standard indexes as long as collections are small
         try {
             if (filesCollection.count() < 1000) {
-                filesCollection.ensureIndex(new BasicDBObject("filename", 1).append("uploadDate", 1));
+                filesCollection.createIndex(new BasicDBObject("filename", 1).append("uploadDate", 1));
             }
             if (chunksCollection.count() < 1000) {
-                chunksCollection.ensureIndex(new BasicDBObject("files_id", 1).append("n", 1), //
-                        new BasicDBObject("unique", true));
+                chunksCollection.createIndex(new BasicDBObject("files_id", 1).append("n", 1),
+                                             new BasicDBObject("unique", true));
             }
         } catch (MongoException e) {
-            // TODO: Logging
+            //TODO: Logging
         }
+
 
         filesCollection.setObjectClass(GridFSDBFile.class);
     }

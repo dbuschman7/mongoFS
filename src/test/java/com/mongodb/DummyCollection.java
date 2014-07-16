@@ -45,7 +45,7 @@ public class DummyCollection extends DBCollection {
         return null;
     }
 
-    @Override
+    // @Override
     Iterator<DBObject> __find(DBObject ref, DBObject fields, int numToSkip, int batchSize, int limit, int options,
             ReadPreference readPref, DBDecoder decoder) {
 
@@ -53,7 +53,7 @@ public class DummyCollection extends DBCollection {
         return null;
     }
 
-    @Override
+    // @Override
     Iterator<DBObject> __find(DBObject ref, DBObject fields, int numToSkip, int batchSize, int limit, int options,
             ReadPreference readPref, DBDecoder decoder, DBEncoder encoder) {
 
@@ -66,5 +66,43 @@ public class DummyCollection extends DBCollection {
 
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    QueryResultIterator find(DBObject ref, DBObject fields, int numToSkip, int batchSize, int limit, int options,
+            ReadPreference readPref, DBDecoder decoder) {
+
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    QueryResultIterator find(DBObject ref, DBObject fields, int numToSkip, int batchSize, int limit, int options,
+            ReadPreference readPref, DBDecoder decoder, DBEncoder encoder) {
+
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Cursor aggregate(List<DBObject> pipeline, AggregationOptions options, ReadPreference readPreference) {
+
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<Cursor> parallelScan(ParallelScanOptions options) {
+
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    BulkWriteResult executeBulkWriteOperation(boolean ordered, List<WriteRequest> requests, WriteConcern writeConcern,
+            DBEncoder encoder) {
+
+        // TODO Auto-generated method stub
+        return null;
     }
 }

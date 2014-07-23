@@ -593,7 +593,7 @@ public class MongoFileStore {
         // files collection
         DBObject filesUpdate = BasicDBObjectBuilder//
                 .start(MongoFileConstants.expireAt.toString(), when)//
-                .append(MongoFileConstants.deleted.toString(), Boolean.TRUE)//
+                .append(MongoFileConstants.deleted.toString(), when.before(new Date()))//
                 .get();
         filesUpdate = BasicDBObjectBuilder.start("$set", filesUpdate).get();
         getFilesCollection().update(filesQuery, filesUpdate, false, multi, WriteConcern.JOURNALED);

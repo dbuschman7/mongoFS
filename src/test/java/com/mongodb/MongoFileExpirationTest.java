@@ -59,9 +59,12 @@ public class MongoFileExpirationTest implements LoremIpsum {
 
     @Test
     public void testExpiresInThePast()
-            throws IOException {
+            throws IOException, InterruptedException {
 
         //
+        Date when = new Date();
+        Thread.sleep(200);
+        assertTrue(when.before(new Date()));
     }
 
     //

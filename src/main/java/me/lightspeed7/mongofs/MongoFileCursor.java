@@ -12,13 +12,12 @@ import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
 
 /**
- * This class is a surrogate holder for the actual DBCursor object underneath. I did not want to have to write this class, but I
- * felt the not have to type cast and given compile time explicit typing is too important in Java to force the users to have to
- * cast every object that come out of the cursor.
+ * This class is a surrogate holder for the actual DBCursor object underneath. I did not want to have to write this class, but I felt the
+ * not have to type cast and given compile time explicit typing is too important in Java to force the users to have to cast every object
+ * that come out of the cursor.
  * 
- * This object will be a pain to keep up to date with the DBCursor class in the mongo-java-driver and will most likely end up
- * tying versions of this library to specific versions on the mongo-java-driver in the future. Compile-time class type checking is
- * that important. ( IMHO )
+ * This object will be a pain to keep up to date with the DBCursor class in the mongo-java-driver and will most likely end up tying versions
+ * of this library to specific versions on the mongo-java-driver in the future. Compile-time class type checking is that important. ( IMHO )
  * 
  * @author David Buschman
  * 

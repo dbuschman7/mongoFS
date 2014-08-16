@@ -38,8 +38,7 @@ public class MongoFileReader {
      * @return an InputStream ready for reading
      * @throws IOException
      */
-    public final InputStream getInputStream()
-            throws IOException {
+    public final InputStream getInputStream() throws IOException {
 
         // returned <- counting <- chunks
         //

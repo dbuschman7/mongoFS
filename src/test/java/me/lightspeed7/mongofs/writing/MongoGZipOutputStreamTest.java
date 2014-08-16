@@ -14,8 +14,7 @@ import org.mockito.Mockito;
 public class MongoGZipOutputStreamTest implements LoremIpsum {
 
     @Test
-    public void test()
-            throws IOException {
+    public void test() throws IOException {
 
         MongoFile mock = Mockito.mock(MongoFile.class);
         Mockito.when(mock.get(MongoFileConstants.length.toString())).thenReturn(Integer.valueOf(100));

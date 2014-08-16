@@ -23,8 +23,7 @@ public class DummyCollection extends DBCollection {
     }
 
     @Override
-    public WriteResult update(DBObject q, DBObject o, boolean upsert, boolean multi, WriteConcern concern,
-            DBEncoder encoder) {
+    public WriteResult update(DBObject q, DBObject o, boolean upsert, boolean multi, WriteConcern concern, DBEncoder encoder) {
 
         this.q = q;
         this.o = o;
@@ -46,16 +45,16 @@ public class DummyCollection extends DBCollection {
     }
 
     // @Override
-    Iterator<DBObject> __find(DBObject ref, DBObject fields, int numToSkip, int batchSize, int limit, int options,
-            ReadPreference readPref, DBDecoder decoder) {
+    Iterator<DBObject> __find(DBObject ref, DBObject fields, int numToSkip, int batchSize, int limit, int options, ReadPreference readPref,
+            DBDecoder decoder) {
 
         // TODO Auto-generated method stub
         return null;
     }
 
     // @Override
-    Iterator<DBObject> __find(DBObject ref, DBObject fields, int numToSkip, int batchSize, int limit, int options,
-            ReadPreference readPref, DBDecoder decoder, DBEncoder encoder) {
+    Iterator<DBObject> __find(DBObject ref, DBObject fields, int numToSkip, int batchSize, int limit, int options, ReadPreference readPref,
+            DBDecoder decoder, DBEncoder encoder) {
 
         // TODO Auto-generated method stub
         return null;
@@ -69,16 +68,16 @@ public class DummyCollection extends DBCollection {
     }
 
     @Override
-    QueryResultIterator find(DBObject ref, DBObject fields, int numToSkip, int batchSize, int limit, int options,
-            ReadPreference readPref, DBDecoder decoder) {
+    QueryResultIterator find(DBObject ref, DBObject fields, int numToSkip, int batchSize, int limit, int options, ReadPreference readPref,
+            DBDecoder decoder) {
 
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    QueryResultIterator find(DBObject ref, DBObject fields, int numToSkip, int batchSize, int limit, int options,
-            ReadPreference readPref, DBDecoder decoder, DBEncoder encoder) {
+    QueryResultIterator find(DBObject ref, DBObject fields, int numToSkip, int batchSize, int limit, int options, ReadPreference readPref,
+            DBDecoder decoder, DBEncoder encoder) {
 
         // TODO Auto-generated method stub
         return null;
@@ -99,8 +98,7 @@ public class DummyCollection extends DBCollection {
     }
 
     @Override
-    BulkWriteResult executeBulkWriteOperation(boolean ordered, List<WriteRequest> requests, WriteConcern writeConcern,
-            DBEncoder encoder) {
+    BulkWriteResult executeBulkWriteOperation(boolean ordered, List<WriteRequest> requests, WriteConcern writeConcern, DBEncoder encoder) {
 
         // TODO Auto-generated method stub
         return null;

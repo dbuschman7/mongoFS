@@ -55,8 +55,7 @@ public class MongoFSOnTopOfGridFSTest implements LoremIpsum {
     }
 
     @Test
-    public void doTheTest()
-            throws IOException {
+    public void doTheTest() throws IOException {
 
         createOriginalGridFSFile();
         verifyReadFromRefactoredGridFS();
@@ -64,8 +63,7 @@ public class MongoFSOnTopOfGridFSTest implements LoremIpsum {
 
     }
 
-    public Object createOriginalGridFSFile()
-            throws IOException {
+    public Object createOriginalGridFSFile() throws IOException {
 
         com.mongodb.gridfs.GridFS gridFS = new com.mongodb.gridfs.GridFS(database, bucket);
         com.mongodb.gridfs.GridFSInputFile file = gridFS.createFile("originalGridFS.txt");
@@ -108,8 +106,7 @@ public class MongoFSOnTopOfGridFSTest implements LoremIpsum {
         return ID;
     }
 
-    public void verifyReadFromRefactoredGridFS()
-            throws IOException {
+    public void verifyReadFromRefactoredGridFS() throws IOException {
 
         me.lightspeed7.mongofs.gridfs.GridFS gridFS = new me.lightspeed7.mongofs.gridfs.GridFS(database, bucket);
         me.lightspeed7.mongofs.gridfs.GridFSDBFile findOne = gridFS.findOne(ID);
@@ -123,8 +120,7 @@ public class MongoFSOnTopOfGridFSTest implements LoremIpsum {
 
     }
 
-    public void verifyReadFromMongoFS()
-            throws IOException {
+    public void verifyReadFromMongoFS() throws IOException {
 
         MongoFileStore store = new MongoFileStore(database, new MongoFileStoreConfig(bucket));
         MongoFile findOne = store.query().findOne(ID);

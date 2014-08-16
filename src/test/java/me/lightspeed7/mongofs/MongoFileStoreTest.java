@@ -40,29 +40,25 @@ public class MongoFileStoreTest implements LoremIpsum {
     }
 
     @Test
-    public void testBasicUncompressedRoundTrip()
-            throws IllegalArgumentException, IOException {
+    public void testBasicUncompressedRoundTrip() throws IllegalArgumentException, IOException {
 
         doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStore.DEFAULT_CHUNKSIZE, false);
     }
 
     @Test
-    public void testBasicCompressedRoundTrip()
-            throws IllegalArgumentException, IOException {
+    public void testBasicCompressedRoundTrip() throws IllegalArgumentException, IOException {
 
         doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStore.DEFAULT_CHUNKSIZE, true);
     }
 
     @Test
-    public void testLotsOfChunksUncompressedRoundTrip()
-            throws IllegalArgumentException, IOException {
+    public void testLotsOfChunksUncompressedRoundTrip() throws IllegalArgumentException, IOException {
 
         doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false);
     }
 
     @Test
-    public void testLotsOfChunksCompressedRoundTrip()
-            throws IllegalArgumentException, IOException {
+    public void testLotsOfChunksCompressedRoundTrip() throws IllegalArgumentException, IOException {
 
         doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true);
     }
@@ -71,8 +67,8 @@ public class MongoFileStoreTest implements LoremIpsum {
     // internal
     // /////////////////
 
-    private void doRoundTrip(String bucket, String filename, ChunkSize chunkSize, boolean compress)
-            throws IOException, MalformedURLException {
+    private void doRoundTrip(String bucket, String filename, ChunkSize chunkSize, boolean compress) throws IOException,
+            MalformedURLException {
 
         MongoFileStoreConfig config = new MongoFileStoreConfig(bucket);
         config.setChunkSize(chunkSize);
@@ -97,7 +93,8 @@ public class MongoFileStoreTest implements LoremIpsum {
             assertNotNull(mongoFile.get(MongoFileConstants.compressedLength)); // verify compression
             assertNotNull(mongoFile.get(MongoFileConstants.compressionFormat)); // verify compression
             assertNotNull(mongoFile.get(MongoFileConstants.compressionRatio)); // verify compression
-        } else {
+        }
+        else {
             assertNull(mongoFile.get(MongoFileConstants.compressedLength)); // verify no compression
             assertNull(mongoFile.get(MongoFileConstants.compressionFormat)); // verify no compression
             assertNull(mongoFile.get(MongoFileConstants.compressionRatio)); // verify no compression

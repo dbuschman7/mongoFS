@@ -51,8 +51,7 @@ public class GridFSDBFile extends GridFSFile {
      * @throws IOException
      * @throws MongoException
      */
-    public long writeTo(final String filename)
-            throws IOException {
+    public long writeTo(final String filename) throws IOException {
 
         return writeTo(new File(filename));
     }
@@ -66,8 +65,7 @@ public class GridFSDBFile extends GridFSFile {
      * @throws IOException
      * @throws MongoException
      */
-    public long writeTo(final File f)
-            throws IOException {
+    public long writeTo(final File f) throws IOException {
 
         FileOutputStream out = null;
         try {
@@ -89,8 +87,7 @@ public class GridFSDBFile extends GridFSFile {
      * @throws IOException
      * @throws MongoException
      */
-    public long writeTo(final OutputStream out)
-            throws IOException {
+    public long writeTo(final OutputStream out) throws IOException {
 
         int nc = numChunks();
         for (int i = 0; i < nc; i++) {

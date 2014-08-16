@@ -12,8 +12,7 @@ import org.junit.Test;
 public class ParserTest {
 
     @Test
-    public void testAutoAssignedCompression()
-            throws IOException {
+    public void testAutoAssignedCompression() throws IOException {
 
         ObjectId id = new ObjectId();
         URL url = Parser.construct(id, "fileName.pdf", "application/pdf", null, true);
@@ -24,8 +23,7 @@ public class ParserTest {
     }
 
     @Test
-    public void testCustomAssignedCompression()
-            throws IOException {
+    public void testCustomAssignedCompression() throws IOException {
 
         ObjectId id = new ObjectId();
         URL url = Parser.construct(id, "fileName.pdf", "application/pdf", "foo", true);
@@ -36,8 +34,7 @@ public class ParserTest {
     }
 
     @Test
-    public void testNoCompression()
-            throws IOException {
+    public void testNoCompression() throws IOException {
 
         ObjectId id = new ObjectId();
         URL url = Parser.construct(id, "fileName.zip", "application/zip", null, true);
@@ -48,8 +45,7 @@ public class ParserTest {
     }
 
     @Test
-    public void testBlockedCompression()
-            throws IOException {
+    public void testBlockedCompression() throws IOException {
 
         ObjectId id = new ObjectId();
         URL url = Parser.construct(id, "fileName.pdf", "application/pdf", null, false);
@@ -60,8 +56,7 @@ public class ParserTest {
     }
 
     @Test
-    public void testCustomAssignedOverrideCompression()
-            throws IOException {
+    public void testCustomAssignedOverrideCompression() throws IOException {
 
         ObjectId id = new ObjectId();
         URL url = Parser.construct(id, "fileName.pdf", "application/pdf", "foo", false);

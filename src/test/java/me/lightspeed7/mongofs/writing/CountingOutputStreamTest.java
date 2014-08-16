@@ -15,8 +15,7 @@ import org.mockito.Mockito;
 public class CountingOutputStreamTest implements LoremIpsum {
 
     @Test
-    public void test()
-            throws IOException {
+    public void test() throws IOException {
 
         MongoFile mock = Mockito.mock(MongoFile.class);
         ByteArrayOutputStream out = new ByteArrayOutputStream(1024 * 1024);

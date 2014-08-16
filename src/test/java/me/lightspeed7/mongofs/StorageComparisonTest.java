@@ -48,8 +48,7 @@ public class StorageComparisonTest implements LoremIpsum {
     }
 
     @Test
-    public void testOriginalGridFS()
-            throws IOException {
+    public void testOriginalGridFS() throws IOException {
 
         String bucket = "original";
         com.mongodb.gridfs.GridFS gridFS = new com.mongodb.gridfs.GridFS(database, bucket);
@@ -92,8 +91,7 @@ public class StorageComparisonTest implements LoremIpsum {
     }
 
     @Test
-    public void testFactoredGridFS()
-            throws IOException {
+    public void testFactoredGridFS() throws IOException {
 
         String bucket = "refactored";
         me.lightspeed7.mongofs.gridfs.GridFS gridFS = new me.lightspeed7.mongofs.gridfs.GridFS(database, bucket);
@@ -129,8 +127,7 @@ public class StorageComparisonTest implements LoremIpsum {
         assertEquals(me.lightspeed7.mongofs.gridfs.GridFS.DEFAULT_CHUNKSIZE, file.getChunkSize());
         assertEquals(1, file.numChunks());
 
-        me.lightspeed7.mongofs.gridfs.GridFSDBFile findOne = gridFS.findOne(BasicDBObjectBuilder.start("_id",
-                file.getId()).get());
+        me.lightspeed7.mongofs.gridfs.GridFSDBFile findOne = gridFS.findOne(BasicDBObjectBuilder.start("_id", file.getId()).get());
         assertNotNull(findOne);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
@@ -141,8 +138,7 @@ public class StorageComparisonTest implements LoremIpsum {
 
     @Test
     // @Ignore
-    public void testMongoFS()
-            throws IOException {
+    public void testMongoFS() throws IOException {
 
         String bucket = "mongofs";
         MongoFileStore store = new MongoFileStore(database, new MongoFileStoreConfig(bucket));

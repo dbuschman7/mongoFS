@@ -17,8 +17,7 @@ public class MongoGZipOutputStream extends OutputStream {
     private MongoFile inputFile;
     private OutputStream surrogate;
 
-    public MongoGZipOutputStream(MongoFile inputFile, OutputStream given)
-            throws IOException {
+    public MongoGZipOutputStream(MongoFile inputFile, OutputStream given) throws IOException {
 
         // This chain is : me -> before -> compression -> after -> given
         //
@@ -33,36 +32,31 @@ public class MongoGZipOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(int b)
-            throws IOException {
+    public void write(int b) throws IOException {
 
         this.surrogate.write(b);
     }
 
     @Override
-    public void write(byte[] b)
-            throws IOException {
+    public void write(byte[] b) throws IOException {
 
         this.surrogate.write(b);
     }
 
     @Override
-    public void write(byte[] b, int off, int len)
-            throws IOException {
+    public void write(byte[] b, int off, int len) throws IOException {
 
         this.surrogate.write(b, off, len);
     }
 
     @Override
-    public void flush()
-            throws IOException {
+    public void flush() throws IOException {
 
         this.surrogate.flush();
     }
 
     @Override
-    public void close()
-            throws IOException {
+    public void close() throws IOException {
 
         // flush and close the streams
         try {

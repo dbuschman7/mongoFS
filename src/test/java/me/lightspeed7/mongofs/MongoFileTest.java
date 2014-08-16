@@ -15,14 +15,12 @@ import com.google.common.net.MediaType;
 public class MongoFileTest {
 
     @Test
-    public void testGZipFactoriesItemized()
-            throws IOException {
+    public void testGZipFactoriesItemized() throws IOException {
 
         ObjectId id = new ObjectId();
         MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", MediaType.PDF.toString(), true);
         assertNotNull(url);
-        assertEquals(String.format("mongofile:gz:fileName.pdf?%s#application/pdf", id.toString()), url.getUrl()
-                .toString());
+        assertEquals(String.format("mongofile:gz:fileName.pdf?%s#application/pdf", id.toString()), url.getUrl().toString());
 
         assertEquals(id, url.getMongoFileId());
         assertEquals("fileName.pdf", url.getFilePath());
@@ -34,8 +32,7 @@ public class MongoFileTest {
     }
 
     @Test
-    public void testFactoriesItemized()
-            throws IOException {
+    public void testFactoriesItemized() throws IOException {
 
         ObjectId id = new ObjectId();
         MongoFileUrl url = MongoFileUrl.construct(id, "fileName.zip", MediaType.ZIP.toString(), true);
@@ -52,8 +49,7 @@ public class MongoFileTest {
     }
 
     @Test
-    public void testFactoriesFromSpecCrosswired()
-            throws IOException {
+    public void testFactoriesFromSpecCrosswired() throws IOException {
 
         // this test to to test the ability to changes what MediaTypes are compressed
         // over time without problems for existing files already stored in the database
@@ -74,11 +70,9 @@ public class MongoFileTest {
     }
 
     @Test
-    public void testGZipFactoriesFromSpec()
-            throws IOException {
+    public void testGZipFactoriesFromSpec() throws IOException {
 
-        MongoFileUrl url = MongoFileUrl
-                .construct("mongofile:/home/myself/foo/activeusers_19.ZIP?52fb1e7b36707d6d13ebfda9#application/zip");
+        MongoFileUrl url = MongoFileUrl.construct("mongofile:/home/myself/foo/activeusers_19.ZIP?52fb1e7b36707d6d13ebfda9#application/zip");
         assertNotNull(url);
 
         assertEquals(new ObjectId("52fb1e7b36707d6d13ebfda9"), url.getMongoFileId());

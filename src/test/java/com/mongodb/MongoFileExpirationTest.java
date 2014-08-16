@@ -28,8 +28,7 @@ public class MongoFileExpirationTest implements LoremIpsum {
 
     // initializer
     @BeforeClass
-    public static void initial()
-            throws IllegalArgumentException, IOException, InterruptedException {
+    public static void initial() throws IllegalArgumentException, IOException, InterruptedException {
 
         mongoClient = MongoTestConfig.construct();
 
@@ -44,8 +43,7 @@ public class MongoFileExpirationTest implements LoremIpsum {
     }
 
     @Test
-    public void test()
-            throws IOException {
+    public void test() throws IOException {
 
         long now = System.currentTimeMillis();
 
@@ -58,8 +56,7 @@ public class MongoFileExpirationTest implements LoremIpsum {
     }
 
     @Test
-    public void testExpiresInThePast()
-            throws IOException, InterruptedException {
+    public void testExpiresInThePast() throws IOException, InterruptedException {
 
         //
         Date when = new Date();
@@ -70,8 +67,7 @@ public class MongoFileExpirationTest implements LoremIpsum {
     //
     // internal
     // //////////////////
-    private void createTempFile(MongoFileStore store, String filename, String mediaType, Date expiresAt)
-            throws IOException {
+    private void createTempFile(MongoFileStore store, String filename, String mediaType, Date expiresAt) throws IOException {
 
         MongoFileWriter writer = store.createNew(filename, mediaType, expiresAt, true);
         writer.write(new ByteArrayInputStream(LOREM_IPSUM.getBytes()));

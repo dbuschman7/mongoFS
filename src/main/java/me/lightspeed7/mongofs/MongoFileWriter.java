@@ -35,8 +35,7 @@ public class MongoFileWriter {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public MongoFile write(InputStream in)
-            throws IOException, IllegalArgumentException {
+    public MongoFile write(InputStream in) throws IOException, IllegalArgumentException {
 
         if (in == null) {
             throw new IllegalArgumentException("passed inputStream cannot be null");
@@ -60,8 +59,7 @@ public class MongoFileWriter {
      * @return an OutputStream
      * @throws IOException
      */
-    public OutputStream getOutputStream()
-            throws IOException {
+    public OutputStream getOutputStream() throws IOException {
 
         MongoFileWriterAdapter adapter = new MongoFileWriterAdapter(file);
 
@@ -72,7 +70,8 @@ public class MongoFileWriter {
 
         if (url.isStoredCompressed()) {
             return new MongoGZipOutputStream(file, sink);
-        } else {
+        }
+        else {
             return new CountingOutputStream(MongoFileConstants.length, file, sink);
         }
     }

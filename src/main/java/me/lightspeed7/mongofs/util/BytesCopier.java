@@ -40,8 +40,7 @@ public class BytesCopier {
         this.out = out;
     }
 
-    public void transfer(boolean flush)
-            throws IOException {
+    public void transfer(boolean flush) throws IOException {
 
         int nread;
         byte buf[] = new byte[blocksize];

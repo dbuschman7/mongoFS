@@ -37,8 +37,7 @@ public class TestHarness {
     }
 
     @Test
-    public void test()
-            throws IllegalArgumentException, IOException {
+    public void test() throws IllegalArgumentException, IOException {
 
         MongoFileStoreConfig config = new MongoFileStoreConfig("xml");
         config.setWriteConcern(WriteConcern.SAFE);

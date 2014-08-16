@@ -55,8 +55,7 @@ public class GridFSTest {
     // /////////////////////////////
 
     @Test
-    public void testSmall()
-            throws Exception {
+    public void testSmall() throws Exception {
 
         try {
             setUp("testSmall");
@@ -67,8 +66,7 @@ public class GridFSTest {
     }
 
     @Test
-    public void testBig()
-            throws Exception {
+    public void testBig() throws Exception {
 
         int target = GridFS.DEFAULT_CHUNKSIZE * 3;
         StringBuilder buf = new StringBuilder(target);
@@ -85,8 +83,7 @@ public class GridFSTest {
     }
 
     @Test
-    public void testOutStreamSmall()
-            throws Exception {
+    public void testOutStreamSmall() throws Exception {
 
         try {
             setUp("testOutStreamSmall");
@@ -97,8 +94,7 @@ public class GridFSTest {
     }
 
     @Test
-    public void testOutStreamBig()
-            throws Exception {
+    public void testOutStreamBig() throws Exception {
 
         try {
             setUp("testOutStreamBig");
@@ -116,8 +112,7 @@ public class GridFSTest {
     }
 
     @Test
-    public void testOutStreamBigAligned()
-            throws Exception {
+    public void testOutStreamBigAligned() throws Exception {
 
         try {
             setUp("testOutStreamBigAligned");
@@ -135,8 +130,7 @@ public class GridFSTest {
     }
 
     @Test
-    public void testMetadata()
-            throws Exception {
+    public void testMetadata() throws Exception {
 
         try {
             setUp("testMetadata");
@@ -151,8 +145,7 @@ public class GridFSTest {
     }
 
     @Test
-    public void testBadChunkSize()
-            throws Exception {
+    public void testBadChunkSize() throws Exception {
 
         try {
             setUp("testBadChunkSize");
@@ -173,8 +166,7 @@ public class GridFSTest {
     }
 
     @Test
-    public void testMultipleChunks()
-            throws Exception {
+    public void testMultipleChunks() throws Exception {
 
         try {
 
@@ -204,8 +196,7 @@ public class GridFSTest {
     }
 
     @Test
-    public void getBigChunkSize()
-            throws Exception {
+    public void getBigChunkSize() throws Exception {
 
         try {
             setUp("getBigChunkSize");
@@ -222,8 +213,7 @@ public class GridFSTest {
     }
 
     @Test
-    public void testInputStreamSkipping()
-            throws Exception {
+    public void testInputStreamSkipping() throws Exception {
 
         try {
             setUp("testInputStreamSkipping");
@@ -289,8 +279,7 @@ public class GridFSTest {
     }
 
     @Test
-    public void testCustomFileID()
-            throws IOException {
+    public void testCustomFileID() throws IOException {
 
         try {
             setUp("testCustomFileID");
@@ -321,7 +310,7 @@ public class GridFSTest {
         }
     }
 
-    @Test( expected = IllegalArgumentException.class )
+    @Test(expected = IllegalArgumentException.class)
     public void testRemoveWhenObjectIdIsNull() {
 
         try {
@@ -334,7 +323,7 @@ public class GridFSTest {
         }
     }
 
-    @Test( expected = IllegalArgumentException.class )
+    @Test(expected = IllegalArgumentException.class)
     public void testRemoveWhenFileNameIsNull() {
 
         try {
@@ -346,7 +335,7 @@ public class GridFSTest {
         }
     }
 
-    @Test( expected = IllegalArgumentException.class )
+    @Test(expected = IllegalArgumentException.class)
     public void testRemoveWhenQueryIsNull() {
 
         try {
@@ -376,8 +365,7 @@ public class GridFSTest {
         database.dropDatabase();
     }
 
-    void testOutStream(final String s)
-            throws Exception {
+    void testOutStream(final String s) throws Exception {
 
         int[] start = getCurrentCollectionCounts();
 
@@ -401,8 +389,7 @@ public class GridFSTest {
 
     }
 
-    void testInOut(final String s)
-            throws Exception {
+    void testInOut(final String s) throws Exception {
 
         int[] start = getCurrentCollectionCounts();
 

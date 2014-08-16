@@ -96,9 +96,8 @@ public class MongoFileStoreConfig {
     @Override
     public String toString() {
 
-        return String
-                .format("MongoFileStoreConfig [bucket=%s, chunkSize=%s, enableCompression=%s, writeConcern=%s, readPreference=%s]",
-                        bucket, chunkSize, enableCompression, writeConcern, readPreference);
+        return String.format("MongoFileStoreConfig [bucket=%s, chunkSize=%s, enableCompression=%s, writeConcern=%s, readPreference=%s]",
+                bucket, chunkSize, enableCompression, writeConcern, readPreference);
     }
 
 }

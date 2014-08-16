@@ -65,8 +65,7 @@ public class GridFSInputStream extends InputStream {
      * Will smartly skips over chunks without fetching them if possible.
      */
     @Override
-    public long skip(final long bytesToSkip)
-            throws IOException {
+    public long skip(final long bytesToSkip) throws IOException {
 
         if (bytesToSkip <= 0) {
             return 0;

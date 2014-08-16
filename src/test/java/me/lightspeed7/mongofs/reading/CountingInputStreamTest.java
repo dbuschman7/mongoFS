@@ -16,8 +16,7 @@ import org.mockito.Mockito;
 public class CountingInputStreamTest implements LoremIpsum {
 
     @Test
-    public void test()
-            throws IOException {
+    public void test() throws IOException {
 
         ByteArrayInputStream lStream = new ByteArrayInputStream(LOREM_IPSUM.getBytes());
 

@@ -25,8 +25,7 @@ public class FileChunksOutputStreamSink extends OutputStream {
     private ChunksStatisticsAdapter adapter;
     private Date expiresAt;
 
-    public FileChunksOutputStreamSink(DBCollection collection, Object fileId, ChunksStatisticsAdapter adapter,
-            Date expiresAt) {
+    public FileChunksOutputStreamSink(DBCollection collection, Object fileId, ChunksStatisticsAdapter adapter, Date expiresAt) {
 
         this.collection = collection;
         this.id = fileId;
@@ -35,15 +34,13 @@ public class FileChunksOutputStreamSink extends OutputStream {
     }
 
     @Override
-    public void write(int b)
-            throws IOException {
+    public void write(int b) throws IOException {
 
         throw new IllegalStateException("Single byte writing not supported with this OutputStream");
     }
 
     @Override
-    public void write(byte[] b)
-            throws IOException {
+    public void write(byte[] b) throws IOException {
 
         if (b == null) {
             throw new IllegalArgumentException("buffer cannot be null");
@@ -53,8 +50,7 @@ public class FileChunksOutputStreamSink extends OutputStream {
     }
 
     @Override
-    public void write(byte[] buffer, int offset, int length)
-            throws IOException {
+    public void write(byte[] buffer, int offset, int length) throws IOException {
 
         byte[] internal = buffer; // assume the whole passed in buffer for efficiency
 
@@ -81,15 +77,13 @@ public class FileChunksOutputStreamSink extends OutputStream {
     }
 
     @Override
-    public void flush()
-            throws IOException {
+    public void flush() throws IOException {
 
         adapter.flush();
     }
 
     @Override
-    public void close()
-            throws IOException {
+    public void close() throws IOException {
 
         adapter.close();
     }

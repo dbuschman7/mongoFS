@@ -35,9 +35,8 @@ public class MongoFileProtocolTest {
         assertNull(x);
     }
 
-    @Test( expected = UnsupportedOperationException.class )
-    public void testHandlerOpenConnection()
-            throws IOException {
+    @Test(expected = UnsupportedOperationException.class)
+    public void testHandlerOpenConnection() throws IOException {
 
         ObjectId id = new ObjectId();
         MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", MediaType.PDF.toString(), true);
@@ -47,9 +46,8 @@ public class MongoFileProtocolTest {
         assert connection != null; // dummy line to get rid of unused warning
     }
 
-    @Test( expected = UnsupportedOperationException.class )
-    public void testHandlerGetContent()
-            throws IOException {
+    @Test(expected = UnsupportedOperationException.class)
+    public void testHandlerGetContent() throws IOException {
 
         ObjectId id = new ObjectId();
         MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", MediaType.PDF.toString(), true);

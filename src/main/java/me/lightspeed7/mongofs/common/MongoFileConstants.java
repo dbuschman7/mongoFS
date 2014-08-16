@@ -10,21 +10,8 @@ import java.util.TreeSet;
  */
 public enum MongoFileConstants {
 
-    _id(true),
-    filename(true),
-    contentType(true),
-    chunkSize(true),
-    length(true),
-    uploadDate(true),
-    aliases(true),
-    md5(true),
-    metadata(true),
-    chunkCount(false),
-    compressedLength(false),
-    compressionRatio(false),
-    compressionFormat(false),
-    expireAt(false),
-    deleted(false),
+    _id(true), filename(true), contentType(true), chunkSize(true), length(true), uploadDate(true), aliases(true), md5(true), metadata(true), chunkCount(
+            false), compressedLength(false), compressionRatio(false), compressionFormat(false), expireAt(false), deleted(false),
 
     //
     ;

@@ -21,24 +21,21 @@ public class CountingOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(int b)
-            throws IOException {
+    public void write(int b) throws IOException {
 
         out.write(b);
         ++count;
     }
 
     @Override
-    public void write(byte[] b, int off, int len)
-            throws IOException {
+    public void write(byte[] b, int off, int len) throws IOException {
 
         out.write(b, off, len);
         count += len;
     }
 
     @Override
-    public void close()
-            throws IOException {
+    public void close() throws IOException {
 
         out.close();
 

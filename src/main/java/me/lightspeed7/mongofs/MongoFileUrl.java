@@ -42,15 +42,13 @@ public class MongoFileUrl {
         return construct(id, fileName, mediaType, compressionFormat, true);
     }
 
-    public static final MongoFileUrl construct(ObjectId id, String fileName, String mediaType,
-            String compressionFormat, boolean compress)
+    public static final MongoFileUrl construct(ObjectId id, String fileName, String mediaType, String compressionFormat, boolean compress)
             throws MalformedURLException {
 
         return construct(Parser.construct(id, fileName, mediaType, compressionFormat, compress));
     }
 
-    public static final MongoFileUrl construct(String spec)
-            throws MalformedURLException {
+    public static final MongoFileUrl construct(String spec) throws MalformedURLException {
 
         return construct(Parser.construct(spec));
     }
@@ -90,8 +88,7 @@ public class MongoFileUrl {
     }
 
     // CTOR - not visible, use construct methods above
-    /* package */MongoFileUrl(String spec)
-            throws MalformedURLException {
+    /* package */MongoFileUrl(String spec) throws MalformedURLException {
 
         this.url = new URL(null, spec, new Handler());
     }

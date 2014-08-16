@@ -36,17 +36,16 @@ import com.mongodb.MongoException;
 /**
  * Implementation of GridFS - a specification for storing and retrieving files that exceed the BSON-document size limit of 16MB.
  * <p/>
- * Instead of storing a file in a single document, GridFS divides a file into parts, or chunks, and stores each of those chunks as
- * a separate document. By default GridFS limits chunk size to 256k. GridFS uses two collections to store files. One collection
- * stores the file chunks, and the other stores file metadata.
+ * Instead of storing a file in a single document, GridFS divides a file into parts, or chunks, and stores each of those chunks as a
+ * separate document. By default GridFS limits chunk size to 256k. GridFS uses two collections to store files. One collection stores the
+ * file chunks, and the other stores file metadata.
  * <p/>
- * When you query a GridFS store for a file, the driver or client will reassemble the chunks as needed. You can perform range
- * queries on files stored through GridFS. You also can access information from arbitrary sections of files, which allows you to
- * "skip" into the middle of a video or audio file.
+ * When you query a GridFS store for a file, the driver or client will reassemble the chunks as needed. You can perform range queries on
+ * files stored through GridFS. You also can access information from arbitrary sections of files, which allows you to "skip" into the middle
+ * of a video or audio file.
  * <p/>
- * GridFS is useful not only for storing files that exceed 16MB but also for storing any files for which you want access without
- * having to load the entire file into memory. For more information on the indications of GridFS, see MongoDB official
- * documentation.
+ * GridFS is useful not only for storing files that exceed 16MB but also for storing any files for which you want access without having to
+ * load the entire file into memory. For more information on the indications of GridFS, see MongoDB official documentation.
  * 
  */
 public class GridFS {
@@ -64,8 +63,8 @@ public class GridFS {
     /**
      * File's max chunk size
      * 
-     * @deprecated You can calculate max chunkSize with a similar formula {@link com.mongodb.MongoClient#getMaxBsonObjectSize()} -
-     *             500*1000. Please ensure that you left enough space for metadata (500kb is enough).
+     * @deprecated You can calculate max chunkSize with a similar formula {@link com.mongodb.MongoClient#getMaxBsonObjectSize()} - 500*1000.
+     *             Please ensure that you left enough space for metadata (500kb is enough).
      */
     @Deprecated
     public static final long MAX_CHUNKSIZE = (long) (3.5 * 1000 * 1000);
@@ -77,8 +76,8 @@ public class GridFS {
     private final DBCollection chunksCollection;
 
     /**
-     * Creates a GridFS instance for the default bucket "fs" in the given database. Set the preferred WriteConcern on the give DB
-     * with DB.setWriteConcern
+     * Creates a GridFS instance for the default bucket "fs" in the given database. Set the preferred WriteConcern on the give DB with
+     * DB.setWriteConcern
      * 
      * @param db
      *            database to work with
@@ -91,8 +90,8 @@ public class GridFS {
     }
 
     /**
-     * Creates a GridFS instance for the specified bucket in the given database. Set the preferred WriteConcern on the give DB
-     * with DB.setWriteConcern
+     * Creates a GridFS instance for the specified bucket in the given database. Set the preferred WriteConcern on the give DB with
+     * DB.setWriteConcern
      * 
      * @param db
      *            database to work with
@@ -115,13 +114,11 @@ public class GridFS {
                 filesCollection.createIndex(new BasicDBObject("filename", 1).append("uploadDate", 1));
             }
             if (chunksCollection.count() < 1000) {
-                chunksCollection.createIndex(new BasicDBObject("files_id", 1).append("n", 1),
-                                             new BasicDBObject("unique", true));
+                chunksCollection.createIndex(new BasicDBObject("files_id", 1).append("n", 1), new BasicDBObject("unique", true));
             }
         } catch (MongoException e) {
-            //TODO: Logging
+            // TODO: Logging
         }
-
 
         filesCollection.setObjectClass(GridFSDBFile.class);
     }
@@ -370,8 +367,7 @@ public class GridFS {
      * @return a gridfs input file
      * @throws IOException
      */
-    public InputFile createFile(final File f)
-            throws IOException {
+    public InputFile createFile(final File f) throws IOException {
 
         return createFile(new FileInputStream(f), f.getName(), true);
     }
@@ -446,10 +442,10 @@ public class GridFS {
     }
 
     /**
-     * This method creates an empty {@link GridFSInputFile} instance. On this instance an {@link java.io.OutputStream} can be
-     * obtained using the {@link GridFSInputFile#getOutputStream()} method. You can still call
-     * {@link GridFSInputFile#setContentType(String)} and {@link GridFSInputFile#setFilename(String)}. The file will be completely
-     * written and closed after calling the {@link java.io.OutputStream#close()} method on the output stream.
+     * This method creates an empty {@link GridFSInputFile} instance. On this instance an {@link java.io.OutputStream} can be obtained using
+     * the {@link GridFSInputFile#getOutputStream()} method. You can still call {@link GridFSInputFile#setContentType(String)} and
+     * {@link GridFSInputFile#setFilename(String)}. The file will be completely written and closed after calling the
+     * {@link java.io.OutputStream#close()} method on the output stream.
      * 
      * @return GridFS file handle instance.
      */

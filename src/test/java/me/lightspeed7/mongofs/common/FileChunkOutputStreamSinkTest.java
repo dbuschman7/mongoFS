@@ -53,8 +53,7 @@ public class FileChunkOutputStreamSinkTest {
     }
 
     @Test
-    public void testFullBufferWrite()
-            throws IOException {
+    public void testFullBufferWrite() throws IOException {
 
         GridFSInputFile file = gridFS.createFile("foo");
         GridFSInputFileAdapter adapter = new GridFSInputFileAdapter(file);
@@ -79,8 +78,7 @@ public class FileChunkOutputStreamSinkTest {
     }
 
     @Test
-    public void testPartialBufferWrite()
-            throws IOException {
+    public void testPartialBufferWrite() throws IOException {
 
         GridFSInputFile file = gridFS.createFile("bar");
         GridFSInputFileAdapter adapter = new GridFSInputFileAdapter(file);

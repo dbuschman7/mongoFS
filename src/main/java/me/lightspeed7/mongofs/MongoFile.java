@@ -116,8 +116,7 @@ public class MongoFile implements InputFile {
 
     }
 
-    public MongoFileUrl getURL()
-            throws MalformedURLException {
+    public MongoFileUrl getURL() throws MalformedURLException {
 
         if (surrogate != null) {
             URL url = Parser.construct(this.getId(), this.getFilename(), this.getContentType(),
@@ -135,8 +134,7 @@ public class MongoFile implements InputFile {
      * 
      * @throws IOException
      */
-    public MongoFileReader read()
-            throws IllegalStateException, IOException {
+    public MongoFileReader read() throws IllegalStateException, IOException {
 
         return new MongoFileReader(store, this);
     }
@@ -253,7 +251,7 @@ public class MongoFile implements InputFile {
      * 
      * @return list of aliases
      */
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<String> getAliases() {
 
         return (List<String>) this.get(MongoFileConstants.aliases);

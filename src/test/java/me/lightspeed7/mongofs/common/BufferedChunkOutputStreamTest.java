@@ -17,8 +17,7 @@ import org.junit.Test;
 public class BufferedChunkOutputStreamTest implements LoremIpsum {
 
     @Test
-    public void test8KBuffer256kChunks()
-            throws IOException {
+    public void test8KBuffer256kChunks() throws IOException {
 
         LogDumpOutputStreamSink log = new LogDumpOutputStreamSink();
 
@@ -34,8 +33,7 @@ public class BufferedChunkOutputStreamTest implements LoremIpsum {
     }
 
     @Test
-    public void test16KBuffers5kChunks()
-            throws IOException {
+    public void test16KBuffers5kChunks() throws IOException {
 
         LogDumpOutputStreamSink log = new LogDumpOutputStreamSink();
 
@@ -52,8 +50,7 @@ public class BufferedChunkOutputStreamTest implements LoremIpsum {
     }
 
     @Test
-    public void test13KBuffers15kChunks()
-            throws IOException {
+    public void test13KBuffers15kChunks() throws IOException {
 
         LogDumpOutputStreamSink log = new LogDumpOutputStreamSink();
 
@@ -64,14 +61,12 @@ public class BufferedChunkOutputStreamTest implements LoremIpsum {
         System.out.println(log.info());
         assertEquals(LOREM_IPSUM.length(), log.total);
         assertEquals(
-                //
-                "total = 32085, commands = [write(b, 0, 15360), write(b, 0, 15360), write(b, 0, 1365), flush, close]",
-                log.info());
+        //
+                "total = 32085, commands = [write(b, 0, 15360), write(b, 0, 15360), write(b, 0, 1365), flush, close]", log.info());
     }
 
-    @Test( expected = IllegalArgumentException.class )
-    public void testIllegalChunkSize()
-            throws IOException {
+    @Test(expected = IllegalArgumentException.class)
+    public void testIllegalChunkSize() throws IOException {
 
         try (OutputStream out = new BufferedChunksOutputStream(null, -1)) {
             // empty
@@ -79,8 +74,7 @@ public class BufferedChunkOutputStreamTest implements LoremIpsum {
     }
 
     @Test
-    public void testSingleByteWrite()
-            throws IOException {
+    public void testSingleByteWrite() throws IOException {
 
         LogDumpOutputStreamSink log = new LogDumpOutputStreamSink();
         try (OutputStream out = new BufferedChunksOutputStream(log, 5)) {
@@ -107,39 +101,34 @@ public class BufferedChunkOutputStreamTest implements LoremIpsum {
         }
 
         @Override
-        public void write(int b)
-                throws IOException {
+        public void write(int b) throws IOException {
 
             commands.add("write(b)");
             ++total;
         }
 
         @Override
-        public void write(byte[] b)
-                throws IOException {
+        public void write(byte[] b) throws IOException {
 
             commands.add(String.format("write(b) - length = %d", b.length));
             total += b.length;
         }
 
         @Override
-        public void write(byte[] b, int off, int len)
-                throws IOException {
+        public void write(byte[] b, int off, int len) throws IOException {
 
             commands.add(String.format("write(b, %d, %d)", off, len));
             total += len;
         }
 
         @Override
-        public void flush()
-                throws IOException {
+        public void flush() throws IOException {
 
             commands.add("flush");
         }
 
         @Override
-        public void close()
-                throws IOException {
+        public void close() throws IOException {
 
             commands.add("close");
         }

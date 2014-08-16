@@ -70,8 +70,8 @@ public class MongoFileStore {
                 filesCollection.ensureIndex(BasicDBObjectBuilder.start().add("filename", 1).add("uploadDate", 1).get());
             }
             if (chunksCollection.count() < 1000) {
-                chunksCollection.ensureIndex(BasicDBObjectBuilder.start().add("files_id", 1).add("n", 1).get(),
-                        BasicDBObjectBuilder.start().add("unique", true).get());
+                chunksCollection.ensureIndex(BasicDBObjectBuilder.start().add("files_id", 1).add("n", 1).get(), BasicDBObjectBuilder
+                        .start().add("unique", true).get());
 
             }
         } catch (MongoException e) {
@@ -118,8 +118,7 @@ public class MongoFileStore {
      * @throws IllegalArgumentException
      *             if required parameters are null
      */
-    public MongoFileWriter createNew(String filename, String mediaType)
-            throws IOException, IllegalArgumentException {
+    public MongoFileWriter createNew(String filename, String mediaType) throws IOException, IllegalArgumentException {
 
         return createNew(filename, mediaType, null, true);
     }
@@ -148,8 +147,8 @@ public class MongoFileStore {
      *             if required parameters are null
      * 
      */
-    public MongoFileWriter createNew(String filename, String mediaType, Date expiresAt, boolean compress)
-            throws IOException, IllegalArgumentException {
+    public MongoFileWriter createNew(String filename, String mediaType, Date expiresAt, boolean compress) throws IOException,
+            IllegalArgumentException {
 
         if (filename == null) {
             throw new IllegalArgumentException("filename cannot be null");
@@ -193,8 +192,7 @@ public class MongoFileStore {
      * @throws FileNotFoundException
      *             if the file does not exist or cannot be read
      */
-    public MongoFile upload(File file, String mediaType)
-            throws IOException, IllegalArgumentException {
+    public MongoFile upload(File file, String mediaType) throws IOException, IllegalArgumentException {
 
         return upload(file.toPath().toString(), mediaType, null, true, new FileInputStream(file));
     }
@@ -222,8 +220,7 @@ public class MongoFileStore {
      * @throws FileNotFoundException
      *             if the file does not exist or cannot be read
      */
-    public MongoFile upload(File file, String mediaType, boolean compress, Date expiresAt)
-            throws IOException, IllegalArgumentException {
+    public MongoFile upload(File file, String mediaType, boolean compress, Date expiresAt) throws IOException, IllegalArgumentException {
 
         if (file == null) {
             throw new IllegalArgumentException("passed in file cannot be null");
@@ -255,8 +252,7 @@ public class MongoFileStore {
      * @throws IllegalArgumentException
      *             if required parameters are null
      */
-    public MongoFile upload(String filename, String mediaType, InputStream inputStream)
-            throws IOException, IllegalArgumentException {
+    public MongoFile upload(String filename, String mediaType, InputStream inputStream) throws IOException, IllegalArgumentException {
 
         return upload(filename, mediaType, null, true, inputStream);
 
@@ -303,8 +299,7 @@ public class MongoFileStore {
      * @throws IllegalArgumentException
      *             if required parameters are null
      */
-    public MongoFile getFile(URL url)
-            throws MongoException, IllegalArgumentException {
+    public MongoFile getFile(URL url) throws MongoException, IllegalArgumentException {
 
         if (url == null) {
             throw new IllegalArgumentException("url cannot be null");
@@ -323,8 +318,7 @@ public class MongoFileStore {
      * @throws IllegalArgumentException
      *             if required parameters are null
      */
-    public MongoFile getFile(MongoFileUrl url)
-            throws MongoException, IllegalArgumentException {
+    public MongoFile getFile(MongoFileUrl url) throws MongoException, IllegalArgumentException {
 
         if (url == null) {
             throw new IllegalArgumentException("url cannot be null");
@@ -345,8 +339,7 @@ public class MongoFileStore {
      * 
      * @throws MongoException
      */
-    public boolean exists(MongoFileUrl url)
-            throws MongoException {
+    public boolean exists(MongoFileUrl url) throws MongoException {
 
         if (url == null) {
             throw new IllegalArgumentException("mongoFile cannot be null");
@@ -362,8 +355,8 @@ public class MongoFileStore {
      * Give this file an expiration date so I can be removed and resources its recovered.Use the TimeMachine DSL to easyily create
      * expiration dates.
      * 
-     * This uses MongoDB's ttl indexes feature to allow a server background thread to remove the file. According to their
-     * documentation, this may not happen immediately at the time the file is set to expire.
+     * This uses MongoDB's ttl indexes feature to allow a server background thread to remove the file. According to their documentation,
+     * this may not happen immediately at the time the file is set to expire.
      * 
      * 
      * NOTE: The MongoFileStore has methods which perform immediate update of the document in the MongoDB collection.
@@ -376,8 +369,7 @@ public class MongoFileStore {
      * @throws MalformedURLException
      */
 
-    public void expireFile(MongoFile file, Date when)
-            throws MalformedURLException {
+    public void expireFile(MongoFile file, Date when) throws MalformedURLException {
 
         MongoFileUrl url = file.getURL();
         DBObject filesQuery = BasicDBObjectBuilder.start("_id", url.getMongoFileId()).get();
@@ -393,12 +385,10 @@ public class MongoFileStore {
      * 
      * @throws MongoException
      */
-    public boolean validateConnection()
-            throws MongoException {
+    public boolean validateConnection() throws MongoException {
 
         try {
-            String command = String
-                    .format("{ touch: \"%s\", data: false, index: true }", config.getBucket() + ".files");
+            String command = String.format("{ touch: \"%s\", data: false, index: true }", config.getBucket() + ".files");
             filesCollection.getDB().command(command).throwOnError();
             return true;
         } catch (Exception e) {
@@ -416,8 +406,7 @@ public class MongoFileStore {
      * 
      * @throws IOException
      */
-    public InputStream read(MongoFile file)
-            throws IOException {
+    public InputStream read(MongoFile file) throws IOException {
 
         return new MongoFileReader(this, file).getInputStream();
     }
@@ -446,8 +435,7 @@ public class MongoFileStore {
      * 
      * @throws IOException
      */
-    public void read(MongoFile file, OutputStream out, boolean flush)
-            throws IOException {
+    public void read(MongoFile file, OutputStream out, boolean flush) throws IOException {
 
         new BytesCopier(file.read().getInputStream(), out).transfer(flush);
     }
@@ -466,8 +454,7 @@ public class MongoFileStore {
      * @throws MongoException
      * @throws IOException
      */
-    public void remove(MongoFile mongoFile)
-            throws IllegalArgumentException, MongoException, IOException {
+    public void remove(MongoFile mongoFile) throws IllegalArgumentException, MongoException, IOException {
 
         remove(mongoFile, false);
     }
@@ -480,8 +467,7 @@ public class MongoFileStore {
      * @throws MongoException
      * @throws IOException
      */
-    public void remove(MongoFile mongoFile, boolean async)
-            throws IllegalArgumentException, MongoException, IOException {
+    public void remove(MongoFile mongoFile, boolean async) throws IllegalArgumentException, MongoException, IOException {
 
         if (mongoFile == null) {
             throw new IllegalArgumentException("mongoFile cannot be null");
@@ -498,8 +484,7 @@ public class MongoFileStore {
      * @throws IllegalArgumentException
      * @throws MongoException
      */
-    public void remove(MongoFileUrl url)
-            throws IllegalArgumentException, MongoException {
+    public void remove(MongoFileUrl url) throws IllegalArgumentException, MongoException {
 
         remove(url, false);
     }
@@ -517,8 +502,7 @@ public class MongoFileStore {
      * @throws IllegalArgumentException
      *             if required parameters are null
      */
-    public void remove(MongoFileUrl url, boolean async)
-            throws IllegalArgumentException, MongoException {
+    public void remove(MongoFileUrl url, boolean async) throws IllegalArgumentException, MongoException {
 
         if (url == null) {
             throw new IllegalArgumentException("mongoFileUrl cannot be null");
@@ -530,7 +514,8 @@ public class MongoFileStore {
 
         if (async) {
             setExpiresAt(filesQuery, chunksQuery, new Date(), false);
-        } else {
+        }
+        else {
             WriteResult writeResult = filesCollection.remove(filesQuery);
             if (writeResult.getN() > 0) {
                 chunksCollection.remove(chunksQuery);
@@ -578,7 +563,8 @@ public class MongoFileStore {
 
         if (async) {
             setExpiresAt(query, chunksQuery, new Date(), true);
-        } else {
+        }
+        else {
             // remove files from bucket
             WriteResult writeResult = getFilesCollection().remove(query);
             if (writeResult.getN() > 0) {
@@ -641,8 +627,8 @@ public class MongoFileStore {
     @Override
     public String toString() {
 
-        return String.format("MongoFileStore [filesCollection=%s, chunksCollection=%s,\n  config=%s\n]",
-                filesCollection, chunksCollection, config.toString());
+        return String.format("MongoFileStore [filesCollection=%s, chunksCollection=%s,\n  config=%s\n]", filesCollection, chunksCollection,
+                config.toString());
     }
 
 }

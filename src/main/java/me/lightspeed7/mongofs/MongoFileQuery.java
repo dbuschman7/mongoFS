@@ -168,7 +168,7 @@ public class MongoFileQuery {
 
         DBCollection coll = store.getFilesCollection();
 
-        @SuppressWarnings( "resource" )
+        @SuppressWarnings("resource")
         DBCursor cursor = new DBCursor(coll, query, null, coll.getReadPreference());
 
         return new MongoFileCursor(store, cursor.sort(sort));

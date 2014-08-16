@@ -24,8 +24,7 @@ import com.google.common.net.MediaType;
 public class Handler extends URLStreamHandler {
 
     @Override
-    protected URLConnection openConnection(URL u)
-            throws IOException {
+    protected URLConnection openConnection(URL u) throws IOException {
 
         throw new UnsupportedOperationException("oppenConnection is currently not supported");
     }

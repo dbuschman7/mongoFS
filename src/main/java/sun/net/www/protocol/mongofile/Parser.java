@@ -10,24 +10,22 @@ import org.bson.types.ObjectId;
 
 public class Parser {
 
-    public static final URL construct(ObjectId id, String fileName, String mediaType, String compressionFormat,
-            boolean compress)
+    public static final URL construct(ObjectId id, String fileName, String mediaType, String compressionFormat, boolean compress)
             throws MalformedURLException {
 
         String protocol = MongoFileUrl.PROTOCOL;
         if (compressionFormat != null) {
             protocol += ":" + compressionFormat;
-        } else {
+        }
+        else {
             if (compress && CompressionMediaTypes.isCompressable(mediaType)) {
                 protocol += ":" + MongoFileUrl.GZ;
             }
         }
-        return construct(String.format("%s:%s?%s#%s", protocol, fileName, id.toString(), mediaType == null ? ""
-                : mediaType.toString()));
+        return construct(String.format("%s:%s?%s#%s", protocol, fileName, id.toString(), mediaType == null ? "" : mediaType.toString()));
     }
 
-    public static URL construct(String spec)
-            throws MalformedURLException {
+    public static URL construct(String spec) throws MalformedURLException {
 
         return new URL(null, spec, new Handler());
     }

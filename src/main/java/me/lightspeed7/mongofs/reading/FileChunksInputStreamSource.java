@@ -80,8 +80,7 @@ public class FileChunksInputStreamSource extends InputStream {
      * Will smartly skips over chunks without fetching them if possible.
      */
     @Override
-    public long skip(final long bytesToSkip)
-            throws IOException {
+    public long skip(final long bytesToSkip) throws IOException {
 
         if (bytesToSkip <= 0) {
             return 0;
@@ -121,8 +120,7 @@ public class FileChunksInputStreamSource extends InputStream {
             throw new IllegalStateException("No MongoFileStore instance defined!");
         }
 
-        DBObject chunk = store.getChunksCollection()
-                .findOne(new BasicDBObject("files_id", file.getId()).append("n", i));
+        DBObject chunk = store.getChunksCollection().findOne(new BasicDBObject("files_id", file.getId()).append("n", i));
         if (chunk == null) {
             throw new MongoException("Can't find a chunk!  file id: " + file.getId().toString() + " chunk: " + i);
         }

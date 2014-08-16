@@ -17,22 +17,22 @@ public class BytesCopier {
     private final int blocksize;
     private boolean closeStreamOnPersist;
 
-    public BytesCopier(InputStream in, OutputStream out) {
+    public BytesCopier(final InputStream in, final OutputStream out) {
 
         this(8192, in, out, false);
     }
 
-    public BytesCopier(InputStream in, OutputStream out, boolean closeStreamOnPersist) {
+    public BytesCopier(final InputStream in, final OutputStream out, final boolean closeStreamOnPersist) {
 
         this(8192, in, out, closeStreamOnPersist);
     }
 
-    public BytesCopier(int blocksize, InputStream in, OutputStream out) {
+    public BytesCopier(final int blocksize, final InputStream in, final OutputStream out) {
 
         this(blocksize, in, out, false);
     }
 
-    public BytesCopier(int blocksize, InputStream in, OutputStream out, boolean closeStreamOnPersist) {
+    public BytesCopier(final int blocksize, final InputStream in, final OutputStream out, final boolean closeStreamOnPersist) {
 
         this.closeStreamOnPersist = closeStreamOnPersist;
         this.blocksize = blocksize;
@@ -40,12 +40,13 @@ public class BytesCopier {
         this.out = out;
     }
 
-    public void transfer(boolean flush) throws IOException {
+    public void transfer(final boolean flush) throws IOException {
 
         int nread;
-        byte buf[] = new byte[blocksize];
-        while ((nread = in.read(buf)) != -1)
+        byte[] buf = new byte[blocksize];
+        while ((nread = in.read(buf)) != -1) {
             out.write(buf, 0, nread);
+        }
         if (flush) {
             out.flush();
         }

@@ -4,22 +4,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import me.lightspeed7.mongofs.common.MongoFileConstants;
-import me.lightspeed7.mongofs.util.BytesCopier;
-import me.lightspeed7.mongofs.writing.BufferedChunksOutputStream;
-import me.lightspeed7.mongofs.writing.CountingOutputStream;
-import me.lightspeed7.mongofs.writing.FileChunksOutputStreamSink;
-import me.lightspeed7.mongofs.writing.MongoGZipOutputStream;
-
-import com.mongodb.DBCollection;
+import org.mongodb.Document;
+import org.mongodb.MongoCollection;
+import org.mongodb.file.url.MongoFileUrl;
+import org.mongodb.file.util.BytesCopier;
+import org.mongodb.file.writing.BufferedChunksOutputStream;
+import org.mongodb.file.writing.CountingOutputStream;
+import org.mongodb.file.writing.FileChunksOutputStreamSink;
+import org.mongodb.file.writing.MongoGZipOutputStream;
 
 public class MongoFileWriter {
 
     private MongoFile file;
     private MongoFileUrl url;
-    private DBCollection chunksCollection;
+    private MongoCollection<Document> chunksCollection;
 
-    public MongoFileWriter(MongoFileUrl url, MongoFile file, DBCollection chunksCollection) {
+    public MongoFileWriter(final MongoFileUrl url, final MongoFile file, final MongoCollection<Document> chunksCollection) {
 
         this.url = url;
         this.file = file;
@@ -30,20 +30,25 @@ public class MongoFileWriter {
      * Stream the data to the file
      * 
      * @param in
-     * @return the fileurl object
+     * @return the file object
      * 
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public MongoFile write(InputStream in) throws IOException, IllegalArgumentException {
+    public MongoFile write(final InputStream in) throws IOException {
 
         if (in == null) {
             throw new IllegalArgumentException("passed inputStream cannot be null");
         }
 
         // transfer the data
-        try (OutputStream out = getOutputStream()) {
+        OutputStream out = getOutputStream();
+        try {
             new BytesCopier(in, out).transfer(true);
+        } finally {
+            if (out != null) {
+                out.close();
+            }
         }
 
         // make sure all the bytes transferred correctly
@@ -70,8 +75,7 @@ public class MongoFileWriter {
 
         if (url.isStoredCompressed()) {
             return new MongoGZipOutputStream(file, sink);
-        }
-        else {
+        } else {
             return new CountingOutputStream(MongoFileConstants.length, file, sink);
         }
     }

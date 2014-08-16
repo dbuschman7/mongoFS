@@ -3,11 +3,9 @@ package me.lightspeed7.mongofs.writing;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import me.lightspeed7.mongofs.common.InputFile;
-import me.lightspeed7.mongofs.common.MongoFileConstants;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.util.Util;
+import org.mongodb.Document;
+import org.mongodb.file.MongoFileConstants;
+import org.mongodb.file.util.FileUtil;
 
 /**
  * 
@@ -16,12 +14,12 @@ import com.mongodb.util.Util;
  */
 public abstract class ChunksStatisticsAdapter {
 
-    protected InputFile file;
+    private InputFile file;
     private MessageDigest messageDigest;
     private int chunkCount;
     private long totalSize;
 
-    public ChunksStatisticsAdapter(InputFile file) {
+    public ChunksStatisticsAdapter(final InputFile file) {
 
         this.file = file;
         try {
@@ -31,7 +29,7 @@ public abstract class ChunksStatisticsAdapter {
         }
     }
 
-    public void collectFromChunk(BasicDBObject obj) {
+    public void collectFromChunk(final Document obj) {
 
         byte[] data = (byte[]) obj.get("data");
 
@@ -45,7 +43,7 @@ public abstract class ChunksStatisticsAdapter {
 
         file.put(MongoFileConstants.chunkCount.name(), chunkCount);
         file.put(MongoFileConstants.length.name(), totalSize);
-        file.put(MongoFileConstants.md5.name(), Util.toHex(messageDigest.digest()));
+        file.put(MongoFileConstants.md5.name(), FileUtil.toHex(messageDigest.digest()));
     }
 
     public void flush() {

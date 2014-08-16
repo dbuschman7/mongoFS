@@ -1,15 +1,12 @@
-package me.lightspeed7.mongofs;
+package me.lightspeed7.mongofs.url;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import me.lightspeed7.mongofs.util.FileUtil;
-
 import org.bson.types.ObjectId;
-
-import sun.net.www.protocol.mongofile.Handler;
-import sun.net.www.protocol.mongofile.Parser;
+import org.mongodb.file.util.CompressionMediaTypes;
+import org.mongodb.file.util.FileUtil;
 
 /**
  * 
@@ -30,36 +27,37 @@ public class MongoFileUrl {
     private URL url;
 
     // factories and helpers
-    public static final MongoFileUrl construct(ObjectId id, String fileName, String mediaType, boolean compress)
-            throws MalformedURLException {
+    public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType,
+            final boolean compress) throws MalformedURLException {
 
         return construct(Parser.construct(id, fileName, mediaType, null, compress));
     }
 
-    public static final MongoFileUrl construct(ObjectId id, String fileName, String mediaType, String compressionFormat)
-            throws MalformedURLException {
+    public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType,
+            final String compressionFormat) throws MalformedURLException {
 
         return construct(id, fileName, mediaType, compressionFormat, true);
     }
 
-    public static final MongoFileUrl construct(ObjectId id, String fileName, String mediaType, String compressionFormat, boolean compress)
-            throws MalformedURLException {
+    public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType,
+            final String compressionFormat, final boolean compress) throws MalformedURLException {
 
         return construct(Parser.construct(id, fileName, mediaType, compressionFormat, compress));
     }
 
-    public static final MongoFileUrl construct(String spec) throws MalformedURLException {
+    public static final MongoFileUrl construct(final String spec) throws MalformedURLException {
 
         return construct(Parser.construct(spec));
     }
 
     /**
-     * Construct a MogoFile object from the given URL, it will be tested from validity
+     * Construct a MogoFile object from the given URL, it will be tested from
+     * validity
      * 
      * @param url
      * @return a MongoFile object for this URL
      */
-    public static final MongoFileUrl construct(URL url) {
+    public static final MongoFileUrl construct(final URL url) {
 
         if (url == null) {
             throw new IllegalArgumentException("url cannot be null");
@@ -77,7 +75,7 @@ public class MongoFileUrl {
      * @param spec
      * @return true if the spec is a valid URL
      */
-    public static final boolean isValidUrl(String spec) {
+    public static final boolean isValidUrl(final String spec) {
 
         try {
             return (null != construct(spec));
@@ -88,13 +86,13 @@ public class MongoFileUrl {
     }
 
     // CTOR - not visible, use construct methods above
-    /* package */MongoFileUrl(String spec) throws MalformedURLException {
+    /* package */MongoFileUrl(final String spec) throws MalformedURLException {
 
         this.url = new URL(null, spec, new Handler());
     }
 
     // CTOR- not visible, use construct methods above
-    /* package */MongoFileUrl(URL url) {
+    /* package */MongoFileUrl(final URL url) {
 
         this.url = url;
     }
@@ -165,11 +163,8 @@ public class MongoFileUrl {
      */
     public String getExtension() {
 
-        String temp = FileUtil.getExtension(new File(url.getPath()));
-        if (temp == null) {
-            return null;
-        }
-        return temp.toLowerCase();
+        // FindBugs, forced removal of null check
+        return FileUtil.getExtension(new File(url.getPath())).toLowerCase();
     }
 
     /**
@@ -183,7 +178,8 @@ public class MongoFileUrl {
     }
 
     /**
-     * Returns the compression format to the stored data, null if not compression
+     * Returns the compression format to the stored data, null if not
+     * compression
      * 
      * @return the compression format
      */
@@ -203,14 +199,16 @@ public class MongoFileUrl {
      */
     public boolean isStoredCompressed() {
 
-        if (url.getHost() != null && url.getHost().equals(GZ))
+        if (url.getHost() != null && url.getHost().equals(GZ)) {
             return true;
+        }
 
         return false;
     }
 
     /**
-     * Is the data compressible based on the media type of the file. This may differ from what is stored in the datasstore
+     * Is the data compressible based on the media type of the file. This may
+     * differ from what is stored in the datasstore
      * 
      * @return true if the data is already compressed based on its media-type
      */
@@ -219,10 +217,11 @@ public class MongoFileUrl {
         return !CompressionMediaTypes.isCompressable(getMediaType());
     }
 
-    public boolean isSupportedProtocol(String protocol) {
+    public boolean isSupportedProtocol(final String protocol) {
 
-        if (url.getProtocol().equals(PROTOCOL))
+        if (url.getProtocol().equals(PROTOCOL)) {
             return true;
+        }
 
         // unknown
         return false;

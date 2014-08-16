@@ -1,4 +1,4 @@
-package sun.net.www.protocol.mongofile;
+package me.lightspeed7.mongofs.url;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -8,6 +8,7 @@ import java.net.URL;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
+import org.mongodb.file.MongoFileTest;
 
 public class ParserTest {
 
@@ -15,7 +16,7 @@ public class ParserTest {
     public void testAutoAssignedCompression() throws IOException {
 
         ObjectId id = new ObjectId();
-        URL url = Parser.construct(id, "fileName.pdf", "application/pdf", null, true);
+        URL url = Parser.construct(id, "fileName.pdf", MongoFileTest.PDF, null, true);
 
         assertNotNull(url);
         assertEquals(String.format("mongofile:gz:fileName.pdf?%s#application/pdf", id.toString()), url.toString());
@@ -26,7 +27,7 @@ public class ParserTest {
     public void testCustomAssignedCompression() throws IOException {
 
         ObjectId id = new ObjectId();
-        URL url = Parser.construct(id, "fileName.pdf", "application/pdf", "foo", true);
+        URL url = Parser.construct(id, "fileName.pdf", MongoFileTest.PDF, "foo", true);
 
         assertNotNull(url);
         assertEquals(String.format("mongofile:foo:fileName.pdf?%s#application/pdf", id.toString()), url.toString());
@@ -37,7 +38,7 @@ public class ParserTest {
     public void testNoCompression() throws IOException {
 
         ObjectId id = new ObjectId();
-        URL url = Parser.construct(id, "fileName.zip", "application/zip", null, true);
+        URL url = Parser.construct(id, "fileName.zip", MongoFileTest.ZIP, null, true);
 
         assertNotNull(url);
         assertEquals(String.format("mongofile:fileName.zip?%s#application/zip", id.toString()), url.toString());
@@ -48,7 +49,7 @@ public class ParserTest {
     public void testBlockedCompression() throws IOException {
 
         ObjectId id = new ObjectId();
-        URL url = Parser.construct(id, "fileName.pdf", "application/pdf", null, false);
+        URL url = Parser.construct(id, "fileName.pdf", MongoFileTest.PDF, null, false);
 
         assertNotNull(url);
         assertEquals(String.format("mongofile:fileName.pdf?%s#application/pdf", id.toString()), url.toString());
@@ -59,7 +60,7 @@ public class ParserTest {
     public void testCustomAssignedOverrideCompression() throws IOException {
 
         ObjectId id = new ObjectId();
-        URL url = Parser.construct(id, "fileName.pdf", "application/pdf", "foo", false);
+        URL url = Parser.construct(id, "fileName.pdf", MongoFileTest.PDF, "foo", false);
 
         assertNotNull(url);
         assertEquals(String.format("mongofile:foo:fileName.pdf?%s#application/pdf", id.toString()), url.toString());

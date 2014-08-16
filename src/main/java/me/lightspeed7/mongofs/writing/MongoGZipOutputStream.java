@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
-import me.lightspeed7.mongofs.MongoFile;
-import me.lightspeed7.mongofs.common.MongoFileConstants;
+import org.mongodb.file.MongoFile;
+import org.mongodb.file.MongoFileConstants;
 
 /**
  * 
@@ -17,7 +17,7 @@ public class MongoGZipOutputStream extends OutputStream {
     private MongoFile inputFile;
     private OutputStream surrogate;
 
-    public MongoGZipOutputStream(MongoFile inputFile, OutputStream given) throws IOException {
+    public MongoGZipOutputStream(final MongoFile inputFile, final OutputStream given) throws IOException {
 
         // This chain is : me -> before -> compression -> after -> given
         //
@@ -32,19 +32,19 @@ public class MongoGZipOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(int b) throws IOException {
+    public void write(final int b) throws IOException {
 
         this.surrogate.write(b);
     }
 
     @Override
-    public void write(byte[] b) throws IOException {
+    public void write(final byte[] b) throws IOException {
 
         this.surrogate.write(b);
     }
 
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(final byte[] b, final int off, final int len) throws IOException {
 
         this.surrogate.write(b, off, len);
     }
@@ -61,12 +61,12 @@ public class MongoGZipOutputStream extends OutputStream {
         // flush and close the streams
         try {
             this.surrogate.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw e; // re-throw it
         } finally {
 
-            int length = inputFile.getInt(MongoFileConstants.length, 0);
-            int compressed = inputFile.getInt(MongoFileConstants.compressedLength, 0);
+            long length = inputFile.getLong(MongoFileConstants.length, 0);
+            long compressed = inputFile.getLong(MongoFileConstants.compressedLength, 0);
 
             double ratio = 0.0d;
             if (length > 0) {

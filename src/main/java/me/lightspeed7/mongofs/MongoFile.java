@@ -1,25 +1,25 @@
 package me.lightspeed7.mongofs;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.zip.GZIPInputStream;
 
-import me.lightspeed7.mongofs.common.InputFile;
-import me.lightspeed7.mongofs.common.MongoFileConstants;
-
-import org.bson.BSON;
 import org.bson.types.ObjectId;
-
-import sun.net.www.protocol.mongofile.Parser;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.mongodb.MongoException;
-import com.mongodb.util.JSON;
+import org.mongodb.Document;
+import org.mongodb.MongoException;
+import org.mongodb.file.reading.CountingInputStream;
+import org.mongodb.file.reading.FileChunksInputStreamSource;
+import org.mongodb.file.url.MongoFileUrl;
+import org.mongodb.file.url.Parser;
+import org.mongodb.file.util.BytesCopier;
+import org.mongodb.file.writing.InputFile;
 
 /**
  * Object to hold the state of the file's metatdata. To persist this outside of MongoFS, use the getURL() and persist that.
@@ -29,7 +29,7 @@ import com.mongodb.util.JSON;
  */
 public class MongoFile implements InputFile {
 
-    DBObject surrogate;
+    private Document surrogate;
 
     private MongoFileStore store;
 
@@ -41,10 +41,11 @@ public class MongoFile implements InputFile {
      * @param store
      * @param o
      */
-    /* package */MongoFile(MongoFileStore store, DBObject o) {
+    /* package */MongoFile(final MongoFileStore store, final Document surrogate) {
 
         this.store = store;
-        this.surrogate = o;
+        this.surrogate = surrogate;
+        this.compress = (surrogate == null) ? false : (surrogate.getString(MongoFileConstants.compressionFormat) != null);
     }
 
     /**
@@ -53,19 +54,20 @@ public class MongoFile implements InputFile {
      * @param collection
      * @param url
      */
-    /* package */MongoFile(MongoFileStore store, MongoFileUrl url, int chunkSize, boolean compress) {
+    /* package */MongoFile(final MongoFileStore store, final MongoFileUrl url, final long chunkSize, final boolean compress) {
 
         this.store = store;
         this.compress = compress;
-        this.surrogate = new BasicDBObject(10);
-        this.surrogate.put(MongoFileConstants._id.toString(), url.getMongoFileId());
-        this.surrogate.put(MongoFileConstants.uploadDate.toString(), new Date());
 
-        this.surrogate.put(MongoFileConstants.chunkSize.toString(), chunkSize);
-        this.surrogate.put(MongoFileConstants.filename.toString(), url.getFilePath());
-        this.surrogate.put(MongoFileConstants.contentType.toString(), url.getMediaType());
+        surrogate = new Document();
+        surrogate.put(MongoFileConstants._id.toString(), url.getMongoFileId());
+        surrogate.put(MongoFileConstants.uploadDate.toString(), new Date());
+
+        surrogate.put(MongoFileConstants.chunkSize.toString(), chunkSize);
+        surrogate.put(MongoFileConstants.filename.toString(), url.getFilePath());
+        surrogate.put(MongoFileConstants.contentType.toString(), url.getMediaType());
         if (url.getCompressionFormat() != null) {
-            this.surrogate.put(MongoFileConstants.compressionFormat.toString(), url.getCompressionFormat());
+            surrogate.put(MongoFileConstants.compressionFormat.toString(), url.getCompressionFormat());
         }
     }
 
@@ -74,7 +76,7 @@ public class MongoFile implements InputFile {
     // //////////////////
     private String getBucketName() {
 
-        return this.store.getFilesCollection().getName().split("\\.")[0];
+        return store.getFilesCollection().getName().split("\\.")[0];
     }
 
     /**
@@ -84,7 +86,7 @@ public class MongoFile implements InputFile {
      */
     public void save() {
 
-        this.store.getFilesCollection().save(surrogate);
+        store.getFilesCollection().save(surrogate);
     }
 
     /**
@@ -95,15 +97,15 @@ public class MongoFile implements InputFile {
     public void validate() {
 
         MongoFileConstants md5key = MongoFileConstants.md5;
-        String md5 = this.getString(md5key);
+        String md5 = getString(md5key);
         if (md5 == null) {
             throw new MongoException("no md5 stored");
         }
 
-        DBObject cmd = new BasicDBObject("filemd5", this.get(MongoFileConstants._id));
+        Document cmd = new Document("filemd5", get(MongoFileConstants._id));
         cmd.put("root", getBucketName());
-        DBObject res = this.store.getFilesCollection().getDB().command(cmd);
-        if (res != null && res.containsField(md5key.toString())) {
+        Document res = store.getFilesCollection().getDatabase().executeCommand(cmd).getResponse();
+        if (res != null && res.containsKey(md5key.toString())) {
             String m = res.get(md5key.toString()).toString();
             if (m.equals(md5)) {
                 return;
@@ -119,12 +121,12 @@ public class MongoFile implements InputFile {
     public MongoFileUrl getURL() throws MalformedURLException {
 
         if (surrogate != null) {
-            URL url = Parser.construct(this.getId(), this.getFilename(), this.getContentType(),
-                    (String) this.get(MongoFileConstants.compressionFormat.toString()), false);
+            URL url = Parser.construct(getId(), getFilename(), getContentType(),
+                    (String) get(MongoFileConstants.compressionFormat.toString()), false);
             return MongoFileUrl.construct(url);
         }
-        return MongoFileUrl.construct(this.getId(), this.getFilename(), this.getContentType(),
-                (String) this.get(MongoFileConstants.compressionFormat.toString()), compress);
+        return MongoFileUrl.construct(getId(), getFilename(), getContentType(),
+                (String) get(MongoFileConstants.compressionFormat.toString()), compress);
     }
 
     /**
@@ -134,9 +136,39 @@ public class MongoFile implements InputFile {
      * 
      * @throws IOException
      */
-    public MongoFileReader read() throws IllegalStateException, IOException {
+    public final InputStream getInputStream() throws IOException {
 
-        return new MongoFileReader(store, this);
+        // returned <- counting <- chunks
+        //
+        // or
+        //
+        // returned <- gzip <- counting <- chunks
+        InputStream returned = new FileChunksInputStreamSource(store, this);
+        returned = new CountingInputStream(this, returned);
+
+        if (getURL().isStoredCompressed()) {
+            returned = new GZIPInputStream(returned);
+        }
+
+        return returned;
+    }
+
+    /**
+     * Copy the content to the given output stream
+     * 
+     * @param out
+     *            the output stream to write to
+     * 
+     * @param flush
+     *            should the output stream be flush when all the data has been written.
+     * 
+     * @throws IOException
+     */
+    public OutputStream readInto(final OutputStream out, final boolean flush) throws IOException {
+
+        new BytesCopier(getInputStream(), out).transfer(flush);
+
+        return out;
     }
 
     //
@@ -154,10 +186,11 @@ public class MongoFile implements InputFile {
             throw new IllegalArgumentException("Cannot get chunk count before data is written");
         }
 
-        // for compatibility with legacy GridFS implementations, if -1 comes back, then legacy file
-        int chunkCount = this.getInt(MongoFileConstants.chunkCount, -1);
+        // for compatibility with legacy GridFS implementations, if -1 comes
+        // back, then legacy file
+        int chunkCount = getInt(MongoFileConstants.chunkCount, -1);
         if (chunkCount == -1) {
-            chunkCount = (int) Math.ceil((double) this.getLength() / this.getChunkSize());
+            chunkCount = (int) Math.ceil((double) getLength() / getChunkSize());
         }
         return chunkCount;
     }
@@ -169,7 +202,7 @@ public class MongoFile implements InputFile {
      */
     public long getLength() {
 
-        return this.getLong(MongoFileConstants.length);
+        return getLong(MongoFileConstants.length);
     }
 
     /**
@@ -179,7 +212,7 @@ public class MongoFile implements InputFile {
      */
     public String getMD5() {
 
-        return this.getString(MongoFileConstants.md5);
+        return getString(MongoFileConstants.md5);
     }
 
     /**
@@ -199,7 +232,7 @@ public class MongoFile implements InputFile {
      */
     public String getFilename() {
 
-        return this.getString(MongoFileConstants.filename);
+        return getString(MongoFileConstants.filename);
     }
 
     /**
@@ -209,7 +242,7 @@ public class MongoFile implements InputFile {
      */
     public String getContentType() {
 
-        return this.getString(MongoFileConstants.contentType);
+        return getString(MongoFileConstants.contentType);
     }
 
     /**
@@ -219,7 +252,7 @@ public class MongoFile implements InputFile {
      */
     public int getChunkSize() {
 
-        return this.getInt(MongoFileConstants.chunkSize);
+        return getInt(MongoFileConstants.chunkSize);
     }
 
     /**
@@ -229,7 +262,7 @@ public class MongoFile implements InputFile {
      */
     public Date getUploadDate() {
 
-        return (Date) this.get(MongoFileConstants.uploadDate);
+        return (Date) get(MongoFileConstants.uploadDate);
     }
 
     /**
@@ -254,12 +287,12 @@ public class MongoFile implements InputFile {
     @SuppressWarnings("unchecked")
     public List<String> getAliases() {
 
-        return (List<String>) this.get(MongoFileConstants.aliases);
+        return (List<String>) get(MongoFileConstants.aliases);
     }
 
-    public void setAliases(List<String> aliases) {
+    public void setAliases(final List<String> aliases) {
 
-        this.put(MongoFileConstants.aliases, aliases);
+        put(MongoFileConstants.aliases, aliases);
     }
 
     /**
@@ -267,9 +300,9 @@ public class MongoFile implements InputFile {
      * 
      * @return the metadata
      */
-    public DBObject getMetaData() {
+    public Document getMetaData() {
 
-        return (DBObject) this.get(MongoFileConstants.metadata);
+        return (Document) get(MongoFileConstants.metadata);
     }
 
     /**
@@ -278,9 +311,9 @@ public class MongoFile implements InputFile {
      * @param metadata
      *            metadata to be set
      */
-    public void setMetaData(final DBObject metadata) {
+    public void setMetaData(final Document metadata) {
 
-        this.put(MongoFileConstants.metadata, metadata);
+        put(MongoFileConstants.metadata, metadata);
     }
 
     /**
@@ -289,11 +322,11 @@ public class MongoFile implements InputFile {
      * @param key
      * @param value
      */
-    public Object setInMetaData(String key, Object value) {
+    public Object setInMetaData(final String key, final Object value) {
 
-        DBObject object = (DBObject) this.get(MongoFileConstants.metadata);
+        Document object = (Document) get(MongoFileConstants.metadata);
         if (object == null) {
-            object = new BasicDBObject();
+            object = new Document();
             setMetaData(object);
         }
         return object.put(key, value);
@@ -304,9 +337,9 @@ public class MongoFile implements InputFile {
      * 
      * @param when
      */
-    /* package */void setExpiresAt(Date when) {
+    /* package */void setExpiresAt(final Date when) {
 
-        this.put(MongoFileConstants.expireAt, when);
+        put(MongoFileConstants.expireAt, when);
     }
 
     /**
@@ -316,7 +349,7 @@ public class MongoFile implements InputFile {
      */
     public Date getExpiresAt() {
 
-        return this.getDate(MongoFileConstants.expireAt, null);
+        return getDate(MongoFileConstants.expireAt, null);
     }
 
     //
@@ -390,7 +423,7 @@ public class MongoFile implements InputFile {
      * 
      * @return the string value
      */
-    public String getString(MongoFileConstants key) {
+    public String getString(final MongoFileConstants key) {
 
         return (String) surrogate.get(key.toString());
     }
@@ -402,7 +435,7 @@ public class MongoFile implements InputFile {
      * 
      * @return the key's value as an integer
      */
-    public int getInt(MongoFileConstants key) {
+    public int getInt(final MongoFileConstants key) {
 
         if (key == null) {
             throw new IllegalArgumentException("key cannot be null");
@@ -423,7 +456,7 @@ public class MongoFile implements InputFile {
      * 
      * @return the value as a long
      */
-    public long getLong(MongoFileConstants key) {
+    public long getLong(final MongoFileConstants key) {
 
         if (key == null) {
             throw new IllegalArgumentException("key cannot be null");
@@ -446,16 +479,14 @@ public class MongoFile implements InputFile {
      *            the default to return
      * @return the field value (or default)
      */
-    public int getInt(MongoFileConstants key, int def) {
+    public int getInt(final MongoFileConstants key, final int def) {
 
-        if (surrogate == null)
+        if (surrogate == null) {
             return def;
+        }
 
-        Object foo = surrogate.get(key.toString());
-        if (foo == null)
-            return def;
-
-        return BSON.toInt(foo);
+        Integer value = surrogate.getInteger(key.toString());
+        return value != null ? value : def;
     }
 
     /**
@@ -467,16 +498,14 @@ public class MongoFile implements InputFile {
      *            the default to return
      * @return the field value (or default)
      */
-    public long getLong(MongoFileConstants key, long def) {
+    public long getLong(final MongoFileConstants key, final long def) {
 
-        if (surrogate == null)
+        if (surrogate == null) {
             return def;
+        }
 
-        Object foo = surrogate.get(key.toString());
-        if (foo == null)
-            return def;
-
-        return ((Number) foo).longValue();
+        Long value = surrogate.getLong(key.toString());
+        return value != null ? value : def;
     }
 
     /**
@@ -488,16 +517,14 @@ public class MongoFile implements InputFile {
      *            the default to return
      * @return the field value (or default)
      */
-    public double getDouble(MongoFileConstants key, double def) {
+    public double getDouble(final MongoFileConstants key, final double def) {
 
-        if (surrogate == null)
+        if (surrogate == null) {
             return def;
+        }
 
-        Object foo = surrogate.get(key.toString());
-        if (foo == null)
-            return def;
-
-        return ((Number) foo).doubleValue();
+        Double value = surrogate.getDouble(key.toString());
+        return value != null ? value : def;
     }
 
     /**
@@ -509,16 +536,14 @@ public class MongoFile implements InputFile {
      *            the default to return
      * @return the value of the field, converted to a string
      */
-    public String getString(MongoFileConstants key, final String def) {
+    public String getString(final MongoFileConstants key, final String def) {
 
-        if (surrogate == null)
+        if (surrogate == null) {
             return def;
+        }
 
-        Object foo = surrogate.get(key.toString());
-        if (foo == null)
-            return def;
-
-        return foo.toString();
+        String value = surrogate.getString(key.toString());
+        return value != null ? value : def;
     }
 
     /**
@@ -530,18 +555,22 @@ public class MongoFile implements InputFile {
      *            the default value in case the field is not found
      * @return the value of the field, converted to a string
      */
-    public boolean getBoolean(MongoFileConstants key, boolean def) {
+    public boolean getBoolean(final MongoFileConstants key, final boolean def) {
 
-        if (surrogate == null)
+        if (surrogate == null) {
             return def;
+        }
 
         Object foo = surrogate.get(key.toString());
-        if (foo == null)
+        if (foo == null) {
             return def;
-        if (foo instanceof Number)
+        }
+        if (foo instanceof Number) {
             return ((Number) foo).intValue() > 0;
-        if (foo instanceof Boolean)
+        }
+        if (foo instanceof Boolean) {
             return ((Boolean) foo).booleanValue();
+        }
         throw new IllegalArgumentException("can't coerce to bool:" + foo.getClass());
     }
 
@@ -556,8 +585,9 @@ public class MongoFile implements InputFile {
      */
     public ObjectId getObjectId(final MongoFileConstants field, final ObjectId def) {
 
-        if (surrogate == null)
+        if (surrogate == null) {
             return def;
+        }
 
         final Object foo = surrogate.get(field.toString());
         return (foo != null) ? (ObjectId) foo : def;
@@ -574,8 +604,9 @@ public class MongoFile implements InputFile {
      */
     public Date getDate(final MongoFileConstants field, final Date def) {
 
-        if (surrogate == null)
+        if (surrogate == null) {
             return def;
+        }
 
         final Object foo = surrogate.get(field.toString());
         return (foo != null) ? (Date) foo : def;
@@ -588,12 +619,12 @@ public class MongoFile implements InputFile {
      * 
      * @return true if it exists
      */
-    public boolean containsField(final String key) {
+    public boolean containsKey(final String key) {
 
         return keySet().contains(key);
     }
 
-    public Set<String> keySet() {
+    private Set<String> keySet() {
 
         Set<String> keys = new HashSet<String>();
         keys.addAll(MongoFileConstants.getFields(true));
@@ -604,7 +635,12 @@ public class MongoFile implements InputFile {
     @Override
     public String toString() {
 
-        return JSON.serialize(surrogate);
+        return surrogate.toString();
+    }
+
+    public boolean isCompressed() {
+
+        return compress;
     }
 
 }

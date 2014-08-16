@@ -9,16 +9,18 @@ import java.io.IOException;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
-
-import com.google.common.net.MediaType;
+import org.mongodb.file.url.MongoFileUrl;
 
 public class MongoFileTest {
+
+    public static final String PDF = "application/pdf";
+    public static final String ZIP = "application/zip";
 
     @Test
     public void testGZipFactoriesItemized() throws IOException {
 
         ObjectId id = new ObjectId();
-        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", MediaType.PDF.toString(), true);
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", PDF, true);
         assertNotNull(url);
         assertEquals(String.format("mongofile:gz:fileName.pdf?%s#application/pdf", id.toString()), url.getUrl().toString());
 
@@ -28,14 +30,14 @@ public class MongoFileTest {
         assertEquals("pdf", url.getExtension());
         assertTrue(url.isStoredCompressed());
         assertFalse(url.isDataCompressed());
-        assertEquals(MediaType.PDF.toString(), url.getMediaType());
+        assertEquals(PDF, url.getMediaType());
     }
 
     @Test
     public void testFactoriesItemized() throws IOException {
 
         ObjectId id = new ObjectId();
-        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.zip", MediaType.ZIP.toString(), true);
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.zip", ZIP, true);
         assertNotNull(url);
         assertEquals(String.format("mongofile:fileName.zip?%s#application/zip", id.toString()), url.getUrl().toString());
 
@@ -45,7 +47,7 @@ public class MongoFileTest {
         assertEquals("zip", url.getExtension());
         assertFalse(url.isStoredCompressed());
         assertTrue(url.isDataCompressed());
-        assertEquals(MediaType.ZIP.toString(), url.getMediaType());
+        assertEquals(ZIP, url.getMediaType());
     }
 
     @Test
@@ -66,13 +68,14 @@ public class MongoFileTest {
         assertFalse(url.isStoredCompressed());
         assertFalse(url.isDataCompressed());
 
-        assertEquals(MediaType.PDF.toString(), url.getMediaType());
+        assertEquals(PDF, url.getMediaType());
     }
 
     @Test
     public void testGZipFactoriesFromSpec() throws IOException {
 
-        MongoFileUrl url = MongoFileUrl.construct("mongofile:/home/myself/foo/activeusers_19.ZIP?52fb1e7b36707d6d13ebfda9#application/zip");
+        MongoFileUrl url = MongoFileUrl
+                .construct("mongofile:/home/myself/foo/activeusers_19.ZIP?52fb1e7b36707d6d13ebfda9#application/zip");
         assertNotNull(url);
 
         assertEquals(new ObjectId("52fb1e7b36707d6d13ebfda9"), url.getMongoFileId());
@@ -82,7 +85,7 @@ public class MongoFileTest {
         assertFalse(url.isStoredCompressed());
         assertTrue(url.isDataCompressed());
 
-        assertEquals(MediaType.ZIP.toString(), url.getMediaType());
+        assertEquals(ZIP, url.getMediaType());
     }
 
 }

@@ -1,11 +1,10 @@
-package sun.net.www.protocol.mongofile;
+package me.lightspeed7.mongofs.url;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import com.google.common.net.MediaType;
 
 /**
  * A URL format to specifying the need info to store email attachments in MongoDB
@@ -24,13 +23,14 @@ import com.google.common.net.MediaType;
 public class Handler extends URLStreamHandler {
 
     @Override
-    protected URLConnection openConnection(URL u) throws IOException {
+    protected URLConnection openConnection(final URL u)
+            throws IOException {
 
         throw new UnsupportedOperationException("oppenConnection is currently not supported");
     }
 
     @Override
-    protected void parseURL(URL u, String spec, int start, int limit) {
+    protected void parseURL(final URL u, final String spec, final int start, final int limit) {
 
         // get what we are working with
         String temp = spec.substring(start, limit);
@@ -48,14 +48,11 @@ public class Handler extends URLStreamHandler {
         String path = temp.substring(0, queryPos);
         String id = temp.substring(queryPos + 1);
 
-        // media type validation
-        String ref = MediaType.parse(u.getRef()).toString();
-
-        setURL(u, u.getProtocol(), host, u.getPort(), u.getAuthority(), u.getUserInfo(), path, id, ref);
+        setURL(u, u.getProtocol(), host, u.getPort(), u.getAuthority(), u.getUserInfo(), path, id, u.getRef());
     }
 
     @Override
-    protected String toExternalForm(URL u) {
+    protected String toExternalForm(final URL u) {
 
         StringBuilder result = new StringBuilder(100);
         result.append(u.getProtocol());

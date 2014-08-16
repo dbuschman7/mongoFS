@@ -1,14 +1,12 @@
-package sun.net.www.protocol.mongofile;
+package me.lightspeed7.mongofs.url;
 
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 
-import me.lightspeed7.mongofs.MongoFileUrl;
-
 public class MongoFileURLStreamHandlerFactory implements URLStreamHandlerFactory {
 
     @Override
-    public URLStreamHandler createURLStreamHandler(String protocol) {
+    public URLStreamHandler createURLStreamHandler(final String protocol) {
 
         if (protocol.equals(MongoFileUrl.PROTOCOL)) {
             return new Handler();

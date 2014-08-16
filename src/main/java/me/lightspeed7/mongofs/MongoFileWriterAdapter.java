@@ -1,9 +1,10 @@
 package me.lightspeed7.mongofs;
 
-import me.lightspeed7.mongofs.writing.ChunksStatisticsAdapter;
+import org.mongodb.file.writing.ChunksStatisticsAdapter;
+import org.mongodb.file.writing.InputFile;
 
 /**
- * Adapter to handle the custom pars of data collection from each chunk
+ * Adapter to handle the custom parts of data collection from each chunk
  * 
  * @author David Buschman
  * 
@@ -12,9 +13,9 @@ public class MongoFileWriterAdapter extends ChunksStatisticsAdapter {
 
     private MongoFile file;
 
-    public MongoFileWriterAdapter(MongoFile file) {
+    public MongoFileWriterAdapter(final MongoFile file) {
 
-        super(file);
+        super((InputFile) file);
         this.file = file;
     }
 

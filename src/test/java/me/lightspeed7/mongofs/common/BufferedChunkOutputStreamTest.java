@@ -2,33 +2,39 @@ package me.lightspeed7.mongofs.common;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.lightspeed7.mongofs.LoremIpsum;
-import me.lightspeed7.mongofs.util.BytesCopier;
-import me.lightspeed7.mongofs.writing.BufferedChunksOutputStream;
-
-import org.apache.tools.ant.filters.StringInputStream;
 import org.junit.Test;
+import org.mongodb.diagnostics.Loggers;
+import org.mongodb.diagnostics.logging.Logger;
+import org.mongodb.file.LoremIpsum;
+import org.mongodb.file.util.BytesCopier;
+import org.mongodb.file.writing.BufferedChunksOutputStream;
 
-public class BufferedChunkOutputStreamTest implements LoremIpsum {
+public class BufferedChunkOutputStreamTest {
+
+    public static final Logger LOGGER = Loggers.getLogger("file");
 
     @Test
     public void test8KBuffer256kChunks() throws IOException {
 
         LogDumpOutputStreamSink log = new LogDumpOutputStreamSink();
 
-        try (BufferedChunksOutputStream stream = new BufferedChunksOutputStream(log)) {
-            new BytesCopier(8 * 1024, new StringInputStream(LOREM_IPSUM, "UTF-8"), stream).transfer(false);
+        BufferedChunksOutputStream stream = new BufferedChunksOutputStream(log);
+        try {
+            new BytesCopier(8 * 1024, new ByteArrayInputStream(LoremIpsum.getBytes()), stream).transfer(false);
+        } finally {
+            stream.close();
         }
 
-        System.out.println(log.info());
-        assertEquals(LOREM_IPSUM.length(), log.total);
-        assertEquals( //
-                "total = 32085, commands = [write(b, 0, 8192), write(b, 0, 8192), write(b, 0, 8192), write(b, 0, 7509), flush, close]", //
+        // System.out.println(log.info());
+        assertEquals(LoremIpsum.getString().length(), log.total);
+        assertEquals(//
+                "total = 32087, commands = [write(b, 0, 8192), write(b, 0, 8192), write(b, 0, 8192), write(b, 0, 7511), flush, close]", //
                 log.info());
     }
 
@@ -37,16 +43,20 @@ public class BufferedChunkOutputStreamTest implements LoremIpsum {
 
         LogDumpOutputStreamSink log = new LogDumpOutputStreamSink();
 
-        try (BufferedChunksOutputStream stream = new BufferedChunksOutputStream(log, 5 * 1024)) {
-            new BytesCopier(16 * 1024, new StringInputStream(LOREM_IPSUM, "UTF-8"), stream).transfer(false);
+        BufferedChunksOutputStream stream = new BufferedChunksOutputStream(log, 5 * 1024);
+        try {
+            new BytesCopier(16 * 1024, new ByteArrayInputStream(LoremIpsum.getBytes()), stream).transfer(false);
+        } finally {
+            stream.close();
         }
 
-        System.out.println(log.info());
-        assertEquals(LOREM_IPSUM.length(), log.total);
+        LOGGER.debug("LoremIpsum length = " + LoremIpsum.getString().length());
+        // System.out.println(log.info());
+        assertEquals(LoremIpsum.getString().length(), log.total);
         assertEquals(
-                //
-                "total = 32085, commands = [write(b, 0, 5120), write(b, 0, 5120), write(b, 0, 5120), write(b, 0, 5120), write(b, 0, 5120), write(b, 0, 5120), write(b, 0, 1365), flush, close]",
-                log.info());
+        //
+                "total = 32087, commands = [write(b, 0, 5120), write(b, 0, 5120), write(b, 0, 5120), write(b, 0, 5120), "
+                        + "write(b, 0, 5120), write(b, 0, 5120), write(b, 0, 1367), flush, close]", log.info());
     }
 
     @Test
@@ -54,34 +64,40 @@ public class BufferedChunkOutputStreamTest implements LoremIpsum {
 
         LogDumpOutputStreamSink log = new LogDumpOutputStreamSink();
 
-        try (BufferedChunksOutputStream stream = new BufferedChunksOutputStream(log, 15 * 1024)) {
-            new BytesCopier(13 * 1024, new StringInputStream(LOREM_IPSUM, "UTF-8"), stream).transfer(false);
+        BufferedChunksOutputStream stream = new BufferedChunksOutputStream(log, 15 * 1024);
+        try {
+            new BytesCopier(13 * 1024, new ByteArrayInputStream(LoremIpsum.getBytes()), stream).transfer(false);
+        } finally {
+            stream.close();
         }
 
-        System.out.println(log.info());
-        assertEquals(LOREM_IPSUM.length(), log.total);
+        // System.out.println(log.info());
+        assertEquals(LoremIpsum.getString().length(), log.total);
         assertEquals(
         //
-                "total = 32085, commands = [write(b, 0, 15360), write(b, 0, 15360), write(b, 0, 1365), flush, close]", log.info());
+                "total = 32087, commands = [write(b, 0, 15360), write(b, 0, 15360), write(b, 0, 1367), flush, close]", log.info());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testIllegalChunkSize() throws IOException {
 
-        try (OutputStream out = new BufferedChunksOutputStream(null, -1)) {
-            // empty
-        }
+        BufferedChunksOutputStream stream = new BufferedChunksOutputStream(null, -1);
+        stream.close();
     }
 
     @Test
     public void testSingleByteWrite() throws IOException {
 
         LogDumpOutputStreamSink log = new LogDumpOutputStreamSink();
-        try (OutputStream out = new BufferedChunksOutputStream(log, 5)) {
+
+        OutputStream out = new BufferedChunksOutputStream(log, 5);
+        try {
             out.write(Byte.valueOf("1"));
+        } finally {
+            out.close();
         }
 
-        System.out.println(log.info());
+        // System.out.println(log.info());
 
         assertEquals(1, log.total);
         assertEquals(
@@ -92,8 +108,8 @@ public class BufferedChunkOutputStreamTest implements LoremIpsum {
 
     private class LogDumpOutputStreamSink extends OutputStream {
 
-        List<String> commands = new ArrayList<>();
-        long total = 0;
+        private List<String> commands = new ArrayList<String>();
+        private long total = 0;
 
         public String info() {
 
@@ -101,21 +117,21 @@ public class BufferedChunkOutputStreamTest implements LoremIpsum {
         }
 
         @Override
-        public void write(int b) throws IOException {
+        public void write(final int b) throws IOException {
 
             commands.add("write(b)");
             ++total;
         }
 
         @Override
-        public void write(byte[] b) throws IOException {
+        public void write(final byte[] b) throws IOException {
 
             commands.add(String.format("write(b) - length = %d", b.length));
             total += b.length;
         }
 
         @Override
-        public void write(byte[] b, int off, int len) throws IOException {
+        public void write(final byte[] b, final int off, final int len) throws IOException {
 
             commands.add(String.format("write(b, %d, %d)", off, len));
             total += len;

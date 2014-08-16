@@ -18,13 +18,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 
-import me.lightspeed7.mongofs.common.InputFile;
-import me.lightspeed7.mongofs.common.MongoFileConstants;
+import me.lightspeed7.mongofs.MongoFileConstants;
 import me.lightspeed7.mongofs.util.BytesCopier;
 import me.lightspeed7.mongofs.writing.BufferedChunksOutputStream;
 import me.lightspeed7.mongofs.writing.FileChunksOutputStreamSink;
+import me.lightspeed7.mongofs.writing.InputFile;
 
 import org.bson.types.ObjectId;
+import org.mongodb.Document;
+import org.mongodb.MongoCollection;
 
 import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
@@ -71,7 +73,8 @@ public class GridFSInputFile extends GridFSFile implements InputFile {
 
         GridFSInputFileAdapter adapter = new GridFSInputFileAdapter(this);
 
-        FileChunksOutputStreamSink streamSink = new FileChunksOutputStreamSink(collection, this.id, adapter, null);
+        FileChunksOutputStreamSink streamSink = new FileChunksOutputStreamSink(new MongoCollection<Document>(collection), this.id, adapter,
+                null);
 
         BufferedChunksOutputStream stream = new BufferedChunksOutputStream(streamSink, this.chunkSize);
         return stream;

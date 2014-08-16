@@ -11,21 +11,20 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 
-import me.lightspeed7.mongofs.common.MongoFileConstants;
 import me.lightspeed7.mongofs.util.BytesCopier;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mongodb.MongoDatabase;
 
-import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 
-public class MongoFileStoreTest implements LoremIpsum {
+public class MongoFileStoreTest {
 
     private static final String DB_NAME = "MongoFSTest-fileStore";
 
-    private static DB database;
+    private static MongoDatabase database;
 
     private static MongoClient mongoClient;
 
@@ -36,19 +35,19 @@ public class MongoFileStoreTest implements LoremIpsum {
         mongoClient = MongoTestConfig.construct();
 
         mongoClient.dropDatabase(DB_NAME);
-        database = mongoClient.getDB(DB_NAME);
+        database = new MongoDatabase(mongoClient.getDB(DB_NAME));
     }
 
     @Test
     public void testBasicUncompressedRoundTrip() throws IllegalArgumentException, IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStore.DEFAULT_CHUNKSIZE, false);
+        doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, false);
     }
 
     @Test
     public void testBasicCompressedRoundTrip() throws IllegalArgumentException, IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStore.DEFAULT_CHUNKSIZE, true);
+        doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, true);
     }
 
     @Test
@@ -70,23 +69,25 @@ public class MongoFileStoreTest implements LoremIpsum {
     private void doRoundTrip(String bucket, String filename, ChunkSize chunkSize, boolean compress) throws IOException,
             MalformedURLException {
 
-        MongoFileStoreConfig config = new MongoFileStoreConfig(bucket);
-        config.setChunkSize(chunkSize);
-        config.setWriteConcern(WriteConcern.SAFE);
+        MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
+                .bucket(bucket).chunkSize(chunkSize).writeConcern(WriteConcern.SAFE) //
+                .build();
         MongoFileStore store = new MongoFileStore(database, config);
 
         MongoFileWriter writer = store.createNew(filename, "text/plain", null, compress);
-        ByteArrayInputStream in = new ByteArrayInputStream(LOREM_IPSUM.getBytes());
-        try (OutputStream out = writer.getOutputStream()) {
+        ByteArrayInputStream in = new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes());
+        OutputStream out = writer.getOutputStream();
+        try {
             new BytesCopier(in, out).transfer(true);
+        } finally {
+            out.close();
         }
 
         // verify it exists
-        MongoFile file = writer.getMongoFile();
-        assertTrue(store.exists(file.getURL()));
+        MongoFile mongoFile = writer.getMongoFile();
+        assertTrue(store.exists(mongoFile.getURL()));
 
         // read a file
-        MongoFile mongoFile = store.getFile(file.getURL());
         assertEquals(compress, mongoFile.getURL().isStoredCompressed());
         assertEquals(LoremIpsum.LOREM_IPSUM.length(), mongoFile.getLength());
         if (compress) {
@@ -100,9 +101,9 @@ public class MongoFileStoreTest implements LoremIpsum {
             assertNull(mongoFile.get(MongoFileConstants.compressionRatio)); // verify no compression
         }
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
-        store.read(file, out, true);
-        assertEquals(LOREM_IPSUM, out.toString());
+        ByteArrayOutputStream out2 = new ByteArrayOutputStream(32 * 1024);
+        new BytesCopier(new MongoFileReader(store, mongoFile).getInputStream(), out2).transfer(true);
+        assertEquals(LoremIpsum.LOREM_IPSUM, out2.toString());
 
         // remove a file
         // store.remove(mongoFile, true); // flag delete

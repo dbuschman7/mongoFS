@@ -3,8 +3,9 @@ package me.lightspeed7.mongofs.url;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import me.lightspeed7.mongofs.CompressionMediaTypes;
+
 import org.bson.types.ObjectId;
-import org.mongodb.file.util.CompressionMediaTypes;
 
 public final class Parser {
 
@@ -18,13 +19,13 @@ public final class Parser {
         String protocol = MongoFileUrl.PROTOCOL;
         if (compressionFormat != null) {
             protocol += ":" + compressionFormat;
-        } else {
+        }
+        else {
             if (compress && CompressionMediaTypes.isCompressable(mediaType)) {
                 protocol += ":" + MongoFileUrl.GZ;
             }
         }
-        return construct(String.format("%s:%s?%s#%s", protocol, fileName, id.toString(),
-                mediaType == null ? "" : mediaType.toString()));
+        return construct(String.format("%s:%s?%s#%s", protocol, fileName, id.toString(), mediaType == null ? "" : mediaType.toString()));
     }
 
     public static URL construct(final String spec) throws MalformedURLException {

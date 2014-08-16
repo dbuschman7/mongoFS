@@ -6,9 +6,10 @@ import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.net.URL;
 
+import me.lightspeed7.mongofs.MongoFileTest;
+
 import org.bson.types.ObjectId;
 import org.junit.Test;
-import org.mongodb.file.MongoFileTest;
 
 public class ParserTest {
 

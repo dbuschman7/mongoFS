@@ -4,19 +4,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import me.lightspeed7.mongofs.url.MongoFileUrl;
+import me.lightspeed7.mongofs.util.BytesCopier;
+import me.lightspeed7.mongofs.writing.BufferedChunksOutputStream;
+import me.lightspeed7.mongofs.writing.CountingOutputStream;
+import me.lightspeed7.mongofs.writing.FileChunksOutputStreamSink;
+import me.lightspeed7.mongofs.writing.MongoGZipOutputStream;
+
 import org.mongodb.Document;
 import org.mongodb.MongoCollection;
-import org.mongodb.file.url.MongoFileUrl;
-import org.mongodb.file.util.BytesCopier;
-import org.mongodb.file.writing.BufferedChunksOutputStream;
-import org.mongodb.file.writing.CountingOutputStream;
-import org.mongodb.file.writing.FileChunksOutputStreamSink;
-import org.mongodb.file.writing.MongoGZipOutputStream;
 
 public class MongoFileWriter {
 
     private MongoFile file;
-    private MongoFileUrl url;
+    private me.lightspeed7.mongofs.url.MongoFileUrl url;
     private MongoCollection<Document> chunksCollection;
 
     public MongoFileWriter(final MongoFileUrl url, final MongoFile file, final MongoCollection<Document> chunksCollection) {
@@ -75,7 +76,8 @@ public class MongoFileWriter {
 
         if (url.isStoredCompressed()) {
             return new MongoGZipOutputStream(file, sink);
-        } else {
+        }
+        else {
             return new CountingOutputStream(MongoFileConstants.length, file, sink);
         }
     }

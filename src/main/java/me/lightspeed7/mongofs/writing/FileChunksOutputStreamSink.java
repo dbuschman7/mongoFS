@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
 
+import me.lightspeed7.mongofs.MongoFileConstants;
+
 import org.mongodb.Document;
 import org.mongodb.MongoCollection;
-import org.mongodb.file.MongoFileConstants;
 
 /**
- * A sink object the absorbs all the chunks that are sent to it and create
- * MongoDB chunks for each one.
+ * A sink object the absorbs all the chunks that are sent to it and create MongoDB chunks for each one.
  * 
  * Place this object behind the BufferedChunksOutputStream
  * 

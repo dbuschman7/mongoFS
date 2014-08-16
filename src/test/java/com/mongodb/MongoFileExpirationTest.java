@@ -16,12 +16,13 @@ import me.lightspeed7.mongofs.util.TimeMachine;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mongodb.MongoDatabase;
 
-public class MongoFileExpirationTest implements LoremIpsum {
+public class MongoFileExpirationTest {
 
     private static final String DB_NAME = "MongoFSTest-expiration";
 
-    private static DB database;
+    private static MongoDatabase database;
 
     private static MongoClient mongoClient;
     private static MongoFileStore store;
@@ -33,10 +34,9 @@ public class MongoFileExpirationTest implements LoremIpsum {
         mongoClient = MongoTestConfig.construct();
 
         mongoClient.dropDatabase(DB_NAME);
-        database = mongoClient.getDB(DB_NAME);
+        database = new MongoDatabase(mongoClient.getDB(DB_NAME));
 
-        MongoFileStoreConfig config = new MongoFileStoreConfig("expire");
-        config.setWriteConcern(WriteConcern.SAFE);
+        MongoFileStoreConfig config = MongoFileStoreConfig.builder().bucket("expire").writeConcern(WriteConcern.SAFE).build();
         store = new MongoFileStore(database, config);
 
         Thread.sleep(2000);
@@ -50,7 +50,7 @@ public class MongoFileExpirationTest implements LoremIpsum {
         createTempFile(store, "/foo/bar1.txt", "text/plain", TimeMachine.now().backward(2).days().inTime());
         createTempFile(store, "/foo/bar1.txt", "text/plain", TimeMachine.from(now).forward(5).seconds().inTime());
 
-        MongoFileCursor cursor = store.query().find("/foo/bar1.txt");
+        MongoFileCursor cursor = store.find("/foo/bar1.txt");
         assertTrue(Math.abs(now - (2 * 24 * 60 * 60 * 1000) - cursor.next().getExpiresAt().getTime()) <= 1);
         assertTrue(Math.abs(now + (5 * 1000) - cursor.next().getExpiresAt().getTime()) <= 1);
     }
@@ -70,6 +70,6 @@ public class MongoFileExpirationTest implements LoremIpsum {
     private void createTempFile(MongoFileStore store, String filename, String mediaType, Date expiresAt) throws IOException {
 
         MongoFileWriter writer = store.createNew(filename, mediaType, expiresAt, true);
-        writer.write(new ByteArrayInputStream(LOREM_IPSUM.getBytes()));
+        writer.write(new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes()));
     }
 }

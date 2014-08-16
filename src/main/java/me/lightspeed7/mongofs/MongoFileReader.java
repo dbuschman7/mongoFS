@@ -46,7 +46,7 @@ public class MongoFileReader {
         //
         // returned <- gzip <- counting <- chunks
         InputStream returned = new FileChunksInputStreamSource(store, file);
-        returned = new CountingInputStream(returned);
+        returned = new CountingInputStream(file, returned);
 
         if (file.getURL().isStoredCompressed()) {
             returned = new GZIPInputStream(returned);

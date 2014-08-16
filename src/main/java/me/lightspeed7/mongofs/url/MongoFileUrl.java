@@ -4,9 +4,10 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import me.lightspeed7.mongofs.CompressionMediaTypes;
+import me.lightspeed7.mongofs.util.FileUtil;
+
 import org.bson.types.ObjectId;
-import org.mongodb.file.util.CompressionMediaTypes;
-import org.mongodb.file.util.FileUtil;
 
 /**
  * 
@@ -27,8 +28,8 @@ public class MongoFileUrl {
     private URL url;
 
     // factories and helpers
-    public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType,
-            final boolean compress) throws MalformedURLException {
+    public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType, final boolean compress)
+            throws MalformedURLException {
 
         return construct(Parser.construct(id, fileName, mediaType, null, compress));
     }
@@ -51,8 +52,7 @@ public class MongoFileUrl {
     }
 
     /**
-     * Construct a MogoFile object from the given URL, it will be tested from
-     * validity
+     * Construct a MogoFile object from the given URL, it will be tested from validity
      * 
      * @param url
      * @return a MongoFile object for this URL
@@ -178,8 +178,7 @@ public class MongoFileUrl {
     }
 
     /**
-     * Returns the compression format to the stored data, null if not
-     * compression
+     * Returns the compression format to the stored data, null if not compression
      * 
      * @return the compression format
      */
@@ -207,8 +206,7 @@ public class MongoFileUrl {
     }
 
     /**
-     * Is the data compressible based on the media type of the file. This may
-     * differ from what is stored in the datasstore
+     * Is the data compressible based on the media type of the file. This may differ from what is stored in the datasstore
      * 
      * @return true if the data is already compressed based on its media-type
      */

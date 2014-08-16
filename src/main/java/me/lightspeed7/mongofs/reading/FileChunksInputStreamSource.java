@@ -3,14 +3,14 @@ package me.lightspeed7.mongofs.reading;
 import java.io.IOException;
 import java.io.InputStream;
 
+import me.lightspeed7.mongofs.MongoFile;
+import me.lightspeed7.mongofs.MongoFileStore;
+
 import org.mongodb.Document;
 import org.mongodb.MongoException;
-import org.mongodb.file.MongoFile;
-import org.mongodb.file.MongoFileStore;
 
 /**
- * This class is borrowed almost verbatim from the GridFS version, not need to
- * change anything here for now.
+ * This class is borrowed almost verbatim from the GridFS version, not need to change anything here for now.
  * 
  * @author antoine
  * @author David Buschman

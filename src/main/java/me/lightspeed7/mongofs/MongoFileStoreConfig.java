@@ -1,8 +1,7 @@
 package me.lightspeed7.mongofs;
 
-import org.mongodb.ReadPreference;
-import org.mongodb.WriteConcern;
-import org.mongodb.file.util.ChunkSize;
+import com.mongodb.ReadPreference;
+import com.mongodb.WriteConcern;
 
 public final class MongoFileStoreConfig {
 
@@ -98,8 +97,7 @@ public final class MongoFileStoreConfig {
     @Override
     public String toString() {
 
-        return String.format(
-                "MongoFileStoreConfig [bucket=%s, chunkSize=%s, enableCompression=%s, writeConcern=%s, readPreference=%s]",
+        return String.format("MongoFileStoreConfig [bucket=%s, chunkSize=%s, enableCompression=%s, writeConcern=%s, readPreference=%s]",
                 bucket, chunkSize, enableCompression, writeConcern, readPreference);
     }
 

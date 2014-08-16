@@ -1,7 +1,7 @@
 package me.lightspeed7.mongofs;
 
-import org.mongodb.file.writing.ChunksStatisticsAdapter;
-import org.mongodb.file.writing.InputFile;
+import me.lightspeed7.mongofs.writing.ChunksStatisticsAdapter;
+import me.lightspeed7.mongofs.writing.InputFile;
 
 /**
  * Adapter to handle the custom parts of data collection from each chunk

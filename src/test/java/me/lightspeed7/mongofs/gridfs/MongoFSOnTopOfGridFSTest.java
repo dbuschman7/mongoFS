@@ -12,35 +12,36 @@ import java.util.Arrays;
 
 import me.lightspeed7.mongofs.LoremIpsum;
 import me.lightspeed7.mongofs.MongoFile;
+import me.lightspeed7.mongofs.MongoFileConstants;
+import me.lightspeed7.mongofs.MongoFileReader;
 import me.lightspeed7.mongofs.MongoFileStore;
 import me.lightspeed7.mongofs.MongoFileStoreConfig;
 import me.lightspeed7.mongofs.MongoTestConfig;
-import me.lightspeed7.mongofs.common.MongoFileConstants;
 import me.lightspeed7.mongofs.util.BytesCopier;
 import me.lightspeed7.mongofs.util.JSONHelper;
 
 import org.bson.types.ObjectId;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mongodb.Document;
+import org.mongodb.MongoCollection;
+import org.mongodb.MongoCollectionOptions;
+import org.mongodb.MongoCursor;
+import org.mongodb.MongoDatabase;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 
-public class MongoFSOnTopOfGridFSTest implements LoremIpsum {
+public class MongoFSOnTopOfGridFSTest {
 
     private static final String bucket = "original";
 
     private static final String DB_NAME = "MongoFSTest-onTop";
 
-    private static DBObject ID = BasicDBObjectBuilder.start(MongoFileConstants._id.toString(), new ObjectId()).get();
+    private static Document ID = new Document(MongoFileConstants._id.name(), new ObjectId());
 
-    private static DB database;
+    private static MongoDatabase database;
 
     private static MongoClient mongoClient;
 
@@ -50,7 +51,7 @@ public class MongoFSOnTopOfGridFSTest implements LoremIpsum {
 
         mongoClient = MongoTestConfig.construct();
         mongoClient.dropDatabase(DB_NAME);
-        database = mongoClient.getDB(DB_NAME);
+        database = new MongoDatabase(mongoClient.getDB(DB_NAME));
 
     }
 
@@ -65,16 +66,19 @@ public class MongoFSOnTopOfGridFSTest implements LoremIpsum {
 
     public Object createOriginalGridFSFile() throws IOException {
 
-        com.mongodb.gridfs.GridFS gridFS = new com.mongodb.gridfs.GridFS(database, bucket);
+        com.mongodb.gridfs.GridFS gridFS = new com.mongodb.gridfs.GridFS(database.surrogate, bucket);
         com.mongodb.gridfs.GridFSInputFile file = gridFS.createFile("originalGridFS.txt");
         file.setId(ID.get(MongoFileConstants._id.toString()));
         file.put("aliases", Arrays.asList("one", "two", "three"));
         file.put(MongoFileConstants.contentType.toString(), "text/plain");
         file.setMetaData(new BasicDBObject("key", "value"));
 
-        try (OutputStream stream = file.getOutputStream()) {
-            byte[] bytes = LOREM_IPSUM.getBytes();
+        OutputStream stream = file.getOutputStream();
+        try {
+            byte[] bytes = LoremIpsum.LOREM_IPSUM.getBytes();
             stream.write(bytes);
+        } finally {
+            stream.close();
         }
 
         System.out.println("Original GridFS (2.11.4)");
@@ -97,24 +101,24 @@ public class MongoFSOnTopOfGridFSTest implements LoremIpsum {
         assertEquals(com.mongodb.gridfs.GridFS.DEFAULT_CHUNKSIZE, file.getChunkSize());
         assertEquals(1, file.numChunks());
 
-        com.mongodb.gridfs.GridFSDBFile findOne = gridFS.findOne(ID);
+        com.mongodb.gridfs.GridFSDBFile findOne = gridFS.findOne(ID.surrogate);
         assertNotNull(findOne);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
         new BytesCopier(findOne.getInputStream(), out).transfer(true);
-        assertEquals(LOREM_IPSUM, out.toString());
+        assertEquals(LoremIpsum.LOREM_IPSUM, out.toString());
         return ID;
     }
 
     public void verifyReadFromRefactoredGridFS() throws IOException {
 
-        me.lightspeed7.mongofs.gridfs.GridFS gridFS = new me.lightspeed7.mongofs.gridfs.GridFS(database, bucket);
-        me.lightspeed7.mongofs.gridfs.GridFSDBFile findOne = gridFS.findOne(ID);
+        me.lightspeed7.mongofs.gridfs.GridFS gridFS = new me.lightspeed7.mongofs.gridfs.GridFS(database.surrogate, bucket);
+        me.lightspeed7.mongofs.gridfs.GridFSDBFile findOne = gridFS.findOne(ID.surrogate);
         assertNotNull(findOne);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
         new BytesCopier(findOne.getInputStream(), out).transfer(true);
-        assertEquals(LOREM_IPSUM, out.toString());
+        assertEquals(LoremIpsum.LOREM_IPSUM, out.toString());
 
         System.out.println("Passed - RefactoredGridFS");
 
@@ -122,12 +126,12 @@ public class MongoFSOnTopOfGridFSTest implements LoremIpsum {
 
     public void verifyReadFromMongoFS() throws IOException {
 
-        MongoFileStore store = new MongoFileStore(database, new MongoFileStoreConfig(bucket));
-        MongoFile findOne = store.query().findOne(ID);
+        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().bucket(bucket).build());
+        MongoFile findOne = store.findOne((ObjectId) ID.get(MongoFileConstants._id.name()));
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
-        store.read(findOne, out, true);
-        assertEquals(LOREM_IPSUM, out.toString());
+        new BytesCopier(new MongoFileReader(store, findOne).getInputStream(), out).transfer(true);
+        assertEquals(LoremIpsum.LOREM_IPSUM, out.toString());
 
         System.out.println("Passed - MongoFS");
     }
@@ -136,11 +140,11 @@ public class MongoFSOnTopOfGridFSTest implements LoremIpsum {
     // internal
     private void dumpChunks(String bucket, Object id, PrintStream out) {
 
-        DBCollection collection = database.getCollection(bucket + ".chunks");
-        DBCursor cursor = collection.find(new BasicDBObject("files_id", id)).sort(new BasicDBObject("n", 1));
+        MongoCollection<Document> collection = database.getCollection(bucket + ".chunks", MongoCollectionOptions.builder().build());
+        MongoCursor<Document> cursor = collection.find(new Document("files_id", id)).sort(new Document("n", 1)).get();
 
         while (cursor.hasNext()) {
-            DBObject current = cursor.next();
+            Document current = cursor.next();
             out.println(current.toString());
         }
     }

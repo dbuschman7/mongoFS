@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.mongodb.file.MongoFile;
-import org.mongodb.file.MongoFileConstants;
+import me.lightspeed7.mongofs.MongoFile;
+import me.lightspeed7.mongofs.MongoFileConstants;
 
 /**
  * 
@@ -63,6 +63,8 @@ public class MongoGZipOutputStream extends OutputStream {
             this.surrogate.close();
         } catch (IOException e) {
             throw e; // re-throw it
+        } catch (Throwable t) {
+            throw new RuntimeException("Unhandled exception caught", t);
         } finally {
 
             long length = inputFile.getLong(MongoFileConstants.length, 0);

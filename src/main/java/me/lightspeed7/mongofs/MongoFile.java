@@ -11,15 +11,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
+import me.lightspeed7.mongofs.reading.CountingInputStream;
+import me.lightspeed7.mongofs.reading.FileChunksInputStreamSource;
+import me.lightspeed7.mongofs.url.MongoFileUrl;
+import me.lightspeed7.mongofs.url.Parser;
+import me.lightspeed7.mongofs.util.BytesCopier;
+import me.lightspeed7.mongofs.writing.InputFile;
+
 import org.bson.types.ObjectId;
 import org.mongodb.Document;
 import org.mongodb.MongoException;
-import org.mongodb.file.reading.CountingInputStream;
-import org.mongodb.file.reading.FileChunksInputStreamSource;
-import org.mongodb.file.url.MongoFileUrl;
-import org.mongodb.file.url.Parser;
-import org.mongodb.file.util.BytesCopier;
-import org.mongodb.file.writing.InputFile;
 
 /**
  * Object to hold the state of the file's metatdata. To persist this outside of MongoFS, use the getURL() and persist that.

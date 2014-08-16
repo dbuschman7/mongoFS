@@ -3,8 +3,8 @@ package me.lightspeed7.mongofs.writing;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.mongodb.file.MongoFile;
-import org.mongodb.file.MongoFileConstants;
+import me.lightspeed7.mongofs.MongoFile;
+import me.lightspeed7.mongofs.MongoFileConstants;
 
 public class CountingOutputStream extends OutputStream {
 

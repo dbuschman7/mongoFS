@@ -3,9 +3,10 @@ package me.lightspeed7.mongofs.writing;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import me.lightspeed7.mongofs.MongoFileConstants;
+import me.lightspeed7.mongofs.util.FileUtil;
+
 import org.mongodb.Document;
-import org.mongodb.file.MongoFileConstants;
-import org.mongodb.file.util.FileUtil;
 
 /**
  * 

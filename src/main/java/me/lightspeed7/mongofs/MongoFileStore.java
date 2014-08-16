@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import me.lightspeed7.mongofs.url.MongoFileUrl;
+
 import org.bson.types.ObjectId;
 import org.mongodb.CommandResult;
 import org.mongodb.Document;
@@ -22,11 +24,11 @@ import org.mongodb.MongoDatabase;
 import org.mongodb.MongoException;
 import org.mongodb.MongoView;
 import org.mongodb.OrderBy;
-import org.mongodb.WriteConcern;
 import org.mongodb.WriteResult;
 import org.mongodb.diagnostics.Loggers;
 import org.mongodb.diagnostics.logging.Logger;
-import org.mongodb.file.url.MongoFileUrl;
+
+import com.mongodb.WriteConcern;
 
 public class MongoFileStore {
 
@@ -296,8 +298,7 @@ public class MongoFileStore {
      * @throws FileNotFoundException
      *             if the file does not exist or cannot be read
      */
-    public MongoFile upload(final File file, final String mediaType, final boolean compress, final Date expiresAt)
-            throws IOException {
+    public MongoFile upload(final File file, final String mediaType, final boolean compress, final Date expiresAt) throws IOException {
 
         if (file == null) {
             throw new IllegalArgumentException("passed in file cannot be null");
@@ -533,8 +534,8 @@ public class MongoFileStore {
      * 
      * Use the TimeMachine DSL to easily create expiration dates.
      * 
-     * This uses MongoDB's TTL indexes feature to allow a server background thread to remove the file. According to their
-     * documentation, this may not happen immediately at the time the file is set to expire.
+     * This uses MongoDB's TTL indexes feature to allow a server background thread to remove the file. According to their documentation,
+     * this may not happen immediately at the time the file is set to expire.
      * 
      * 
      * NOTE: The MongoFileStore has remove methods which perform immediate removal of the file in the MongoFileStore.
@@ -626,10 +627,11 @@ public class MongoFileStore {
 
         if (async) {
             setExpiresAt(filesQuery, chunksQuery, new Date(), false);
-        } else {
-            WriteResult writeResult = filesCollection.find(filesQuery).remove();
+        }
+        else {
+            WriteResult writeResult = filesCollection.remove(filesQuery);
             if (writeResult.getCount() > 0) {
-                chunksCollection.find(chunksQuery).remove();
+                chunksCollection.remove(chunksQuery);
             }
         }
     }
@@ -674,12 +676,13 @@ public class MongoFileStore {
 
         if (async) {
             setExpiresAt(query, chunksQuery, new Date(), true);
-        } else {
+        }
+        else {
             // remove files from bucket
-            WriteResult writeResult = getFilesCollection().find(query).remove();
+            WriteResult writeResult = getFilesCollection().remove(query);
             if (writeResult.getCount() > 0) {
                 // then remove chunks, for those file objects
-                getChunksCollection().find(chunksQuery).remove();
+                getChunksCollection().remove(chunksQuery);
             }
         }
     }
@@ -689,7 +692,7 @@ public class MongoFileStore {
         // files collection
         Document filesUpdate = new Document()//
                 .append(MongoFileConstants.expireAt.toString(), when)//
-                .append(MongoFileConstants.deleted.toString(), Boolean.TRUE);
+                .append(MongoFileConstants.deleted.toString(), when.before(new Date()));//
         filesUpdate = new Document().append("$set", filesUpdate);
         getFilesCollection().find(filesQuery)//
                 .withWriteConcern(WriteConcern.JOURNALED)//
@@ -744,8 +747,8 @@ public class MongoFileStore {
     @Override
     public String toString() {
 
-        return String.format("MongoFileStore [filesCollection=%s, chunksCollection=%s,%n  config=%s%n]", filesCollection,
-                chunksCollection, config.toString());
+        return String.format("MongoFileStore [filesCollection=%s, chunksCollection=%s,%n  config=%s%n]", filesCollection, chunksCollection,
+                config.toString());
     }
 
 }

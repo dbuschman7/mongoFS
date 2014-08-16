@@ -7,9 +7,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
+import me.lightspeed7.mongofs.url.MongoFileUrl;
+
 import org.bson.types.ObjectId;
 import org.junit.Test;
-import org.mongodb.file.url.MongoFileUrl;
 
 public class MongoFileTest {
 
@@ -74,8 +75,7 @@ public class MongoFileTest {
     @Test
     public void testGZipFactoriesFromSpec() throws IOException {
 
-        MongoFileUrl url = MongoFileUrl
-                .construct("mongofile:/home/myself/foo/activeusers_19.ZIP?52fb1e7b36707d6d13ebfda9#application/zip");
+        MongoFileUrl url = MongoFileUrl.construct("mongofile:/home/myself/foo/activeusers_19.ZIP?52fb1e7b36707d6d13ebfda9#application/zip");
         assertNotNull(url);
 
         assertEquals(new ObjectId("52fb1e7b36707d6d13ebfda9"), url.getMongoFileId());

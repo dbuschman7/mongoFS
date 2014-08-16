@@ -5,12 +5,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * The class implements a buffered output stream. By setting up such an output
- * stream, an application can write bytes to the underlying output stream in an
- * orderly chunked fashion
+ * The class implements a buffered output stream. By setting up such an output stream, an application can write bytes to the underlying
+ * output stream in an orderly chunked fashion
  * 
- * NOTE: I have removed the synchronized from the write and flush methods for
- * performance reasons, thread safety is not required.
+ * NOTE: I have removed the synchronized from the write and flush methods for performance reasons, thread safety is not required.
  * 
  * @author David Buschman
  * @author Arthur van Hoff - Original
@@ -25,9 +23,8 @@ public class BufferedChunksOutputStream extends FilterOutputStream {
     private byte[] myBuffer;
 
     /**
-     * The number of valid bytes in the buffer. This value is always in the
-     * range <tt>0</tt> through <tt>buf.length</tt>; elements <tt>buf[0]</tt>
-     * through <tt>buf[count-1]</tt> contain valid byte data.
+     * The number of valid bytes in the buffer. This value is always in the range <tt>0</tt> through <tt>buf.length</tt>; elements
+     * <tt>buf[0]</tt> through <tt>buf[count-1]</tt> contain valid byte data.
      */
     private int currentPosition;
 
@@ -37,8 +34,7 @@ public class BufferedChunksOutputStream extends FilterOutputStream {
     private int chunkSize;
 
     /**
-     * Creates a new buffered output stream to write data to the specified
-     * underlying output stream.
+     * Creates a new buffered output stream to write data to the specified underlying output stream.
      * 
      * @param out
      *            the underlying output stream.
@@ -49,8 +45,7 @@ public class BufferedChunksOutputStream extends FilterOutputStream {
     }
 
     /**
-     * Creates a new buffered output stream to write data to the specified
-     * underlying output stream with the specified buffer size.
+     * Creates a new buffered output stream to write data to the specified underlying output stream with the specified buffer size.
      * 
      * @param out
      *            the underlying output stream.
@@ -95,11 +90,9 @@ public class BufferedChunksOutputStream extends FilterOutputStream {
     }
 
     /**
-     * Writes <code>len</code> bytes from the specified byte array starting at
-     * offset <code>off</code> to this buffered output stream.
+     * Writes <code>len</code> bytes from the specified byte array starting at offset <code>off</code> to this buffered output stream.
      * 
-     * This method will recurse on itself until the buffer is exhausted to allow
-     * for orderly chunk writes to the underlying stream.
+     * This method will recurse on itself until the buffer is exhausted to allow for orderly chunk writes to the underlying stream.
      * 
      * @param inBuffer
      *            the data.
@@ -129,7 +122,8 @@ public class BufferedChunksOutputStream extends FilterOutputStream {
                 flushBuffer();
 
                 write(inBuffer, offset + chunkSize, length - chunkSize); // recurse
-            } else {
+            }
+            else {
                 // fill the rest of myBuffer and flush
                 bytesToCopy = this.chunkSize - currentPosition;
                 System.arraycopy(inBuffer, offset, myBuffer, currentPosition, bytesToCopy);
@@ -139,7 +133,8 @@ public class BufferedChunksOutputStream extends FilterOutputStream {
                 flushBuffer();
                 write(inBuffer, offset + bytesToCopy, length - bytesToCopy); // recurse
             }
-        } else {
+        }
+        else {
             // the last of the buffer
             if (bytesToCopy > 0) {
                 System.arraycopy(inBuffer, offset, myBuffer, currentPosition, bytesToCopy);
@@ -149,8 +144,7 @@ public class BufferedChunksOutputStream extends FilterOutputStream {
     }
 
     /**
-     * Flushes this buffered output stream. This forces any buffered output
-     * bytes to be written out to the underlying output stream.
+     * Flushes this buffered output stream. This forces any buffered output bytes to be written out to the underlying output stream.
      * 
      * @exception IOException
      *                if an I/O error occurs.

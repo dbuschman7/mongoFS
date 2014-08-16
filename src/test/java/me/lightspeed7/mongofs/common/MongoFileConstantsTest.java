@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
+import me.lightspeed7.mongofs.MongoFileConstants;
+
 import org.junit.Test;
 
 public class MongoFileConstantsTest {

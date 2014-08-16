@@ -4,8 +4,8 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.mongodb.file.MongoFile;
-import org.mongodb.file.MongoFileConstants;
+import me.lightspeed7.mongofs.MongoFile;
+import me.lightspeed7.mongofs.MongoFileConstants;
 
 public class CountingInputStream extends FilterInputStream {
 

@@ -8,16 +8,15 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.lightspeed7.mongofs.LoremIpsum;
+import me.lightspeed7.mongofs.util.BytesCopier;
+import me.lightspeed7.mongofs.writing.BufferedChunksOutputStream;
+
 import org.junit.Test;
-import org.mongodb.diagnostics.Loggers;
-import org.mongodb.diagnostics.logging.Logger;
-import org.mongodb.file.LoremIpsum;
-import org.mongodb.file.util.BytesCopier;
-import org.mongodb.file.writing.BufferedChunksOutputStream;
 
 public class BufferedChunkOutputStreamTest {
 
-    public static final Logger LOGGER = Loggers.getLogger("file");
+    // public static final Logger LOGGER = Loggers.getLogger("file");
 
     @Test
     public void test8KBuffer256kChunks() throws IOException {
@@ -50,7 +49,7 @@ public class BufferedChunkOutputStreamTest {
             stream.close();
         }
 
-        LOGGER.debug("LoremIpsum length = " + LoremIpsum.getString().length());
+        // LOGGER.debug("LoremIpsum length = " + LoremIpsum.getString().length());
         // System.out.println(log.info());
         assertEquals(LoremIpsum.getString().length(), log.total);
         assertEquals(

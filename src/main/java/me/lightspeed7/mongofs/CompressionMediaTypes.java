@@ -13,7 +13,7 @@ import java.util.TreeSet;
  */
 public class CompressionMediaTypes {
 
-    private static Set<String> noCompressionTypes = new TreeSet<>();
+    private static Set<String> noCompressionTypes = new TreeSet<String>();
 
     // below is a list on types that are already compressed, so don't compress again
     static {

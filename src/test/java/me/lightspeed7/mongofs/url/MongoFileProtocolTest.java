@@ -9,9 +9,10 @@ import java.io.IOException;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
+import me.lightspeed7.mongofs.MongoFileTest;
+
 import org.bson.types.ObjectId;
 import org.junit.Test;
-import org.mongodb.file.MongoFileTest;
 
 public class MongoFileProtocolTest {
 

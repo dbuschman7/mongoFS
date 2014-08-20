@@ -27,8 +27,8 @@ public class EncryptChunkOutputStream extends OutputStream {
 
         try {
             byte[] encrypt = crypto.encrypt(b, off, len);
+            out.writeInt(len); // actual length
             out.writeInt(encrypt.length); // encrypted length
-            // out.writeInt(len); // actual length
             out.write(encrypt, 0, encrypt.length);
         } catch (GeneralSecurityException e) {
             throw new IOException("Error in crypto", e);

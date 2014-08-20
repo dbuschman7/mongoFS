@@ -37,15 +37,15 @@ public class EncryptChunkOutputStreamTest {
 
         LOGGER.debug("LoremIpsum length = " + LoremIpsum.getString().length());
         System.out.println(log.info());
-        assertEquals(32148, log.total);
+        assertEquals(32168, log.total);
         assertEquals(
         //
-                "total = 32148, commands = [" //
-                        + "write(b), write(b), write(b), write(b), write(b, 0, 7488), " //
-                        + "write(b), write(b), write(b), write(b), write(b, 0, 7488), " //
-                        + "write(b), write(b), write(b), write(b), write(b, 0, 7488), " //
-                        + "write(b), write(b), write(b), write(b), write(b, 0, 7488), " //
-                        + "write(b), write(b), write(b), write(b), write(b, 0, 2176), " //
+                "total = 32168, commands = [" //
+                        + "write(b), write(b), write(b), write(b), write(b), write(b), write(b), write(b), write(b, 0, 7488), " //
+                        + "write(b), write(b), write(b), write(b), write(b), write(b), write(b), write(b), write(b, 0, 7488), " //
+                        + "write(b), write(b), write(b), write(b), write(b), write(b), write(b), write(b), write(b, 0, 7488), " //
+                        + "write(b), write(b), write(b), write(b), write(b), write(b), write(b), write(b), write(b, 0, 7488), " //
+                        + "write(b), write(b), write(b), write(b), write(b), write(b), write(b), write(b), write(b, 0, 2176), " //
                         + "flush, close]", log.info());
     }
 

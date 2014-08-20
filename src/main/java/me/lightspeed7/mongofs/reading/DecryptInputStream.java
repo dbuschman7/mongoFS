@@ -56,7 +56,7 @@ public class DecryptInputStream extends InputStream {
             if (remainingBytes <= 0) {
                 return -1;
             }
-            readEncryptedChunk();
+            readEncryptedChunk(true);
         }
 
         int r = Math.min(len, buffer.length - offset);
@@ -66,9 +66,10 @@ public class DecryptInputStream extends InputStream {
 
     }
 
-    private void readEncryptedChunk() throws IOException, EOFException {
+    private int readEncryptedChunk(boolean readActualHeader) throws IOException, EOFException {
+        int actualLength = readActualHeader ? inputStream.readInt() : -1;
         int chunkLength = inputStream.readInt();
-        remainingBytes -= 4;
+        remainingBytes -= readActualHeader ? 8 : 4;
 
         byte[] temp = new byte[chunkLength];
         if (chunkLength != fillBuffer(temp, 0, chunkLength)) {
@@ -82,6 +83,7 @@ public class DecryptInputStream extends InputStream {
             throw new IOException("Error decrypting data", e);
         }
         offset = 0;
+        return actualLength;
     }
 
     private int fillBuffer(byte[] temp, int offset, int length) throws IOException, EOFException {
@@ -94,7 +96,7 @@ public class DecryptInputStream extends InputStream {
     }
 
     /**
-     * THis will read all the data skipped due to the fact that it is compressed
+     * This will try to skip reading and decrypting as much data as possible
      */
     @Override
     public long skip(final long bytesToSkip) throws IOException {
@@ -103,33 +105,59 @@ public class DecryptInputStream extends InputStream {
             return 0;
         }
 
-        if (buffer == null) {
-            readEncryptedChunk();
-        }
-
-        int leftInBuffer = buffer.length - offset;
-        int bytesSkipped = leftInBuffer;
-        if (bytesToSkip < leftInBuffer) {
-            // within my buffer
-            offset += bytesToSkip;
-        }
-        else {
-            // more than my buffer
-            long leftToSkip = bytesToSkip - leftInBuffer;
-            while (leftToSkip > 0) {
-                readEncryptedChunk();
-
-                if (leftToSkip < buffer.length) { // last buffer to skip
-                    offset += leftToSkip;
-                    bytesSkipped += leftToSkip;
-                    leftToSkip = 0; // need to jump out here
+        long stillToSkip = bytesToSkip;
+        while (stillToSkip > 0) {
+            if (buffer == null) { // no existing buffer, reading header and skip if possible
+                int chunkLength = inputStream.readInt();
+                remainingBytes -= 4;
+                if (stillToSkip > chunkLength) { // skip the whole chunk
+                    int length = inputStream.readInt();
+                    inputStream.skip(length);
+                    remainingBytes -= length + 4;
+                    stillToSkip -= chunkLength;
                 }
-                else {
-                    leftToSkip -= buffer.length;
-                    bytesSkipped = buffer.length;
+                else { // only skipping part of this chunk, must read it
+                    readEncryptedChunk(false);
+                    offset = (int) stillToSkip; // the value must less than a chunk size
+                    stillToSkip = 0;
                 }
             }
+            else { // handle the existing buffer
+                int toSkip = (int) Math.min(stillToSkip, buffer.length - offset);
+                offset += toSkip;
+                remainingBytes -= toSkip;
+                stillToSkip -= toSkip;
+                if (buffer.length <= offset) { // reset the buffer since it is now empty
+                    buffer = null;
+                    offset = 0;
+                }
+            }
+
         }
-        return bytesSkipped;
+
+        // int leftInBuffer = buffer.length - offset;
+        // int bytesSkipped = leftInBuffer;
+        // if (bytesToSkip < leftInBuffer) {
+        // // within my buffer
+        // offset += bytesToSkip;
+        // }
+        // else {
+        // // more than my buffer
+        // long leftToSkip = bytesToSkip - leftInBuffer;
+        // while (leftToSkip > 0) {
+        // readEncryptedChunk();
+        //
+        // if (leftToSkip < buffer.length) { // last buffer to skip
+        // offset += leftToSkip;
+        // bytesSkipped += leftToSkip;
+        // leftToSkip = 0; // need to jump out here
+        // }
+        // else {
+        // leftToSkip -= buffer.length;
+        // bytesSkipped = buffer.length;
+        // }
+        // }
+        // }
+        return bytesToSkip;
     }
 }

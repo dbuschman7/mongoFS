@@ -85,7 +85,7 @@ public class EncryptionStreamTest {
 
         String result = buf.toString();
         assertNotNull(result);
-        assertEquals(LoremIpsum.LOREM_IPSUM.length() - 9000, result.length());
+        // assertEquals(LoremIpsum.LOREM_IPSUM.length() - 9000, result.length());
         assertEquals(LoremIpsum.LOREM_IPSUM.substring(9000), result);
 
     }

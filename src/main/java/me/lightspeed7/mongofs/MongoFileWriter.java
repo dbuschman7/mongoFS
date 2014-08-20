@@ -9,6 +9,7 @@ import me.lightspeed7.mongofs.util.BytesCopier;
 import me.lightspeed7.mongofs.writing.BufferedChunksOutputStream;
 import me.lightspeed7.mongofs.writing.CountingOutputStream;
 import me.lightspeed7.mongofs.writing.FileChunksOutputStreamSink;
+import me.lightspeed7.mongofs.writing.MongoEncryptionOutputStream;
 import me.lightspeed7.mongofs.writing.MongoGZipOutputStream;
 
 import org.mongodb.Document;
@@ -19,9 +20,12 @@ public class MongoFileWriter {
     private MongoFile file;
     private me.lightspeed7.mongofs.url.MongoFileUrl url;
     private MongoCollection<Document> chunksCollection;
+    private MongoFileStore store;
 
-    public MongoFileWriter(final MongoFileUrl url, final MongoFile file, final MongoCollection<Document> chunksCollection) {
+    public MongoFileWriter(MongoFileStore store, final MongoFileUrl url, final MongoFile file,
+            final MongoCollection<Document> chunksCollection) {
 
+        this.store = store;
         this.url = url;
         this.file = file;
         this.chunksCollection = chunksCollection;
@@ -56,7 +60,7 @@ public class MongoFileWriter {
         file.validate();
 
         // return the file object
-        return file;
+        return store.findOne(file.getId());
     }
 
     /**
@@ -76,6 +80,9 @@ public class MongoFileWriter {
 
         if (url.isStoredCompressed()) {
             return new MongoGZipOutputStream(file, sink);
+        }
+        else if (url.isStoredEncrypted()) {
+            return new MongoEncryptionOutputStream(store.getConfig(), file, sink);
         }
         else {
             return new CountingOutputStream(MongoFileConstants.length, file, sink);

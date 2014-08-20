@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import me.lightspeed7.mongofs.reading.CountingInputStream;
+import me.lightspeed7.mongofs.reading.DecryptInputStream;
 import me.lightspeed7.mongofs.reading.FileChunksInputStreamSource;
 import me.lightspeed7.mongofs.url.MongoFileUrl;
 import me.lightspeed7.mongofs.url.Parser;
@@ -36,6 +37,8 @@ public class MongoFile implements InputFile {
 
     private boolean compress = true;
 
+    private boolean encrypted = false;
+
     /**
      * Construct a MongoFile object for reading data
      * 
@@ -47,6 +50,7 @@ public class MongoFile implements InputFile {
         this.store = store;
         this.surrogate = surrogate;
         this.compress = (surrogate == null) ? false : (surrogate.getString(MongoFileConstants.compressionFormat) != null);
+        this.encrypted = store.getConfig().isCryptoEnabled();
     }
 
     /**
@@ -59,6 +63,7 @@ public class MongoFile implements InputFile {
 
         this.store = store;
         this.compress = compress;
+        this.encrypted = store.getConfig().isCryptoEnabled();
 
         surrogate = new Document();
         surrogate.put(MongoFileConstants._id.toString(), url.getMongoFileId());
@@ -121,13 +126,13 @@ public class MongoFile implements InputFile {
 
     public MongoFileUrl getURL() throws MalformedURLException {
 
-        if (surrogate != null) {
+        if (surrogate != null) {// compression and encrypted read from stored compressionformat
             URL url = Parser.construct(getId(), getFilename(), getContentType(),
-                    (String) get(MongoFileConstants.compressionFormat.toString()), false);
+                    (String) get(MongoFileConstants.compressionFormat.toString()), false, false);
             return MongoFileUrl.construct(url);
         }
         return MongoFileUrl.construct(getId(), getFilename(), getContentType(),
-                (String) get(MongoFileConstants.compressionFormat.toString()), compress);
+                (String) get(MongoFileConstants.compressionFormat.toString()), compress, store.getConfig().isCryptoEnabled());
     }
 
     /**
@@ -139,16 +144,28 @@ public class MongoFile implements InputFile {
      */
     public final InputStream getInputStream() throws IOException {
 
-        // returned <- counting <- chunks
+        // /////////////////////////////////////////////////////////
+        // Assembled backwards
         //
-        // or
+        // Plain Text -- returned <- counting <- chunks
+        // Compressed -- returned <- gzip <- counting <- chunks
+        // Encryption -- returned <- decrypt <- counting <- chunks
         //
-        // returned <- gzip <- counting <- chunks
+        // /////////////////////////////////////////////////////////
         InputStream returned = new FileChunksInputStreamSource(store, this);
         returned = new CountingInputStream(this, returned);
 
         if (getURL().isStoredCompressed()) {
             returned = new GZIPInputStream(returned);
+        }
+        else if (getURL().isStoredEncrypted()) {
+
+            if (store.getConfig().getCrypto() == null) {
+                throw new IllegalStateException("File is stored in ecrypted but store is not configured for decryption");
+            }
+
+            returned = new DecryptInputStream(store.getConfig().getCrypto(), this, returned);
+
         }
 
         return returned;
@@ -204,6 +221,23 @@ public class MongoFile implements InputFile {
     public long getLength() {
 
         return getLong(MongoFileConstants.length);
+    }
+
+    /**
+     * Gets the file's length on MongoDB, this is the actual size stored.
+     * 
+     * NOTE: For compressed and encrypted files, this size will differ from the getLength() method.
+     * 
+     * @return the length of the file
+     */
+    public long getStorageLength() {
+
+        if (containsKey(MongoFileConstants.storageLength.name())) {
+            return getLong(MongoFileConstants.storageLength);
+        }
+        else { // deprecated, files stored from 0.7.x versions and before
+            return getLong(MongoFileConstants.compressedLength);
+        }
     }
 
     /**

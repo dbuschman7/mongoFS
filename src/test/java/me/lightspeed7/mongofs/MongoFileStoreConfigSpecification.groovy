@@ -34,4 +34,13 @@ class MongoFileStoreConfigSpecification extends Specification {
         false == config.isAsyncDeletes();
         false == config.isEnableCompression();
     }
+
+     def "should throw when compression and encryption are both enabled"() {
+        when:
+        def config = MongoFileStoreConfig.builder().enableCompression(tree).encryption(new BasicCrypto())//
+                .build();
+
+        then:
+        thrown(IllegalStateException)
+    }
 }

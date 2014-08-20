@@ -57,11 +57,19 @@ public class CountingInputStream extends FilterInputStream {
         super.close();
 
         // check for full file read
-        long expected = file.isCompressed() ? file.getLong(MongoFileConstants.compressedLength) : file.getLength();
+        long expected = file.getLength();
+        if (file.isCompressed()) {
+            if (file.containsKey(MongoFileConstants.storageLength.name())) {
+                expected = file.getLong(MongoFileConstants.storageLength);
+            }
+            else if (file.containsKey(MongoFileConstants.compressedLength.name())) {
+                expected = file.getLong(MongoFileConstants.storageLength);
+            }
+        }
+
         if (expected != count) {
-            throw new IOException("File Length mispatch");
+            throw new IOException("File Length mismatch");
         }
 
     }
-
 }

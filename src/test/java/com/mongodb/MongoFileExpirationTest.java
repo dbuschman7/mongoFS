@@ -16,28 +16,23 @@ import me.lightspeed7.mongofs.util.TimeMachine;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mongodb.MongoDatabase;
 
 public class MongoFileExpirationTest {
 
     private static final String DB_NAME = "MongoFSTest-expiration";
 
-    private static MongoDatabase database;
-
-    private static MongoClient mongoClient;
     private static MongoFileStore store;
 
     // initializer
     @BeforeClass
     public static void initial() throws IllegalArgumentException, IOException, InterruptedException {
 
-        mongoClient = MongoTestConfig.construct();
+        MongoClient mongoClient = MongoTestConfig.construct();
 
         mongoClient.dropDatabase(DB_NAME);
-        database = new MongoDatabase(mongoClient.getDB(DB_NAME));
 
         MongoFileStoreConfig config = MongoFileStoreConfig.builder().bucket("expire").writeConcern(WriteConcern.SAFE).build();
-        store = new MongoFileStore(database, config);
+        store = new MongoFileStore(mongoClient.getDB(DB_NAME), config);
 
         Thread.sleep(2000);
     }

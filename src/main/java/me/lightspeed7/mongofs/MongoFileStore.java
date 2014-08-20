@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 import me.lightspeed7.mongofs.url.MongoFileUrl;
+import me.lightspeed7.mongofs.util.ChunkSize;
 
 import org.bson.types.ObjectId;
 import org.mongodb.CommandResult;
@@ -28,6 +29,7 @@ import org.mongodb.WriteResult;
 import org.mongodb.diagnostics.Loggers;
 import org.mongodb.diagnostics.logging.Logger;
 
+import com.mongodb.DB;
 import com.mongodb.WriteConcern;
 
 public class MongoFileStore {
@@ -38,6 +40,16 @@ public class MongoFileStore {
     private final MongoCollection<Document> chunksCollection;
 
     private MongoFileStoreConfig config;
+
+    /**
+     * Legacy CTOR, use this for the 2.12.x driver only
+     * 
+     * @param database
+     * @param config
+     */
+    public MongoFileStore(final DB database, final MongoFileStoreConfig config) {
+        this(new MongoDatabase(database), config);
+    }
 
     /**
      * CTOR
@@ -135,9 +147,13 @@ public class MongoFileStore {
     // public
     // ///////////////
 
-    public int getChunkSize() {
+    public ChunkSize getChunkSize() {
 
         return config.getChunkSize();
+    }
+
+    MongoFileStoreConfig getConfig() {
+        return config;
     }
 
     /**
@@ -234,16 +250,20 @@ public class MongoFileStore {
             throw new IllegalStateException("This data store has compression disabled");
         }
 
+        if (compress && config.isCryptoEnabled()) {
+            throw new IllegalStateException("This data store has encryption enabled, cannot use compression");
+        }
+
         // send wrapper object
         MongoFileUrl mongoFileUrl = MongoFileUrl//
-                .construct(new ObjectId(), filename, mediaType, null, compress);
+                .construct(new ObjectId(), filename, mediaType, null, compress, config.isCryptoEnabled());
 
-        MongoFile mongoFile = new MongoFile(this, mongoFileUrl, config.getChunkSize(), mongoFileUrl.isStoredCompressed());
+        MongoFile mongoFile = new MongoFile(this, mongoFileUrl, config.getChunkSize().getChunkSize(), mongoFileUrl.isStoredCompressed());
         if (expiresAt != null) {
             mongoFile.setExpiresAt(expiresAt);
         }
 
-        return new MongoFileWriter(mongoFileUrl, mongoFile, chunksCollection);
+        return new MongoFileWriter(this, mongoFileUrl, mongoFile, chunksCollection);
     }
 
     /**

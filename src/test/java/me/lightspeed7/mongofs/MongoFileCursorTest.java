@@ -16,7 +16,6 @@ import me.lightspeed7.mongofs.util.BytesCopier;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mongodb.Document;
-import org.mongodb.MongoDatabase;
 
 import com.mongodb.MongoClient;
 
@@ -25,21 +24,17 @@ public class MongoFileCursorTest {
     private static final String DB_NAME = "MongoFSTest-cursor";
     private static final String BUCKET = "cursor";
 
-    private static MongoDatabase database;
-
-    private static MongoClient mongoClient;
     private static MongoFileStore store;
 
     // initializer
     @BeforeClass
     public static void initial() throws IllegalArgumentException, IOException {
 
-        mongoClient = MongoTestConfig.construct();
+        MongoClient mongoClient = MongoTestConfig.construct();
 
         mongoClient.dropDatabase(DB_NAME);
-        database = new MongoDatabase(mongoClient.getDB(DB_NAME));
 
-        store = new MongoFileStore(database, MongoFileStoreConfig.builder().bucket(BUCKET).build());
+        store = new MongoFileStore(mongoClient.getDB(DB_NAME), MongoFileStoreConfig.builder().bucket(BUCKET).build());
 
         createFile(store, "/foo/bar1.txt", "text/plain");
         createFile(store, "/foo/bar4.txt", "text/plain");

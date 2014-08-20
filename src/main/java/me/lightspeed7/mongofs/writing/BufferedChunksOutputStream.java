@@ -4,6 +4,8 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import me.lightspeed7.mongofs.util.ChunkSize;
+
 /**
  * The class implements a buffered output stream. By setting up such an output stream, an application can write bytes to the underlying
  * output stream in an orderly chunked fashion
@@ -42,6 +44,19 @@ public class BufferedChunksOutputStream extends FilterOutputStream {
     public BufferedChunksOutputStream(final OutputStream out) {
 
         this(out, 8192);
+    }
+
+    /**
+     * Creates a new buffered output stream to write data to the specified underlying output stream with the specified buffer size.
+     * 
+     * @param out
+     * @param chunkSize
+     * 
+     * @exception IllegalArgumentException
+     *                if size &lt;= 0.
+     */
+    public BufferedChunksOutputStream(final OutputStream out, final ChunkSize chunkSize) {
+        this(out, chunkSize.getChunkSize());
     }
 
     /**

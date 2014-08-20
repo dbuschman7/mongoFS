@@ -1,5 +1,8 @@
 package me.lightspeed7.mongofs;
 
+import me.lightspeed7.mongofs.crypto.Crypto;
+import me.lightspeed7.mongofs.util.ChunkSize;
+
 import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
 
@@ -13,6 +16,7 @@ public final class MongoFileStoreConfig {
     private boolean enableCompression = true;
     private ChunkSize chunkSize = DEFAULT_CHUNKSIZE;
     private boolean asyncDeletes = true;
+    private Crypto crypto = null;
 
     private MongoFileStoreConfig() {
         // use Builder
@@ -58,47 +62,44 @@ public final class MongoFileStoreConfig {
         this.enableCompression = enableCompression;
     }
 
-    public int getChunkSize() {
+    public ChunkSize getChunkSize() {
 
-        return chunkSize.getChunkSize();
+        return chunkSize;
     }
 
-    /**
-     * Specifies the chunk size to use for data chunks
-     * 
-     * @param chunkSize
-     */
     private void setChunkSize(final ChunkSize chunkSize) {
 
         this.chunkSize = chunkSize;
     }
 
-    /**
-     * Are async deletes allowed
-     * 
-     * @return true if allowed
-     */
     public boolean isAsyncDeletes() {
 
         return asyncDeletes;
     }
 
-    /**
-     * Should async deletes be allowed
-     * 
-     * @param asyncDeletes
-     *            true is the default
-     */
     private void setAsyncDeletes(final boolean asyncDeletes) {
 
         this.asyncDeletes = asyncDeletes;
     }
 
+    public Crypto getCrypto() {
+        return crypto;
+    }
+
+    public void setCrypto(Crypto crypto) {
+        this.crypto = crypto;
+    }
+
+    public boolean isCryptoEnabled() {
+        return this.crypto != null;
+    }
+
     @Override
     public String toString() {
 
-        return String.format("MongoFileStoreConfig [bucket=%s, chunkSize=%s, enableCompression=%s, writeConcern=%s, readPreference=%s]",
-                bucket, chunkSize, enableCompression, writeConcern, readPreference);
+        return String
+                .format("MongoFileStoreConfig [bucket=%s, chunkSize=%s, enableCompression=%s, cryptoEnabled=%s, writeConcern=%s, readPreference=%s]",
+                        bucket, chunkSize, enableCompression, crypto != null, writeConcern, readPreference);
     }
 
     public static Builder builder() {
@@ -108,16 +109,32 @@ public final class MongoFileStoreConfig {
     public static class Builder {
         private MongoFileStoreConfig config = new MongoFileStoreConfig();
 
+        /**
+         * Start a builder
+         * 
+         * @return the builder
+         */
         public MongoFileStoreConfig build() {
             return config;
         }
 
-        // setters
+        /**
+         * Enable background deletes for this collection
+         * 
+         * @param value
+         * @return the builder
+         */
         public Builder asyncDeletes(final boolean value) {
             config.setAsyncDeletes(value);
             return this;
         }
 
+        /**
+         * Set the bucket name for this collection
+         * 
+         * @param value
+         * @return the builder
+         */
         public Builder bucket(final String value) {
             if (value == null || value.trim().isEmpty()) {
                 throw new IllegalArgumentException("bucket name cannot be nul of empty");
@@ -126,21 +143,86 @@ public final class MongoFileStoreConfig {
             return this;
         }
 
-        public Builder chunkSize(final ChunkSize value) {
-            config.setChunkSize(value);
+        /**
+         * Specifies the chunk size to use for data chunks. The size here cause buffers on the chunkSize to kept inside the writing and
+         * reading processes. So be advised on using memory wisely, large chunksize means larger buffers internally.
+         * 
+         * @param chunkSize
+         * @return the builder
+         */
+        public Builder chunkSize(final ChunkSize chunkSize) {
+            config.setChunkSize(chunkSize);
             return this;
         }
 
+        /**
+         * Enable compression on this collection
+         * 
+         * NOTE: Cannot be used with encryption enabled as well.
+         * 
+         * @param value
+         * @return the builder
+         */
         public Builder enableCompression(final boolean value) {
+            if (value == true && config.crypto != null) {
+                throw new IllegalStateException("Compression and Encryption cannot be enabled at the same time");
+            }
             config.setEnableCompression(value);
             return this;
         }
 
+        /**
+         * Enable encryption on this collection
+         * 
+         * NOTE: Cannot be used with compression enabled as well.
+         * 
+         * @param crypto
+         * @return the builder
+         */
+
+        public Builder enableEncryption(final Crypto crypto) {
+            if (config.enableCompression == true && crypto != null) {
+                throw new IllegalStateException("Compression and Encryption cannot be enabled at the same time");
+            }
+
+            if (crypto == null) {
+                return this;
+            }
+
+            if (crypto.getChunkSize() == null) {
+                throw new IllegalArgumentException("Encryption algorithm must specfic chunk size");
+            }
+
+            if (crypto.getChunkSize().greaterThan(config.getChunkSize())) {
+                throw new IllegalArgumentException("Encryption chunk size cannot be greater than file chunk size ");
+            }
+
+            if (crypto.getChunkSize() == ChunkSize.mongo_16M) {
+                throw new IllegalArgumentException(
+                        "Encryption chunk size cannot be be 'mongo_16M', since that is the max size for MongoDB documents and excrypting may increase the size of the data to be saved in a single chunk");
+            }
+
+            config.setCrypto(crypto);
+            return this;
+        }
+
+        /**
+         * Set the readPreference on the collection
+         * 
+         * @param value
+         * @return the builder
+         */
         public Builder readPreference(final ReadPreference value) {
             config.setReadPreference(value);
             return this;
         }
 
+        /**
+         * Set the WriteConcern for this collection
+         * 
+         * @param value
+         * @return the builder
+         */
         public Builder writeConcern(final WriteConcern value) {
             config.setWriteConcern(value);
             return this;

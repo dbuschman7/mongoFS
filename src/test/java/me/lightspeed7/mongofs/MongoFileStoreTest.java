@@ -11,9 +11,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 
+import me.lightspeed7.mongofs.crypto.BasicCrypto;
+import me.lightspeed7.mongofs.url.MongoFileUrl;
 import me.lightspeed7.mongofs.util.BytesCopier;
+import me.lightspeed7.mongofs.util.ChunkSize;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.MongoDatabase;
 
@@ -39,38 +43,50 @@ public class MongoFileStoreTest {
     }
 
     @Test
+    @Ignore
     public void testBasicUncompressedRoundTrip() throws IllegalArgumentException, IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, false);
+        doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, false, false);
     }
 
     @Test
+    @Ignore
     public void testBasicCompressedRoundTrip() throws IllegalArgumentException, IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, true);
+        doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, true, false);
     }
 
     @Test
+    @Ignore
     public void testLotsOfChunksUncompressedRoundTrip() throws IllegalArgumentException, IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false);
+        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, false);
     }
 
     @Test
+    @Ignore
     public void testLotsOfChunksCompressedRoundTrip() throws IllegalArgumentException, IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true);
+        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true, false);
+    }
+
+    @Test
+    public void testLotsOfChunksEncryptedRoundTrip() throws IllegalArgumentException, IOException {
+
+        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, true);
     }
 
     //
     // internal
     // /////////////////
 
-    private void doRoundTrip(String bucket, String filename, ChunkSize chunkSize, boolean compress) throws IOException,
+    private void doRoundTrip(String bucket, String filename, ChunkSize chunkSize, boolean compress, boolean encrypt) throws IOException,
             MalformedURLException {
 
         MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket(bucket).chunkSize(chunkSize).writeConcern(WriteConcern.SAFE) //
+                .bucket(bucket).chunkSize(chunkSize)//
+                .enableCompression(compress).enableEncryption(encrypt ? new BasicCrypto(chunkSize) : null)//
+                .writeConcern(WriteConcern.SAFE) //
                 .build();
         MongoFileStore store = new MongoFileStore(database, config);
 
@@ -91,12 +107,17 @@ public class MongoFileStoreTest {
         assertEquals(compress, mongoFile.getURL().isStoredCompressed());
         assertEquals(LoremIpsum.LOREM_IPSUM.length(), mongoFile.getLength());
         if (compress) {
-            assertNotNull(mongoFile.get(MongoFileConstants.compressedLength)); // verify compression
-            assertNotNull(mongoFile.get(MongoFileConstants.compressionFormat)); // verify compression
+            assertNotNull(mongoFile.get(MongoFileConstants.storageLength)); // verify compression
+            assertEquals(MongoFileUrl.GZIPPED, mongoFile.get(MongoFileConstants.compressionFormat)); // verify compression
             assertNotNull(mongoFile.get(MongoFileConstants.compressionRatio)); // verify compression
         }
+        else if (encrypt) {
+            assertEquals(MongoFileUrl.ENCRYPTED, mongoFile.get(MongoFileConstants.compressionFormat)); // verify encryption
+            assertNotNull(mongoFile.get(MongoFileConstants.storageLength)); // verify encryption
+            assertNotNull(mongoFile.get(MongoFileConstants.compressionRatio)); // verify encryption sets its ratio
+        }
         else {
-            assertNull(mongoFile.get(MongoFileConstants.compressedLength)); // verify no compression
+            assertNull(mongoFile.get(MongoFileConstants.storageLength)); // verify no compression
             assertNull(mongoFile.get(MongoFileConstants.compressionFormat)); // verify no compression
             assertNull(mongoFile.get(MongoFileConstants.compressionRatio)); // verify no compression
         }

@@ -40,6 +40,11 @@ public class BytesCopier {
         this.out = out;
     }
 
+    public BytesCopier closeOutput() {
+        this.closeStreamOnPersist = true;
+        return this;
+    }
+
     public void transfer(final boolean flush) throws IOException {
 
         int nread;
@@ -53,6 +58,37 @@ public class BytesCopier {
         if (closeStreamOnPersist) {
             in.close();
         }
+    }
+
+    public void transfer(final long bytesToRead, final boolean flush) throws IOException {
+
+        long bytesLeft = bytesToRead;
+        while (bytesLeft > 0) {
+            long buffSize = bytesToRead < blocksize ? bytesToRead : blocksize;
+            bytesLeft -= blocksize;
+
+            byte[] buf = new byte[(int) buffSize];
+            int nread = in.read(buf);
+
+            // write any bytes
+            if (nread != -1) {
+                out.write(buf, 0, nread);
+            }
+
+            if (nread != buffSize) { // hit EOF
+                if (flush) {
+                    out.flush();
+                }
+                if (closeStreamOnPersist) {
+                    in.close();
+                }
+                bytesLeft = 0;
+            }
+        }
+        if (flush) {
+            out.flush();
+        }
+
     }
 
 }

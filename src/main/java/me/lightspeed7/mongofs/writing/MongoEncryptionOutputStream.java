@@ -2,30 +2,27 @@ package me.lightspeed7.mongofs.writing;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.zip.GZIPOutputStream;
 
 import me.lightspeed7.mongofs.MongoFile;
 import me.lightspeed7.mongofs.MongoFileConstants;
+import me.lightspeed7.mongofs.MongoFileStoreConfig;
 
-/**
- * 
- * @author David Buschman
- * 
- */
-public class MongoGZipOutputStream extends OutputStream {
+public class MongoEncryptionOutputStream extends OutputStream {
 
     private MongoFile inputFile;
     private OutputStream surrogate;
 
-    public MongoGZipOutputStream(final MongoFile inputFile, final OutputStream given) throws IOException {
+    public MongoEncryptionOutputStream(final MongoFileStoreConfig config, final MongoFile inputFile, final OutputStream given)
+            throws IOException {
 
-        // This chain is : me -> before -> compression -> after -> given
+        // This chain is : me -> before -> chunking -> encryption -> after -> given
         //
         // It will be constructed in reverse
         //
         CountingOutputStream after = new CountingOutputStream(MongoFileConstants.storageLength, inputFile, given);
-        GZIPOutputStream compression = new GZIPOutputStream(after);
-        CountingOutputStream before = new CountingOutputStream(MongoFileConstants.length, inputFile, compression);
+        EncryptChunkOutputStream encryption = new EncryptChunkOutputStream(config.getCrypto(), after);
+        BufferedChunksOutputStream chunking = new BufferedChunksOutputStream(encryption, config.getCrypto().getChunkSize());
+        CountingOutputStream before = new CountingOutputStream(MongoFileConstants.length, inputFile, chunking);
 
         this.surrogate = before;
         this.inputFile = inputFile;

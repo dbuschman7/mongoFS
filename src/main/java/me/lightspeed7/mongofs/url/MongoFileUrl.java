@@ -4,7 +4,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import me.lightspeed7.mongofs.CompressionMediaTypes;
+import me.lightspeed7.mongofs.util.CompressionMediaTypes;
 import me.lightspeed7.mongofs.util.FileUtil;
 
 import org.bson.types.ObjectId;
@@ -23,27 +23,28 @@ import org.bson.types.ObjectId;
 public class MongoFileUrl {
 
     public static final String PROTOCOL = "mongofile";
-    public static final String GZ = "gz";
+    public static final String GZIPPED = "gz";
+    public static final String ENCRYPTED = "enc";
 
     private URL url;
 
     // factories and helpers
-    public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType, final boolean compress)
-            throws MalformedURLException {
+    public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType, final boolean compress,
+            boolean encrypted) throws MalformedURLException {
 
-        return construct(Parser.construct(id, fileName, mediaType, null, compress));
+        return construct(Parser.construct(id, fileName, mediaType, null, compress, encrypted));
     }
 
     public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType,
             final String compressionFormat) throws MalformedURLException {
 
-        return construct(id, fileName, mediaType, compressionFormat, true);
+        return construct(id, fileName, mediaType, compressionFormat, true, false);
     }
 
     public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType,
-            final String compressionFormat, final boolean compress) throws MalformedURLException {
+            final String compressionFormat, final boolean compress, boolean encrypted) throws MalformedURLException {
 
-        return construct(Parser.construct(id, fileName, mediaType, compressionFormat, compress));
+        return construct(Parser.construct(id, fileName, mediaType, compressionFormat, compress, encrypted));
     }
 
     public static final MongoFileUrl construct(final String spec) throws MalformedURLException {
@@ -198,7 +199,7 @@ public class MongoFileUrl {
      */
     public boolean isStoredCompressed() {
 
-        if (url.getHost() != null && url.getHost().equals(GZ)) {
+        if (url.getHost() != null && url.getHost().equals(GZIPPED)) {
             return true;
         }
 
@@ -215,6 +216,14 @@ public class MongoFileUrl {
         return !CompressionMediaTypes.isCompressable(getMediaType());
     }
 
+    /**
+     * Is the given protocol supported by this library
+     * 
+     * @param protocol
+     * 
+     * @return true if supported
+     * 
+     */
     public boolean isSupportedProtocol(final String protocol) {
 
         if (url.getProtocol().equals(PROTOCOL)) {
@@ -222,6 +231,19 @@ public class MongoFileUrl {
         }
 
         // unknown
+        return false;
+    }
+
+    /**
+     * Is the data encrypted within the chunks
+     * 
+     * @return true if encrypted
+     */
+    public boolean isStoredEncrypted() {
+        if (url.getHost() != null && url.getHost().equals(ENCRYPTED)) {
+            return true;
+        }
+
         return false;
     }
 }

@@ -101,7 +101,7 @@ public class StorageComparisonTest {
         me.lightspeed7.mongofs.gridfs.GridFSInputFile file = gridFS.createFile("refactoredGridFS.txt");
         file.put(MongoFileConstants.chunkCount.toString(), 0);
         file.put(MongoFileConstants.compressionRatio.toString(), 0.0d);
-        file.put(MongoFileConstants.compressedLength.toString(), 0);
+        file.put(MongoFileConstants.storageLength.toString(), 0);
         file.put("aliases", Arrays.asList("one", "two", "three"));
         file.setMetaData(new BasicDBObject("key", "value"));
 
@@ -173,7 +173,7 @@ public class StorageComparisonTest {
             fail(e.getMessage());
         }
 
-        assertEquals(store.getChunkSize(), file.getChunkSize());
+        assertEquals(store.getChunkSize().getChunkSize(), file.getChunkSize());
         assertEquals(1, file.getChunkCount());
         assertNotNull(file.getUploadDate());
 

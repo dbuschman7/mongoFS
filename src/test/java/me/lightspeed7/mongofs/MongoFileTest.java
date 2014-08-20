@@ -21,7 +21,7 @@ public class MongoFileTest {
     public void testGZipFactoriesItemized() throws IOException {
 
         ObjectId id = new ObjectId();
-        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", PDF, true);
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", PDF, true, false);
         assertNotNull(url);
         assertEquals(String.format("mongofile:gz:fileName.pdf?%s#application/pdf", id.toString()), url.getUrl().toString());
 
@@ -38,7 +38,7 @@ public class MongoFileTest {
     public void testFactoriesItemized() throws IOException {
 
         ObjectId id = new ObjectId();
-        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.zip", ZIP, true);
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.zip", ZIP, true, false);
         assertNotNull(url);
         assertEquals(String.format("mongofile:fileName.zip?%s#application/zip", id.toString()), url.getUrl().toString());
 

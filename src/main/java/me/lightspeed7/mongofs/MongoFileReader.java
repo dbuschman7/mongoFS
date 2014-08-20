@@ -2,10 +2,6 @@ package me.lightspeed7.mongofs;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.zip.GZIPInputStream;
-
-import me.lightspeed7.mongofs.reading.CountingInputStream;
-import me.lightspeed7.mongofs.reading.FileChunksInputStreamSource;
 
 /**
  * Class for encapsulate the reader of data from a MongoFile
@@ -40,19 +36,7 @@ public class MongoFileReader {
      */
     public final InputStream getInputStream() throws IOException {
 
-        // returned <- counting <- chunks
-        //
-        // or
-        //
-        // returned <- gzip <- counting <- chunks
-        InputStream returned = new FileChunksInputStreamSource(store, file);
-        returned = new CountingInputStream(file, returned);
-
-        if (file.getURL().isStoredCompressed()) {
-            returned = new GZIPInputStream(returned);
-        }
-
-        return returned;
+        return file.getInputStream();
     }
 
     /**

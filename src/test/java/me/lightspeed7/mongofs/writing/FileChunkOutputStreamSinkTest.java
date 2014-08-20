@@ -1,4 +1,4 @@
-package me.lightspeed7.mongofs.common;
+package me.lightspeed7.mongofs.writing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

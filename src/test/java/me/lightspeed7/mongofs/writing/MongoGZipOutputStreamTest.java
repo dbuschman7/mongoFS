@@ -18,7 +18,7 @@ public class MongoGZipOutputStreamTest {
 
         MongoFile mock = Mockito.mock(MongoFile.class);
         Mockito.when(mock.get(MongoFileConstants.length.toString())).thenReturn(Integer.valueOf(100));
-        Mockito.when(mock.get(MongoFileConstants.compressedLength.toString())).thenReturn(Integer.valueOf(50));
+        Mockito.when(mock.get(MongoFileConstants.storageLength.toString())).thenReturn(Integer.valueOf(50));
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(1024 * 1024);
 

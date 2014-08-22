@@ -57,7 +57,7 @@ a:focus {
 
 .navbar {
     margin-bottom: 0;
-    border-bottom: 1px solid rgb(60,40,23);
+    border-bottom: 2px solid rgb(60,40,23);
     text-transform: uppercase;
     font-family: Montserrat,"Helvetica Neue",Helvetica,Arial,sans-serif;
     background-color: #000;
@@ -116,7 +116,7 @@ a:focus {
     }
 
     .navbar-custom.top-nav-collapse {
-        border-bottom: 1px solid rgb(60,40,23);
+        border-bottom: 2px solid rgb(60,40,23);
     }
 }
 
@@ -182,13 +182,13 @@ h2 small  {
 }
 
 .btn-circle {
-    width: 70px;
-    height: 70px;
-    margin-top: 15px;
-    padding: 7px 16px;
+    width: 60px;
+    height: 60px;
+    margin-top: 10px;
+    padding: 5px 16px;
     border: 2px solid #fff;
     border-radius: 35px;
-    font-size: 40px;
+    font-size: 35px;
     color: #fff;
     background: 0 0;
     -webkit-transition: background .3s ease-in-out;
@@ -255,16 +255,15 @@ h2 small  {
     }
 }
 
-.content-section {
-    padding-top: 10px;
+.about-section {
+    padding-top: 100px;
 }
 
 .download-section {
-    width: 100%;
-    padding: 50px 0;
-    color: #fff;
+    padding-top: 100px;
+
+	width:100%;
     background: url(../img/downloads-bg.jpg) no-repeat center center scroll;
-    background-color: #000;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     background-size: cover;
@@ -272,13 +271,23 @@ h2 small  {
 }
 
 .features-section {
-    padding-top: 30px;
-    padding-bottom 30px;
+    padding-top: 100px;
 }
 
 .migration-section {
-    padding-top: 30px;
-    padding-bottom 30px;
+    padding-top: 100px;
+}
+
+.migration-section {
+    padding-top: 100px;
+}
+
+.contact-section {
+    padding-top: 100px;
+}
+
+.example-section {
+    padding-top: 100px;
 }
 
 #map {
@@ -288,21 +297,29 @@ h2 small  {
 }
 
 @media(min-width:767px) {
-    .content-section {
-        padding-top: 150px;
+    .about-section {
+        padding-top: 100px;
     }
 
     .features-section {
-        padding-top: 150px;
+        padding-top: 100px;
     }
     
     .migration-section {
-        padding-top: 150px;
+        padding-top: 100px;
     }
     
     .download-section {
-        padding: 25px;
+        padding: 100px;
     }
+    
+    .contact-section {
+        padding: 100px;
+    }
+
+	.example-section {
+	    padding-top: 100px;
+	}
 
     #map {
         height: 400px;

@@ -33,7 +33,7 @@
                     <i class="fa fa-bars"></i>
                 </button>
                 <a class="navbar-brand" href="#page-top">
-                    <i class="fa fa-play-circle"></i><i><small class="green">mongo</small><span class="beige" >FS</span></i>
+                    <i class="fa fa-folder-open-o"></i><i><small class="green">mongo</small><span class="beige" >FS</span></i>
                 </a>
             </div>
 
@@ -72,7 +72,7 @@
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
                         <h1 class="brand-heading"><i><small class="green">mongo</small><span class="beige" >FS</span></i></h1>
-                        <p class="intro-text">An enhanced file storage implementation in MongoDB that extends the GridFS functionality</p>
+                        <p class="intro-text">An enhanced file storage implementation in MongoDB that extends the GridFS functionality of the Mongo-Java-Driver</p>
                         <div class="page-scroll hidden-xs">
                             <a href="#about" class="btn btn-circle">
                                 <i class="fa fa-angle-double-down animated"></i>
@@ -84,11 +84,12 @@
         </div>
     </section>
 
-    <section id="about" class="container content-section text-center page-height">
+    <section id="about" class="container about-section text-center ">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2">
                 <h2>About <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
                 <p>This project came out of a need in my company to extend the current GridFS functionality to include compression of file data. After spending a day or so trying to work with the existing implementation, I determined that the existing implementation was not going to be extendible due to the current use of inner classes and heavy cross-class collusion. So I decided to re-write the existing implementation in order to extend it and publish those enhancements for anyone else who will like to make use of it.</p>
+                <p> Also the "coming soon" Mongo-Java-Driver 3.0.x which is an almost complete re-write by the MonogDB folks has a new and much cleaner API and Object Model, I need a way to bridge the gap seamlessly at my current company because we are making heavy use of the library using the 2.10.x thru 2.12.x drivers. I need to be able to migrate these systems to the new 3.0.x driver when it is released.</p> 
 				<p>I have version 0.7.6 published and available. Goto the <a href="#download" >downloads</a> section to see how to get it. Check out my task list under the <a href="https://github.com/dbuschman7/mongoFS/blob/master/TODO.md" >TODO</a> to check the progress. I need to have this code into production by end of March so keep checking back to see my progress.</p>
                 <div class="page-scroll hidden-xs">
                     <a href="#features" class="btn btn-circle">
@@ -98,7 +99,7 @@
             </div>
         </div>
     </section>
-    <section id="features" class="container features-section text-center page-height">
+    <section id="features" class="container features-section text-center">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2">
                 <h2>Comparing <i><small class="green">mongo</small><span class="beige" >FS</span></i> to G<small>rid</small>FS</h2>
@@ -113,11 +114,13 @@
 					<tr><td>MD5 data checksums</td><td><i class="fa fa-check" ></i></td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>Available in JVM based languages</td><td><i class="fa fa-check" ></i></td><td><i class="fa fa-check" ></i></td></tr>
 					<tr><td>Available in other languages</td><td><i class="fa fa-check" ></i></td><td>Not Yet</i></td> </tr>
-					<tr><td>Optimized for usePowerOf2Sizes storage</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
+					<tr><td>Optimized for usePowerOf2Sizes storage</td><td>starting in 2.6</td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>Background deletes ( asynchronous )</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>Temporary file storage ( expiration )</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>Provides URL for easy file refrence</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>Space saving data compression ( gzip )</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
+					<tr><td>Storing files with customer defined encryption</td><td>&nbsp;</td><td>Coming ( 0.8.x )</td> </tr>
+					<tr><td>Uses a 3.0.x compatible API bridge </td><td>&nbsp;</td><td>Coming ( 0.8.x )</td> </tr>
 					<tr><td>ZIP archives and serachable manifests</td><td>&nbsp;</td><td>Coming ( 0.8.x )</td> </tr>
 				
 				</table>
@@ -129,12 +132,16 @@
             </div>
         </div>
     </section>
-    <section id="migration" class="container migration-section text-center page-height">
+    <section id="migration" class="container migration-section text-center">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2">
                 <h2>Migrating a G<small>rid</small>FS store to <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
 				<p><i><small class="green">mongo</small><span class="beige" >FS</span></i> was built to be compatible with an existing GridFS collections. There is even an implementation of GridFS inside of <i><small class="green">mongo</small><span class="beige" >FS</span></i> that has been refactored to use some <i><small class="green">mongo</small><span class="beige" >FS</span></i> classes underneath.</p>
-				<p>Simply point MongoFileStore to the existing GridFS collections and gain the new compression and URL functionality. </p><p><strong>NOTE:</strong> This is a one-way process. Once <i><small class="green">mongo</small><span class="beige" >FS</span></i> starts writing compressed file chunks, the data read from GridFS will be a Gzip compressed stream that you will have to handle to get the raw data back. Also, <i><small class="green">mongo</small><span class="beige" >FS</span></i> adds fields to the documents that help it know what to do with the file and chunk data in the DB collections.</p>  
+				<p>Simply point MongoFileStore to the existing GridFS collections and gain the new compression and URL functionality. </p><p><strong>NOTE:</strong> This is a one-way process. Once <i><small class="green">mongo</small><span class="beige" >FS</span></i> starts writing compressed and/or encrypted file chunks, the data read from GridFS directly will be a Gzip compressed and/or encrypted stream that you will have to handle to get the raw data back. Also, <i><small class="green">mongo</small><span class="beige" >FS</span></i> adds fields to the documents that help it know what to do with the file and chunk data in the DB collections.</p>  
+				
+				<h2>Migrating from <i><small class="green">mongo</small><span class="beige" >FS</span></i> 0.7.x to 0.8.x</h2>
+				<p>This migration will require some coding changes need to unsure compatiblity with the uncoming 3.0.x driver. The code changes allow for the upcoming change from DBObject to the new Document base object found in the 3.0.x driver. Most of the changes fro the 3.0.x driver are hidden from the user but some changes to my API were needed to support the new class structure in the 3.0.x driver.</p>
+				
 				
                 <div class="page-scroll hidden-xs">
                     <a href="#download" class="btn btn-circle">
@@ -146,11 +153,11 @@
     </section>
 
 
-    <section id="download" class="content-section text-center">
-        <div class="download-section">
-            <div class="container">
-                <div class="col-lg-8 col-lg-offset-2">
+    <section id="download" class="container download-section text-center">
+        <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 download-padding">
                     <h2>Download <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
+                    <p>I will be working on getting this in the main Maven Repository in the near future</p>
                     <p>My maven based repo is hosted on GitHub, repo url is <br/>https://github.com/dbuschman7/mvn-repo/raw/master</p>
                     <div class="row">
                     <div class="col-xs-12 col-sm-offset-2 col-sm-8 col-md-offset-3 col-md-6 col-lg-offset-3 col-lg-6" >
@@ -170,11 +177,10 @@
 	                    </a>
                 	</div>
                 </div>
-            </div>
         </div>
     </section>
 
-    <section id="contact" class="container content-section text-center page-height">
+    <section id="contact" class="container contact-section text-center ">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2">
                 <h2>Contact <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
@@ -190,6 +196,7 @@
 	                	<i class="fa fa-angle-double-up animated"></i>
 	                </a>
                	</div>
+               	<div style="height:500px" ></div>
             </div>
         </div>
     </section>

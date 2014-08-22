@@ -1,0 +1,195 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="mongoFS - extended file storage in MongoDB">
+    <meta name="author" content="David Buschman">
+
+    <title>mongoFS - Extended file storage in MongoDB</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+
+    <!-- Fonts -->
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+
+    <!-- Custom Theme CSS -->
+    <link href="css/grayscale.css" rel="stylesheet">
+
+</head>
+
+<body id="page-top" data-spy="scroll" data-target=".navbar-custom">
+
+    <nav class="navbar navbar-custom navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-main-collapse">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="#page-top">
+                    Mongo Files
+                </a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse navbar-right navbar-main-collapse">
+                <ul class="nav navbar-nav">
+                    <!-- Hidden li included to remove active class from about link when scrolled up past about section -->
+                    <li class="hidden">
+                        <a href="#page-top"></a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#configuration">Config</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#upload">Uploading</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#finding">Finding</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#reading">Reading</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#deleting">Deleting</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <section id="first" class="container example-section text-center ">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2>MongoFiles and Urls</h2>
+                <p>Content here</p>
+                <div class="page-scroll hidden-xs">
+                    <a href="#features" class="btn btn-circle">
+                        <i class="fa fa-angle-double-down animated"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="configuration" class="container example-section text-center ">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2>Configuring to run <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
+                <p>The constructor requires two parameters, a com.mongodb.DB and me.lightspeed7.mongofs.MongoFileStoreConfig</p>
+                <p>For the DB object, the library leaves the task of connect to a database to you. However you choose to provide the host, port, database and credentials is up to you. You just need to provide the constructor with a com.mongodb.DB object setup and ready to go. This allows the maximum flexabilility within users systems. </p>
+				
+                <p>At my company, we use Spring for Dependency Injection, here is an example in XML : 
+                <div>Code here</div>
+                
+                <div class="page-scroll hidden-xs">
+                    <a href="#features" class="btn btn-circle">
+                        <i class="fa fa-angle-double-down animated"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="mongoFiles" class="container example-section text-center ">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2>MongoFiles and URLs in <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
+                <p>Content here</p>
+                <div class="page-scroll hidden-xs">
+                    <a href="#features" class="btn btn-circle">
+                        <i class="fa fa-angle-double-down animated"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="upload" class="container features-section text-center">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2>Uploading files into <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
+                <div class="page-scroll hidden-xs">
+                    <a href="#migration" class="btn btn-circle">
+                        <i class="fa fa-angle-double-down animated"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="finding" class="container features-section text-center">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2>Finding files stored in <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
+                <div class="page-scroll hidden-xs">
+                    <a href="#migration" class="btn btn-circle">
+                        <i class="fa fa-angle-double-down animated"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="reading" class="container features-section text-center">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2>Reading the contents of files stored in <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
+                <div class="page-scroll hidden-xs">
+                    <a href="#migration" class="btn btn-circle">
+                        <i class="fa fa-angle-double-down animated"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="deleting" class="container features-section text-center">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2>Removing file stored in <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
+                <div class="page-scroll hidden-xs">
+                    <a href="#migration" class="btn btn-circle">
+                        <i class="fa fa-angle-double-down animated"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>               
+     <section id="contact" class="container contact-section text-center ">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2>Contact <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
+                <ul class="list-inline banner-social-buttons">
+                    <li><a href="https://github.com/dbuschman7/mongoFS" class="btn btn-default btn-lg"><i class="fa fa-github fa-fw"></i> <span class="network-name">Github</span></a>
+                    </li>
+                </ul>
+                <p>&nbsp;</p>
+                <p>More to come here</p>
+                
+                <div class="page-scroll">
+	            	<a href="#page-top" class="btn btn-circle">
+	                	<i class="fa fa-angle-double-up animated"></i>
+	                </a>
+               	</div>
+               	<div style="height:500px" ></div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Core JavaScript Files -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="js/grayscale.js"></script>
+
+</body>
+
+</html>
+
+					</tr>
+					<tr>

@@ -31,12 +31,22 @@ repositories{
     mavenCentral()
 }
 
+project.ext {
+  springVersion = "4.0.3.RELEASE"
+}
+
 dependencies {
     compile gradleApi()
     compile 'org.mongodb:mongo-java-driver:2.12.2'
     testCompile 'org.mockito:mockito-all:1.9.5'
     testCompile 'com.google.guava:guava:16.0.1'   
     testCompile 'com.google.code.gson:gson:2.2.4'
+    
+    testCompile("org.springframework:spring-core:${project.springVersion}")
+	testCompile("org.springframework:spring-context:${project.springVersion}")
+	testCompile("org.springframework:spring-expression:${project.springVersion}")
+	testCompile("org.springframework:spring-test:${project.springVersion}")
+    
 }
 
 task sourcesJar(type: Jar) {

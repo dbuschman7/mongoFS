@@ -30,6 +30,7 @@ import org.mongodb.diagnostics.Loggers;
 import org.mongodb.diagnostics.logging.Logger;
 
 import com.mongodb.DB;
+import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
 
 public class MongoFileStore {
@@ -48,6 +49,7 @@ public class MongoFileStore {
      * @param config
      */
     public MongoFileStore(final DB database, final MongoFileStoreConfig config) {
+
         this(new MongoDatabase(database), config);
     }
 
@@ -63,19 +65,25 @@ public class MongoFileStore {
 
         this.config = config;
 
+        // Determine which object to get readPreference and WriteConcern
+        WriteConcern writeConcern = config.getWriteConcern() == null // pull from database object
+        ? database.surrogate.getWriteConcern()
+                : config.getWriteConcern();
+
+        ReadPreference readPreference = config.getReadPreference() == null // pull from database object
+        ? database.surrogate.getReadPreference()
+                : config.getReadPreference();
+
         // FILES
-        MongoCollectionOptions fileOptions = (MongoCollectionOptions) MongoCollectionOptions.builder()//
-                .writeConcern(config.getWriteConcern())//
-                .readPreference(config.getReadPreference())//
-                .build();
+        MongoCollectionOptions fileOptions = (MongoCollectionOptions) MongoCollectionOptions.builder()
+                .writeConcern(writeConcern).readPreference(readPreference).build();
 
         filesCollection = database.getCollection(config.getBucket() + ".files", fileOptions);
 
         // CHUNKS
         MongoCollectionOptions chunksOptions = (MongoCollectionOptions) MongoCollectionOptions.builder()//
-                .writeConcern(config.getWriteConcern())//
-                .readPreference(config.getReadPreference())//
-                .build();
+                .writeConcern(writeConcern).readPreference(readPreference).build();
+
         chunksCollection = database.getCollection(config.getBucket() + ".chunks", chunksOptions);
 
         // make sure the expiration index is present
@@ -96,8 +104,10 @@ public class MongoFileStore {
     }
 
     private int getCollectionStats(final MongoCollection<Document> coll) {
+
         // { collStats: "collection" , scale : 1024 }
-        CommandResult result = coll.getDatabase().executeCommand(new Document("collStats", coll.getName()).append("scale", 1024));
+        CommandResult result = coll.getDatabase().executeCommand(
+                new Document("collStats", coll.getName()).append("scale", 1024));
         return result.isOk() ? result.getResponse().getInteger("size").intValue() : 0;
     }
 
@@ -124,6 +134,7 @@ public class MongoFileStore {
     }
 
     private void createIdIndexes(final MongoCollection<Document> fileColl, final MongoCollection<Document> chunksColl) {
+
         Index filesIdx = Index.builder()//
                 .name("filename")//
                 .addKey("filename", OrderBy.ASC)//
@@ -153,6 +164,7 @@ public class MongoFileStore {
     }
 
     MongoFileStoreConfig getConfig() {
+
         return config;
     }
 
@@ -207,7 +219,8 @@ public class MongoFileStore {
      * @throws IllegalArgumentException
      *             if required parameters are null
      */
-    public MongoFileWriter createNew(final String filename, final String mediaType) throws IOException {
+    public MongoFileWriter createNew(final String filename, final String mediaType)
+            throws IOException {
 
         return createNew(filename, mediaType, null, config.isEnableCompression());
     }
@@ -236,7 +249,8 @@ public class MongoFileStore {
      *             if required parameters are null
      * 
      */
-    public MongoFileWriter createNew(final String filename, final String mediaType, final Date expiresAt, final boolean compress)
+    public MongoFileWriter createNew(final String filename, final String mediaType, final Date expiresAt,
+            final boolean compress)
             throws IOException {
 
         if (filename == null) {
@@ -258,7 +272,8 @@ public class MongoFileStore {
         MongoFileUrl mongoFileUrl = MongoFileUrl//
                 .construct(new ObjectId(), filename, mediaType, null, compress, config.isCryptoEnabled());
 
-        MongoFile mongoFile = new MongoFile(this, mongoFileUrl, config.getChunkSize().getChunkSize(), mongoFileUrl.isStoredCompressed());
+        MongoFile mongoFile = new MongoFile(this, mongoFileUrl, config.getChunkSize().getChunkSize(),
+                mongoFileUrl.isStoredCompressed());
         if (expiresAt != null) {
             mongoFile.setExpiresAt(expiresAt);
         }
@@ -285,7 +300,8 @@ public class MongoFileStore {
      * @throws FileNotFoundException
      *             if the file does not exist or cannot be read
      */
-    public MongoFile upload(final File file, final String mediaType) throws IOException {
+    public MongoFile upload(final File file, final String mediaType)
+            throws IOException {
 
         FileInputStream inputStream = new FileInputStream(file);
         try {
@@ -318,7 +334,8 @@ public class MongoFileStore {
      * @throws FileNotFoundException
      *             if the file does not exist or cannot be read
      */
-    public MongoFile upload(final File file, final String mediaType, final boolean compress, final Date expiresAt) throws IOException {
+    public MongoFile upload(final File file, final String mediaType, final boolean compress, final Date expiresAt)
+            throws IOException {
 
         if (file == null) {
             throw new IllegalArgumentException("passed in file cannot be null");
@@ -355,7 +372,8 @@ public class MongoFileStore {
      * @throws IllegalArgumentException
      *             if required parameters are null
      */
-    public MongoFile upload(final String filename, final String mediaType, final InputStream inputStream) throws IOException {
+    public MongoFile upload(final String filename, final String mediaType, final InputStream inputStream)
+            throws IOException {
 
         return upload(filename, mediaType, null, true, inputStream);
 
@@ -385,8 +403,9 @@ public class MongoFileStore {
      *             if required parameters are null
      * 
      */
-    public MongoFile upload(final String filename, final String mediaType, final Date expiresAt, final boolean compress,
-            final InputStream inputStream) throws IOException {
+    public MongoFile upload(final String filename, final String mediaType, final Date expiresAt,
+            final boolean compress, final InputStream inputStream)
+            throws IOException {
 
         return createNew(filename, mediaType, expiresAt, compress).write(inputStream);
     }
@@ -466,6 +485,7 @@ public class MongoFileStore {
      * @return true if file exists in the DataStore
      */
     public boolean exists(final ObjectId id) {
+
         return null != findOne(id);
     }
 
@@ -554,8 +574,8 @@ public class MongoFileStore {
      * 
      * Use the TimeMachine DSL to easily create expiration dates.
      * 
-     * This uses MongoDB's TTL indexes feature to allow a server background thread to remove the file. According to their documentation,
-     * this may not happen immediately at the time the file is set to expire.
+     * This uses MongoDB's TTL indexes feature to allow a server background thread to remove the file. According to their
+     * documentation, this may not happen immediately at the time the file is set to expire.
      * 
      * 
      * NOTE: The MongoFileStore has remove methods which perform immediate removal of the file in the MongoFileStore.
@@ -567,7 +587,8 @@ public class MongoFileStore {
      * 
      * @throws MalformedURLException
      */
-    public void expireFile(final MongoFile file, final Date when) throws MalformedURLException {
+    public void expireFile(final MongoFile file, final Date when)
+            throws MalformedURLException {
 
         MongoFileUrl url = file.getURL();
 
@@ -587,7 +608,8 @@ public class MongoFileStore {
      * @throws MongoException
      * @throws IOException
      */
-    public void remove(final MongoFile mongoFile) throws IOException {
+    public void remove(final MongoFile mongoFile)
+            throws IOException {
 
         remove(mongoFile, false);
     }
@@ -600,7 +622,8 @@ public class MongoFileStore {
      * @throws MongoException
      * @throws IOException
      */
-    public void remove(final MongoFile mongoFile, final boolean async) throws IOException {
+    public void remove(final MongoFile mongoFile, final boolean async)
+            throws IOException {
 
         if (mongoFile == null) {
             throw new IllegalArgumentException("mongoFile cannot be null");
@@ -647,8 +670,7 @@ public class MongoFileStore {
 
         if (async) {
             setExpiresAt(filesQuery, chunksQuery, new Date(), false);
-        }
-        else {
+        } else {
             WriteResult writeResult = filesCollection.remove(filesQuery);
             if (writeResult.getCount() > 0) {
                 chunksCollection.remove(chunksQuery);
@@ -696,8 +718,7 @@ public class MongoFileStore {
 
         if (async) {
             setExpiresAt(query, chunksQuery, new Date(), true);
-        }
-        else {
+        } else {
             // remove files from bucket
             WriteResult writeResult = getFilesCollection().remove(query);
             if (writeResult.getCount() > 0) {
@@ -707,7 +728,8 @@ public class MongoFileStore {
         }
     }
 
-    private void setExpiresAt(final Document filesQuery, final Document chunksQuery, final Date when, final boolean multi) {
+    private void setExpiresAt(final Document filesQuery, final Document chunksQuery, final Date when,
+            final boolean multi) {
 
         // files collection
         Document filesUpdate = new Document()//
@@ -767,8 +789,8 @@ public class MongoFileStore {
     @Override
     public String toString() {
 
-        return String.format("MongoFileStore [filesCollection=%s, chunksCollection=%s,%n  config=%s%n]", filesCollection, chunksCollection,
-                config.toString());
+        return String.format("MongoFileStore [filesCollection=%s, chunksCollection=%s,%n  config=%s%n]",
+                filesCollection, chunksCollection, config.toString());
     }
 
 }

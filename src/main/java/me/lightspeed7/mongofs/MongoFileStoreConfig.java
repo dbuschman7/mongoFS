@@ -19,6 +19,7 @@ public final class MongoFileStoreConfig {
     private Crypto crypto = null;
 
     private MongoFileStoreConfig() {
+
         // use Builder
     }
 
@@ -83,14 +84,17 @@ public final class MongoFileStoreConfig {
     }
 
     public Crypto getCrypto() {
+
         return crypto;
     }
 
     public void setCrypto(Crypto crypto) {
+
         this.crypto = crypto;
     }
 
     public boolean isCryptoEnabled() {
+
         return this.crypto != null;
     }
 
@@ -103,10 +107,12 @@ public final class MongoFileStoreConfig {
     }
 
     public static Builder builder() {
+
         return new Builder();
     }
 
     public static class Builder {
+
         private MongoFileStoreConfig config = new MongoFileStoreConfig();
 
         /**
@@ -115,6 +121,7 @@ public final class MongoFileStoreConfig {
          * @return the builder
          */
         public MongoFileStoreConfig build() {
+
             return config;
         }
 
@@ -125,6 +132,7 @@ public final class MongoFileStoreConfig {
          * @return the builder
          */
         public Builder asyncDeletes(final boolean value) {
+
             config.setAsyncDeletes(value);
             return this;
         }
@@ -136,6 +144,7 @@ public final class MongoFileStoreConfig {
          * @return the builder
          */
         public Builder bucket(final String value) {
+
             if (value == null || value.trim().isEmpty()) {
                 throw new IllegalArgumentException("bucket name cannot be nul of empty");
             }
@@ -144,13 +153,32 @@ public final class MongoFileStoreConfig {
         }
 
         /**
-         * Specifies the chunk size to use for data chunks. The size here cause buffers on the chunkSize to kept inside the writing and
-         * reading processes. So be advised on using memory wisely, large chunksize means larger buffers internally.
+         * Returns a setup that will be compatible with other GridFS drivers.
+         * 
+         * @param bucket
+         * @return
+         */
+        public MongoFileStoreConfig gridFSCompatible(String bucket) {
+
+            config.asyncDeletes = false;
+            config.bucket = bucket;
+            config.chunkSize = ChunkSize.medium_256K;
+            config.crypto = null;
+            config.enableCompression = false;
+            config.readPreference = null;
+            config.writeConcern = null;
+            return config;
+        }
+
+        /**
+         * Specifies the chunk size to use for data chunks. The size here cause buffers on the chunkSize to kept inside the
+         * writing and reading processes. So be advised on using memory wisely, large chunksize means larger buffers internally.
          * 
          * @param chunkSize
          * @return the builder
          */
         public Builder chunkSize(final ChunkSize chunkSize) {
+
             config.setChunkSize(chunkSize);
             return this;
         }
@@ -164,6 +192,7 @@ public final class MongoFileStoreConfig {
          * @return the builder
          */
         public Builder enableCompression(final boolean value) {
+
             if (value == true && config.crypto != null) {
                 throw new IllegalStateException("Compression and Encryption cannot be enabled at the same time");
             }
@@ -181,6 +210,7 @@ public final class MongoFileStoreConfig {
          */
 
         public Builder enableEncryption(final Crypto crypto) {
+
             if (config.enableCompression == true && crypto != null) {
                 throw new IllegalStateException("Compression and Encryption cannot be enabled at the same time");
             }
@@ -213,6 +243,7 @@ public final class MongoFileStoreConfig {
          * @return the builder
          */
         public Builder readPreference(final ReadPreference value) {
+
             config.setReadPreference(value);
             return this;
         }
@@ -224,6 +255,7 @@ public final class MongoFileStoreConfig {
          * @return the builder
          */
         public Builder writeConcern(final WriteConcern value) {
+
             config.setWriteConcern(value);
             return this;
         }

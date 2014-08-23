@@ -48,6 +48,11 @@
 * provide a manifest list for files inside the zip file 
 * searchable manifests list for files within zip archives 
 
+## 1.0 Mongo-Java-Driver 3.0.x
+* Will move this  library to 1.0 when the official Mongo Java Driver 3.0.x is released
+* Remove support for the < 3.0.x drivers going forward
+* 0.9.x versions will be maintained for legacy driver support <= 2.12.x
+
 ## Futures ideas
 * auto-grow/shrink chunk size as "empty-space" entropy rises, maybe multiple collections 
 * migrate to NIO for better streaming performance

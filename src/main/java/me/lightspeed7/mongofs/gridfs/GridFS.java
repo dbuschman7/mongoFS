@@ -369,7 +369,14 @@ public class GridFS {
      */
     public InputFile createFile(final File f) throws IOException {
 
-        return createFile(new FileInputStream(f), f.getName(), true);
+        FileInputStream in = new FileInputStream(f);
+        try {
+            return createFile(in, f.getName(), true);
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+        }
     }
 
     /**

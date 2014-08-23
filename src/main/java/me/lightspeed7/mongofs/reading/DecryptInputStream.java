@@ -111,8 +111,8 @@ public class DecryptInputStream extends InputStream {
                 remainingBytes -= 4;
                 if (stillToSkip > chunkLength) { // skip the whole chunk
                     int length = inputStream.readInt();
-                    inputStream.skip(length);
-                    remainingBytes -= length + 4;
+                    long skipped = inputStream.skip(length);
+                    remainingBytes -= skipped + 4;
                     stillToSkip -= chunkLength;
                 }
                 else { // only skipping part of this chunk, must read it

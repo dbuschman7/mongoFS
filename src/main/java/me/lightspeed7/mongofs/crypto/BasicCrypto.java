@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public class BasicCrypto implements Crypto {
 
-    private static final byte[] SALT = "SayNoToOracle".getBytes();
+    private static final String SALT = "SayNoToOracle";
 
     private static final char[] PASSWORD = "MongoDB Rules The World!".toCharArray();
 
@@ -34,7 +34,7 @@ public class BasicCrypto implements Crypto {
         try {
             // Create key
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-            KeySpec spec = new PBEKeySpec(PASSWORD, SALT, 1024, 128);
+            KeySpec spec = new PBEKeySpec(PASSWORD, SALT.getBytes("UTF-8"), 1024, 128);
             SecretKey tmp = factory.generateSecret(spec);
             SecretKeySpec secret = new SecretKeySpec(tmp.getEncoded(), "AES");
 

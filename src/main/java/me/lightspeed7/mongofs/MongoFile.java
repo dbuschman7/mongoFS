@@ -35,9 +35,9 @@ public class MongoFile implements InputFile {
 
     private MongoFileStore store;
 
-    private boolean compress = true;
+    private final boolean compress;
 
-    private boolean encrypted = false;
+    private final boolean encrypted;
 
     /**
      * Construct a MongoFile object for reading data
@@ -49,8 +49,9 @@ public class MongoFile implements InputFile {
 
         this.store = store;
         this.surrogate = surrogate;
-        this.compress = (surrogate == null) ? false : (surrogate.getString(MongoFileConstants.compressionFormat) != null);
-        this.encrypted = store.getConfig().isCryptoEnabled();
+        String format = surrogate.getString(MongoFileConstants.compressionFormat);
+        this.compress = MongoFileUrl.GZIPPED.equals(format);
+        this.encrypted = MongoFileUrl.ENCRYPTED.equals(format);
     }
 
     /**
@@ -63,7 +64,7 @@ public class MongoFile implements InputFile {
 
         this.store = store;
         this.compress = compress;
-        this.encrypted = store.getConfig().isCryptoEnabled();
+        this.encrypted = url.isStoredEncrypted();
 
         surrogate = new Document();
         surrogate.put(MongoFileConstants._id.toString(), url.getMongoFileId());
@@ -132,7 +133,7 @@ public class MongoFile implements InputFile {
             return MongoFileUrl.construct(url);
         }
         return MongoFileUrl.construct(getId(), getFilename(), getContentType(),
-                (String) get(MongoFileConstants.compressionFormat.toString()), compress, store.getConfig().isCryptoEnabled());
+                (String) get(MongoFileConstants.compressionFormat.toString()), compress, encrypted);
     }
 
     /**
@@ -558,8 +559,7 @@ public class MongoFile implements InputFile {
             return def;
         }
 
-        Double value = surrogate.getDouble(key.toString());
-        return value != null ? value : def;
+        return surrogate.getDouble(key.toString(), def);
     }
 
     /**
@@ -676,6 +676,10 @@ public class MongoFile implements InputFile {
     public boolean isCompressed() {
 
         return compress;
+    }
+
+    public boolean isEncrypted() {
+        return encrypted;
     }
 
 }

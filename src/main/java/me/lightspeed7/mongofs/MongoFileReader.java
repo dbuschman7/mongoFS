@@ -52,7 +52,7 @@ public class MongoFileReader {
     @Override
     public String toString() {
 
-        return String.format("MongoFileReader [ file=%s, \n  store=%s\n]", file, store);
+        return String.format("MongoFileReader [ file=%s, %n  store=%s%n]", file, store);
     }
 
 }

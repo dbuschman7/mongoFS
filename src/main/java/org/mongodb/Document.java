@@ -72,7 +72,8 @@ public class Document {
         }
 
         try {
-            Field field = value.getClass().getField("surrogate");
+            Field field = value.getClass().getDeclaredField("surrogate");
+            field.setAccessible(true);
             return field.get(value);
 
         } catch (Exception e) {

@@ -169,11 +169,11 @@ public class MongoFile implements InputFile {
         }
         else if (getURL().isStoredEncrypted()) {
 
-            if (store.getConfig().getCrypto() == null) {
+            if (store.getConfig().getEncryption() == null) {
                 throw new IllegalStateException("File is stored in ecrypted but store is not configured for decryption");
             }
 
-            returned = new DecryptInputStream(store.getConfig().getCrypto(), this, returned);
+            returned = new DecryptInputStream(store.getConfig().getEncryption(), this, returned);
 
         }
 

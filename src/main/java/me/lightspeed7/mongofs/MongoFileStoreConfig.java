@@ -53,7 +53,7 @@ public final class MongoFileStoreConfig {
         this.readPreference = readPreference;
     }
 
-    public boolean isEnableCompression() {
+    public boolean isCompressionEnabled() {
 
         return enableCompression;
     }
@@ -83,17 +83,17 @@ public final class MongoFileStoreConfig {
         this.asyncDeletes = asyncDeletes;
     }
 
-    public Crypto getCrypto() {
+    public Crypto getEncryption() {
 
         return crypto;
     }
 
-    public void setCrypto(final Crypto crypto) {
+    public void setEnryption(final Crypto crypto) {
 
         this.crypto = crypto;
     }
 
-    public boolean isCryptoEnabled() {
+    public boolean isEncryptionEnabled() {
 
         return this.crypto != null;
     }
@@ -233,7 +233,7 @@ public final class MongoFileStoreConfig {
                                 + "and excrypting may increase the size of the data to be saved in a single chunk");
             }
 
-            config.setCrypto(crypto);
+            config.setEnryption(crypto);
             return this;
         }
 

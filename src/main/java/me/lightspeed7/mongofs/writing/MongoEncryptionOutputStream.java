@@ -20,8 +20,8 @@ public class MongoEncryptionOutputStream extends OutputStream {
         // It will be constructed in reverse
         //
         CountingOutputStream after = new CountingOutputStream(MongoFileConstants.storage, inputFile, given);
-        EncryptChunkOutputStream encryption = new EncryptChunkOutputStream(config.getCrypto(), after);
-        BufferedChunksOutputStream chunking = new BufferedChunksOutputStream(encryption, config.getCrypto().getChunkSize());
+        EncryptChunkOutputStream encryption = new EncryptChunkOutputStream(config.getEncryption(), after);
+        BufferedChunksOutputStream chunking = new BufferedChunksOutputStream(encryption, config.getEncryption().getChunkSize());
         CountingOutputStream before = new CountingOutputStream(MongoFileConstants.length, inputFile, chunking);
 
         this.surrogate = before;

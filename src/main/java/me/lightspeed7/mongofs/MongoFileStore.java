@@ -220,7 +220,7 @@ public class MongoFileStore {
      */
     public MongoFileWriter createNew(final String filename, final String mediaType) throws IOException {
 
-        return createNew(filename, mediaType, null, config.isEnableCompression());
+        return createNew(filename, mediaType, null, config.isCompressionEnabled());
     }
 
     /**
@@ -257,17 +257,17 @@ public class MongoFileStore {
             throw new IllegalArgumentException("mediaType cannot be null");
         }
 
-        if (compress && !config.isEnableCompression()) {
+        if (compress && !config.isCompressionEnabled()) {
             throw new IllegalStateException("This data store has compression disabled");
         }
 
-        if (compress && config.isCryptoEnabled()) {
+        if (compress && config.isEncryptionEnabled()) {
             throw new IllegalStateException("This data store has encryption enabled, cannot use compression");
         }
 
         // send wrapper object
         MongoFileUrl mongoFileUrl = MongoFileUrl//
-                .construct(new ObjectId(), filename, mediaType, null, compress, config.isCryptoEnabled());
+                .construct(new ObjectId(), filename, mediaType, null, compress, config.isEncryptionEnabled());
 
         MongoFile mongoFile = new MongoFile(this, mongoFileUrl, config.getChunkSize().getChunkSize());
         if (expiresAt != null) {

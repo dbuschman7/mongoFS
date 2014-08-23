@@ -5,7 +5,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-
 /**
  * A URL format to specifying the need info to store email attachments in MongoDB
  * 
@@ -23,8 +22,7 @@ import java.net.URLStreamHandler;
 public class Handler extends URLStreamHandler {
 
     @Override
-    protected URLConnection openConnection(final URL u)
-            throws IOException {
+    protected URLConnection openConnection(final URL u) throws IOException {
 
         throw new UnsupportedOperationException("oppenConnection is currently not supported");
     }

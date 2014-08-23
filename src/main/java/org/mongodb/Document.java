@@ -15,52 +15,52 @@ import com.mongodb.DBObject;
 
 public class Document {
 
-    public DBObject surrogate;
+    private DBObject surrogate;
 
-    public Document(String key, Object id) {
+    public Document(final String key, final Object id) {
         this();
-        surrogate.put(key, unwrap(id));
+        getSurrogate().put(key, unwrap(id));
     }
 
     public Document() {
-        surrogate = new BasicDBObject();
+        setSurrogate(new BasicDBObject());
     }
 
-    public Document(DBObject incoming) {
-        this.surrogate = incoming;
+    public Document(final DBObject incoming) {
+        this.setSurrogate(incoming);
     }
 
-    public Document append(String key, Object value) {
-        surrogate.put(key, unwrap(value));
+    public Document append(final String key, final Object value) {
+        getSurrogate().put(key, unwrap(value));
         return this;
     }
 
-    public Object put(String key, Object value) {
-        return surrogate.put(key, unwrap(value));
+    public Object put(final String key, final Object value) {
+        return getSurrogate().put(key, unwrap(value));
     }
 
-    public Object get(String key) {
-        return wrap(surrogate.get(key));
+    public Object get(final String key) {
+        return wrap(getSurrogate().get(key));
     }
 
-    public String getString(MongoFileConstants compressionformat) {
+    public String getString(final MongoFileConstants compressionformat) {
         return this.getString(compressionformat.name());
     }
 
     @SuppressWarnings("deprecation")
-    public boolean containsKey(String key) {
-        return surrogate.containsKey(key);
+    public boolean containsKey(final String key) {
+        return getSurrogate().containsKey(key);
     }
 
     public Collection<? extends String> keySet() {
 
-        return surrogate.keySet();
+        return getSurrogate().keySet();
     }
 
     //
     // Private helpers
     // ///////////////////////////////
-    private Object unwrap(Object value) {
+    private Object unwrap(final Object value) {
 
         if (value == null || !value.getClass().isAssignableFrom(Document.class)) {
             return value;
@@ -80,7 +80,7 @@ public class Document {
         }
     }
 
-    private Object wrap(Object value) {
+    private Object wrap(final Object value) {
 
         if (value != null && value.getClass().isAssignableFrom(DBObject.class)) {
             return new Document((DBObject) value);
@@ -95,11 +95,11 @@ public class Document {
      *            the field to look for
      * @return the field value (or default)
      */
-    public int getInt(String key) {
+    public int getInt(final String key) {
         Object o = get(key);
-        if (o == null)
+        if (o == null) {
             throw new NullPointerException("no value for: " + key);
-
+        }
         return BSON.toInt(o);
     }
 
@@ -112,11 +112,11 @@ public class Document {
      *            the default to return
      * @return the field value (or default)
      */
-    public int getInt(String key, int def) {
+    public int getInt(final String key, final int def) {
         Object foo = get(key);
-        if (foo == null)
+        if (foo == null) {
             return def;
-
+        }
         return BSON.toInt(foo);
     }
 
@@ -127,7 +127,7 @@ public class Document {
      *            the field to return
      * @return the field value
      */
-    public long getLong(String key) {
+    public long getLong(final String key) {
         Object foo = get(key);
         return ((Number) foo).longValue();
     }
@@ -141,11 +141,11 @@ public class Document {
      *            the default to return
      * @return the field value (or default)
      */
-    public long getLong(String key, long def) {
+    public long getLong(final String key, final long def) {
         Object foo = get(key);
-        if (foo == null)
+        if (foo == null) {
             return def;
-
+        }
         return ((Number) foo).longValue();
     }
 
@@ -156,7 +156,7 @@ public class Document {
      *            the field to return
      * @return the field value
      */
-    public double getDouble(String key) {
+    public double getDouble(final String key) {
         Object foo = get(key);
         return ((Number) foo).doubleValue();
     }
@@ -170,11 +170,11 @@ public class Document {
      *            the default to return
      * @return the field value (or default)
      */
-    public double getDouble(String key, double def) {
+    public double getDouble(final String key, final double def) {
         Object foo = get(key);
-        if (foo == null)
+        if (foo == null) {
             return def;
-
+        }
         return ((Number) foo).doubleValue();
     }
 
@@ -185,10 +185,11 @@ public class Document {
      *            the field to look up
      * @return the value of the field, converted to a string
      */
-    public String getString(String key) {
+    public String getString(final String key) {
         Object foo = get(key);
-        if (foo == null)
+        if (foo == null) {
             return null;
+        }
         return foo.toString();
     }
 
@@ -201,10 +202,11 @@ public class Document {
      *            the default to return
      * @return the value of the field, converted to a string
      */
-    public String getString(String key, final String def) {
+    public String getString(final String key, final String def) {
         Object foo = get(key);
-        if (foo == null)
+        if (foo == null) {
             return def;
+        }
 
         return foo.toString();
     }
@@ -216,7 +218,7 @@ public class Document {
      *            the field to look up
      * @return the value of the field, or false if field does not exist
      */
-    public boolean getBoolean(String key) {
+    public boolean getBoolean(final String key) {
         return getBoolean(key, false);
     }
 
@@ -229,14 +231,17 @@ public class Document {
      *            the default value in case the field is not found
      * @return the value of the field, converted to a string
      */
-    public boolean getBoolean(String key, boolean def) {
+    public boolean getBoolean(final String key, final boolean def) {
         Object foo = get(key);
-        if (foo == null)
+        if (foo == null) {
             return def;
-        if (foo instanceof Number)
+        }
+        if (foo instanceof Number) {
             return ((Number) foo).intValue() > 0;
-        if (foo instanceof Boolean)
+        }
+        if (foo instanceof Boolean) {
             return ((Boolean) foo).booleanValue();
+        }
         throw new IllegalArgumentException("can't coerce to bool:" + foo.getClass());
     }
 
@@ -297,6 +302,14 @@ public class Document {
     public int getInteger(final Object key, final int defaultValue) {
         Object value = get(key.toString());
         return value == null ? defaultValue : (Integer) value;
+    }
+
+    public DBObject getSurrogate() {
+        return surrogate;
+    }
+
+    public void setSurrogate(final DBObject surrogate) {
+        this.surrogate = surrogate;
     }
 
 }

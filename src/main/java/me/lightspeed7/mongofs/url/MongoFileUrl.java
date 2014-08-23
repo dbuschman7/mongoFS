@@ -30,7 +30,7 @@ public class MongoFileUrl {
 
     // factories and helpers
     public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType, final boolean compress,
-            boolean encrypted) throws MalformedURLException {
+            final boolean encrypted) throws MalformedURLException {
 
         return construct(Parser.construct(id, fileName, mediaType, null, compress, encrypted));
     }
@@ -42,7 +42,7 @@ public class MongoFileUrl {
     }
 
     public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType,
-            final String compressionFormat, final boolean compress, boolean encrypted) throws MalformedURLException {
+            final String compressionFormat, final boolean compress, final boolean encrypted) throws MalformedURLException {
 
         return construct(Parser.construct(id, fileName, mediaType, compressionFormat, compress, encrypted));
     }

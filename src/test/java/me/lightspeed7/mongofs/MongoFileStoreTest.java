@@ -44,34 +44,34 @@ public class MongoFileStoreTest {
 
     @Test
     @Ignore
-    public void testBasicUncompressedRoundTrip() throws IllegalArgumentException, IOException {
+    public void testBasicUncompressedRoundTrip() throws IOException {
 
         doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, false, false);
     }
 
     @Test
     @Ignore
-    public void testBasicCompressedRoundTrip() throws IllegalArgumentException, IOException {
+    public void testBasicCompressedRoundTrip() throws IOException {
 
         doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, true, false);
     }
 
     @Test
     @Ignore
-    public void testLotsOfChunksUncompressedRoundTrip() throws IllegalArgumentException, IOException {
+    public void testLotsOfChunksUncompressedRoundTrip() throws IOException {
 
         doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, false);
     }
 
     @Test
     @Ignore
-    public void testLotsOfChunksCompressedRoundTrip() throws IllegalArgumentException, IOException {
+    public void testLotsOfChunksCompressedRoundTrip() throws IOException {
 
         doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true, false);
     }
 
     @Test
-    public void testLotsOfChunksEncryptedRoundTrip() throws IllegalArgumentException, IOException {
+    public void testLotsOfChunksEncryptedRoundTrip() throws IOException {
 
         doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, true);
     }
@@ -80,8 +80,8 @@ public class MongoFileStoreTest {
     // internal
     // /////////////////
 
-    private void doRoundTrip(String bucket, String filename, ChunkSize chunkSize, boolean compress, boolean encrypt) throws IOException,
-            MalformedURLException {
+    private void doRoundTrip(final String bucket, final String filename, final ChunkSize chunkSize, final boolean compress,
+            final boolean encrypt) throws IOException, MalformedURLException {
 
         MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
                 .bucket(bucket).chunkSize(chunkSize)//

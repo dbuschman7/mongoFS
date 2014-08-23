@@ -19,7 +19,7 @@ package org.mongodb.diagnostics.logging;
 import org.slf4j.LoggerFactory;
 
 public class SLF4JLogger implements Logger {
-    
+
     private final org.slf4j.Logger delegate;
 
     public SLF4JLogger(final String name) {

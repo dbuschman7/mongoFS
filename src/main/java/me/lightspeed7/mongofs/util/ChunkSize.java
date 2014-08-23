@@ -55,9 +55,8 @@ public enum ChunkSize {
     /**
      * the largest file chunk size currently possible, Mongo documents size limit
      */
-    mongo_16M(16 * 1024)
+    mongo_16M(16 * 1024);
     //
-    ;
 
     private int k;
 
@@ -71,7 +70,7 @@ public enum ChunkSize {
         return (this.k * 1024) - BREATHING_ROOM;
     }
 
-    public boolean greaterThan(ChunkSize other) {
+    public boolean greaterThan(final ChunkSize other) {
         return this.k > other.k;
     }
 

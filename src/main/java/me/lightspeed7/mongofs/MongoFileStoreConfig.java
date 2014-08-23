@@ -88,7 +88,7 @@ public final class MongoFileStoreConfig {
         return crypto;
     }
 
-    public void setCrypto(Crypto crypto) {
+    public void setCrypto(final Crypto crypto) {
 
         this.crypto = crypto;
     }
@@ -101,9 +101,9 @@ public final class MongoFileStoreConfig {
     @Override
     public String toString() {
 
-        return String
-                .format("MongoFileStoreConfig [bucket=%s, chunkSize=%s, enableCompression=%s, cryptoEnabled=%s, writeConcern=%s, readPreference=%s]",
-                        bucket, chunkSize, enableCompression, crypto != null, writeConcern, readPreference);
+        return String.format("MongoFileStoreConfig [bucket=%s, chunkSize=%s, enableCompression=%s, "
+                + "cryptoEnabled=%s, writeConcern=%s, readPreference=%s]", //
+                bucket, chunkSize, enableCompression, crypto != null, writeConcern, readPreference);
     }
 
     public static Builder builder() {
@@ -156,9 +156,9 @@ public final class MongoFileStoreConfig {
          * Returns a setup that will be compatible with other GridFS drivers.
          * 
          * @param bucket
-         * @return
+         * @return the config
          */
-        public MongoFileStoreConfig gridFSCompatible(String bucket) {
+        public MongoFileStoreConfig gridFSCompatible(final String bucket) {
 
             config.asyncDeletes = false;
             config.bucket = bucket;
@@ -171,8 +171,8 @@ public final class MongoFileStoreConfig {
         }
 
         /**
-         * Specifies the chunk size to use for data chunks. The size here cause buffers on the chunkSize to kept inside the
-         * writing and reading processes. So be advised on using memory wisely, large chunksize means larger buffers internally.
+         * Specifies the chunk size to use for data chunks. The size here cause buffers on the chunkSize to kept inside the writing and
+         * reading processes. So be advised on using memory wisely, large chunksize means larger buffers internally.
          * 
          * @param chunkSize
          * @return the builder
@@ -193,7 +193,7 @@ public final class MongoFileStoreConfig {
          */
         public Builder enableCompression(final boolean value) {
 
-            if (value == true && config.crypto != null) {
+            if (value && config.crypto != null) {
                 throw new IllegalStateException("Compression and Encryption cannot be enabled at the same time");
             }
             config.setEnableCompression(value);
@@ -211,7 +211,7 @@ public final class MongoFileStoreConfig {
 
         public Builder enableEncryption(final Crypto crypto) {
 
-            if (config.enableCompression == true && crypto != null) {
+            if (config.enableCompression && crypto != null) {
                 throw new IllegalStateException("Compression and Encryption cannot be enabled at the same time");
             }
 
@@ -229,7 +229,8 @@ public final class MongoFileStoreConfig {
 
             if (crypto.getChunkSize() == ChunkSize.mongo_16M) {
                 throw new IllegalArgumentException(
-                        "Encryption chunk size cannot be be 'mongo_16M', since that is the max size for MongoDB documents and excrypting may increase the size of the data to be saved in a single chunk");
+                        "Encryption chunk size cannot be be 'mongo_16M', since that is the max size for MongoDB documents "
+                                + "and excrypting may increase the size of the data to be saved in a single chunk");
             }
 
             config.setCrypto(crypto);

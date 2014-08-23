@@ -1,11 +1,10 @@
 package org.mongodb;
 
-
 public class CommandResult {
 
     private com.mongodb.CommandResult surrogate;
 
-    public CommandResult(com.mongodb.CommandResult command) {
+    public CommandResult(final com.mongodb.CommandResult command) {
         this.surrogate = command;
     }
 

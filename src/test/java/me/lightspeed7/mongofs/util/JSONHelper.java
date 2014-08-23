@@ -12,11 +12,15 @@ public class JSONHelper {
      * @param marshal
      * @return the pretty printed version
      */
-    public static final String prettyPrint(String marshal) {
+    public static final String prettyPrint(final String marshal) {
 
         JsonParser jp = new JsonParser();
         JsonElement je = jp.parse(marshal);
         return new GsonBuilder().setPrettyPrinting().create().toJson(je);
 
+    }
+
+    private JSONHelper() {
+        // empty
     }
 }

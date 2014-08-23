@@ -13,7 +13,6 @@ import java.io.PrintStream;
 import java.util.Arrays;
 
 import me.lightspeed7.mongofs.util.BytesCopier;
-import me.lightspeed7.mongofs.util.JSONHelper;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -51,7 +50,7 @@ public class StorageComparisonTest {
     public void testOriginalGridFS() throws IOException {
 
         String bucket = "original";
-        com.mongodb.gridfs.GridFS gridFS = new com.mongodb.gridfs.GridFS(database.surrogate, bucket);
+        com.mongodb.gridfs.GridFS gridFS = new com.mongodb.gridfs.GridFS(database.getSurrogate(), bucket);
         com.mongodb.gridfs.GridFSInputFile file = gridFS.createFile("originalGridFS.txt");
         file.put(MongoFileConstants.chunkCount.toString(), 0);
         file.put("aliases", Arrays.asList("one", "two", "three"));
@@ -65,15 +64,15 @@ public class StorageComparisonTest {
             stream.close();
         }
 
-        System.out.println("Original GridFS (2.11.4)");
-        System.out.println("==============================");
-        System.out.println(String.format("id = %s, filepath = %s", file.getId(), file.getFilename()));
-        System.out.println("==============================");
-        System.out.println(JSONHelper.prettyPrint(file.toString()));
-        System.out.println("======");
-        dumpChunks(bucket, file.getId(), System.out);
-        System.out.println("==============================");
-        System.out.println();
+        // System.out.println("Original GridFS (2.11.4)");
+        // System.out.println("==============================");
+        // System.out.println(String.format("id = %s, filepath = %s", file.getId(), file.getFilename()));
+        // System.out.println("==============================");
+        // System.out.println(JSONHelper.prettyPrint(file.toString()));
+        // System.out.println("======");
+        // dumpChunks(bucket, file.getId(), System.out);
+        // System.out.println("==============================");
+        // System.out.println();
 
         // md5 validation
         try {
@@ -97,7 +96,7 @@ public class StorageComparisonTest {
     public void testFactoredGridFS() throws IOException {
 
         String bucket = "refactored";
-        me.lightspeed7.mongofs.gridfs.GridFS gridFS = new me.lightspeed7.mongofs.gridfs.GridFS(database.surrogate, bucket);
+        me.lightspeed7.mongofs.gridfs.GridFS gridFS = new me.lightspeed7.mongofs.gridfs.GridFS(database.getSurrogate(), bucket);
         me.lightspeed7.mongofs.gridfs.GridFSInputFile file = gridFS.createFile("refactoredGridFS.txt");
         file.put(MongoFileConstants.chunkCount.toString(), 0);
         file.put(MongoFileConstants.compressionRatio.toString(), 0.0d);
@@ -113,15 +112,15 @@ public class StorageComparisonTest {
             stream.close();
         }
 
-        System.out.println("Refactored GridFS (3.0.x)");
-        System.out.println("==============================");
-        System.out.println(String.format("id = %s, filepath = %s", file.getId(), file.getFilename()));
-        System.out.println("==============================");
-        System.out.println(JSONHelper.prettyPrint(file.toString()));
-        System.out.println("======");
-        dumpChunks(bucket, file.getId(), System.out);
-        System.out.println("==============================");
-        System.out.println();
+        // System.out.println("Refactored GridFS (3.0.x)");
+        // System.out.println("==============================");
+        // System.out.println(String.format("id = %s, filepath = %s", file.getId(), file.getFilename()));
+        // System.out.println("==============================");
+        // System.out.println(JSONHelper.prettyPrint(file.toString()));
+        // System.out.println("======");
+        // dumpChunks(bucket, file.getId(), System.out);
+        // System.out.println("==============================");
+        // System.out.println();
 
         // md5 validation
         try {
@@ -156,15 +155,15 @@ public class StorageComparisonTest {
 
         writer.write(new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes()));
 
-        System.out.println("MongoFS (0.x)");
-        System.out.println("==============================");
-        System.out.println(String.format("url= %s", file.getURL().toString()));
-        System.out.println("==============================");
-        System.out.println(JSONHelper.prettyPrint(file.toString()));
-        System.out.println("======");
-        dumpChunks(bucket, file.getId(), System.out);
-        System.out.println("==============================");
-        System.out.println();
+        // System.out.println("MongoFS (0.x)");
+        // System.out.println("==============================");
+        // System.out.println(String.format("url= %s", file.getURL().toString()));
+        // System.out.println("==============================");
+        // System.out.println(JSONHelper.prettyPrint(file.toString()));
+        // System.out.println("======");
+        // dumpChunks(bucket, file.getId(), System.out);
+        // System.out.println("==============================");
+        // System.out.println();
 
         // md5 validation
         try {
@@ -191,7 +190,7 @@ public class StorageComparisonTest {
     }
 
     // internal
-    private void dumpChunks(String bucket, Object id, PrintStream out) {
+    protected void dumpChunks(final String bucket, final Object id, final PrintStream out) {
 
         MongoCollection<Document> collection = database.getCollection(bucket + ".chunks", MongoCollectionOptions.builder().build());
         MongoCursor<Document> cursor = collection.find(new Document("files_id", id)).sort(new Document("n", 1)).get();

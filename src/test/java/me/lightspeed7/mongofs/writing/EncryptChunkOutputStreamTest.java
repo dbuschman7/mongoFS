@@ -36,7 +36,7 @@ public class EncryptChunkOutputStreamTest {
         }
 
         LOGGER.debug("LoremIpsum length = " + LoremIpsum.getString().length());
-        System.out.println(log.info());
+        // System.out.println(log.info());
         assertEquals(32168, log.total);
         assertEquals(
         //

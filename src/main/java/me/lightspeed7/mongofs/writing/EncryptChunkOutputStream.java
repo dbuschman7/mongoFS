@@ -12,7 +12,7 @@ public class EncryptChunkOutputStream extends OutputStream {
     private DataOutputStream out;
     private Crypto crypto;
 
-    public EncryptChunkOutputStream(Crypto crypto, final OutputStream out) {
+    public EncryptChunkOutputStream(final Crypto crypto, final OutputStream out) {
         this.crypto = crypto;
         this.out = new DataOutputStream(out);
     }

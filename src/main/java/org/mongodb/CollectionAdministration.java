@@ -11,7 +11,7 @@ public class CollectionAdministration {
 
     private DBCollection surrogate;
 
-    public CollectionAdministration(DBCollection surrogate) {
+    public CollectionAdministration(final DBCollection surrogate) {
         this.surrogate = surrogate;
     }
 
@@ -24,7 +24,7 @@ public class CollectionAdministration {
         return indexes;
     }
 
-    public void createIndexes(List<Index> indexes) {
+    public void createIndexes(final List<Index> indexes) {
         for (Index index : indexes) {
 
             // keys

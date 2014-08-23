@@ -9,7 +9,7 @@ public class MongoQueryCursor<T> implements MongoCursor<T> {
 
     private DBCursor surrogate;
 
-    public MongoQueryCursor(DBCursor cursor) {
+    public MongoQueryCursor(final DBCursor cursor) {
         this.surrogate = cursor;
 
     }

@@ -9,11 +9,11 @@ public class MongoView<T> {
     private DBCursor surrogate;
     private WriteConcern writeConcern;
 
-    public MongoView(DBCursor cursor) {
+    public MongoView(final DBCursor cursor) {
         this.surrogate = cursor;
     }
 
-    public MongoView(DBCursor cursor, WriteConcern writeConcern) {
+    public MongoView(final DBCursor cursor, final WriteConcern writeConcern) {
         this.surrogate = cursor;
     }
 
@@ -25,19 +25,19 @@ public class MongoView<T> {
         return get().next();
     }
 
-    public MongoView<T> sort(Document sort) {
-        surrogate = surrogate.sort(sort.surrogate);
+    public MongoView<T> sort(final Document sort) {
+        surrogate = surrogate.sort(sort.getSurrogate());
         return this;
     }
 
-    public MongoView<T> withWriteConcern(WriteConcern writeConcern) {
+    public MongoView<T> withWriteConcern(final WriteConcern writeConcern) {
         this.writeConcern = writeConcern;
         return this;
     }
 
-    public void update(Document updateQuery) {
+    public void update(final Document updateQuery) {
         DBObject query = surrogate.getQuery();
-        surrogate.getCollection().update(query, updateQuery.surrogate, false, true);
+        surrogate.getCollection().update(query, updateQuery.getSurrogate(), false, true, writeConcern);
     }
 
 }

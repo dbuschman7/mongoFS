@@ -26,17 +26,15 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
 public class SpringStandUpTest {
 
     @BeforeClass
-    public static void setup()
-            throws UnknownHostException {
+    public static void setup() throws UnknownHostException {
 
-        SpringContext.ctx = new FileSystemXmlApplicationContext("src/test/resources/spring.xml");
+        SpringContext.setCtx(new FileSystemXmlApplicationContext("src/test/resources/spring.xml"));
         SpringContext.dumpDefinedBeanNames();
 
     }
 
     @Test
-    public void testSpringJavaConfig()
-            throws IOException {
+    public void testSpringJavaConfig() throws IOException {
 
         MongoFileStore store = SpringContext.getBean("mongoFileStore");
 
@@ -44,16 +42,14 @@ public class SpringStandUpTest {
     }
 
     @Test
-    public void testSpringXMLConfig()
-            throws IOException {
+    public void testSpringXMLConfig() throws IOException {
 
         MongoFileStore store = SpringContext.getBean("mongoFileStore2");
 
         doRoundTrip(store, "file2.txt");
     }
 
-    private void doRoundTrip(MongoFileStore store, String filename)
-            throws IOException {
+    private void doRoundTrip(final MongoFileStore store, final String filename) throws IOException {
 
         MongoFileWriter writer = store.createNew(filename, "text/plain", null, true);
         ByteArrayInputStream in = new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes());

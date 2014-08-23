@@ -28,7 +28,7 @@ public class MongoFileCursorTest {
 
     // initializer
     @BeforeClass
-    public static void initial() throws IllegalArgumentException, IOException {
+    public static void initial() throws IOException {
 
         MongoClient mongoClient = MongoTestConfig.construct();
 
@@ -43,7 +43,7 @@ public class MongoFileCursorTest {
     }
 
     @Test
-    public void testFilterFileNameList() throws IllegalArgumentException, IOException {
+    public void testFilterFileNameList() throws IOException {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
 
@@ -61,7 +61,7 @@ public class MongoFileCursorTest {
     }
 
     @Test
-    public void testSortedList() throws IllegalArgumentException, IOException {
+    public void testSortedList() throws IOException {
 
         MongoFileCursor fileList = store.find(new Document("contentType", "text/plain"), new Document("filename", 1));
 
@@ -81,7 +81,7 @@ public class MongoFileCursorTest {
     }
 
     @Test
-    public void testSortedFilteredList() throws IllegalArgumentException, IOException {
+    public void testSortedFilteredList() throws IOException {
 
         store.getFilesCollection().createIndex(new Document("md5", 1));
 
@@ -97,7 +97,7 @@ public class MongoFileCursorTest {
     }
 
     @Test
-    public void testFindList() throws IllegalArgumentException, IOException {
+    public void testFindList() throws IOException {
 
         List<MongoFile> fileList = store.find("/foo/bar1.txt").toList();
 
@@ -109,7 +109,7 @@ public class MongoFileCursorTest {
     //
     // internal
     // //////////////////
-    private static void createFile(MongoFileStore store, String filename, String mediaType) throws IOException {
+    private static void createFile(final MongoFileStore store, final String filename, final String mediaType) throws IOException {
 
         MongoFileWriter writer = store.createNew(filename, mediaType, null, true);
         writer.write(new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes()));

@@ -66,7 +66,7 @@ public class MongoFSOnTopOfGridFSTest {
 
     public Object createOriginalGridFSFile() throws IOException {
 
-        com.mongodb.gridfs.GridFS gridFS = new com.mongodb.gridfs.GridFS(database.surrogate, bucket);
+        com.mongodb.gridfs.GridFS gridFS = new com.mongodb.gridfs.GridFS(database.getSurrogate(), bucket);
         com.mongodb.gridfs.GridFSInputFile file = gridFS.createFile("originalGridFS.txt");
         file.setId(ID.get(MongoFileConstants._id.toString()));
         file.put("aliases", Arrays.asList("one", "two", "three"));
@@ -101,7 +101,7 @@ public class MongoFSOnTopOfGridFSTest {
         assertEquals(com.mongodb.gridfs.GridFS.DEFAULT_CHUNKSIZE, file.getChunkSize());
         assertEquals(1, file.numChunks());
 
-        com.mongodb.gridfs.GridFSDBFile findOne = gridFS.findOne(ID.surrogate);
+        com.mongodb.gridfs.GridFSDBFile findOne = gridFS.findOne(ID.getSurrogate());
         assertNotNull(findOne);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
@@ -112,8 +112,8 @@ public class MongoFSOnTopOfGridFSTest {
 
     public void verifyReadFromRefactoredGridFS() throws IOException {
 
-        me.lightspeed7.mongofs.gridfs.GridFS gridFS = new me.lightspeed7.mongofs.gridfs.GridFS(database.surrogate, bucket);
-        me.lightspeed7.mongofs.gridfs.GridFSDBFile findOne = gridFS.findOne(ID.surrogate);
+        me.lightspeed7.mongofs.gridfs.GridFS gridFS = new me.lightspeed7.mongofs.gridfs.GridFS(database.getSurrogate(), bucket);
+        me.lightspeed7.mongofs.gridfs.GridFSDBFile findOne = gridFS.findOne(ID.getSurrogate());
         assertNotNull(findOne);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);

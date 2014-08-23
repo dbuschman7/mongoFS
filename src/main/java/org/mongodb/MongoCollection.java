@@ -7,13 +7,13 @@ public class MongoCollection<T> {
 
     private DBCollection surrogate;
 
-    public MongoCollection(DBCollection db) {
+    public MongoCollection(final DBCollection db) {
         this.surrogate = db;
     }
 
-    public void save(Document document) {
+    public void save(final Document document) {
 
-        DBObject dbObject = document.surrogate;
+        DBObject dbObject = document.getSurrogate();
 
         Object id = dbObject.get("_id");
         if (id == null) {
@@ -32,19 +32,19 @@ public class MongoCollection<T> {
         return new MongoDatabase(surrogate.getDB());
     }
 
-    public MongoView<T> find(Document in) {
-        return new MongoView<T>(surrogate.find(in.surrogate));
+    public MongoView<T> find(final Document in) {
+        return new MongoView<T>(surrogate.find(in.getSurrogate()));
     }
 
     public CollectionAdministration tools() {
         return new CollectionAdministration(surrogate);
     }
 
-    public WriteResult remove(Document filesQuery) {
-        return new WriteResult(surrogate.remove(filesQuery.surrogate));
+    public WriteResult remove(final Document filesQuery) {
+        return new WriteResult(surrogate.remove(filesQuery.getSurrogate()));
     }
 
-    public void createIndex(Document document) {
-        surrogate.createIndex(document.surrogate);
+    public void createIndex(final Document document) {
+        surrogate.createIndex(document.getSurrogate());
     }
 }

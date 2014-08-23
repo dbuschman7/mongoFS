@@ -10,4 +10,8 @@ public class XMLFactory {
 
         return new MongoFileStore(javaConfig.client().getDB(JavaConfig.COLLECTION_NAME), javaConfig.configure());
     }
+
+    private XMLFactory() {
+        // empty
+    }
 }

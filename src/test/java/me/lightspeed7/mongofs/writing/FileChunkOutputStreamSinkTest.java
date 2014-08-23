@@ -10,8 +10,6 @@ import me.lightspeed7.mongofs.MongoTestConfig;
 import me.lightspeed7.mongofs.gridfs.GridFS;
 import me.lightspeed7.mongofs.gridfs.GridFSInputFile;
 import me.lightspeed7.mongofs.gridfs.GridFSInputFileAdapter;
-import me.lightspeed7.mongofs.writing.ChunksStatisticsAdapter;
-import me.lightspeed7.mongofs.writing.FileChunksOutputStreamSink;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -22,7 +22,7 @@ public class MongoFileWriter {
     private MongoCollection<Document> chunksCollection;
     private MongoFileStore store;
 
-    public MongoFileWriter(MongoFileStore store, final MongoFileUrl url, final MongoFile file,
+    public MongoFileWriter(final MongoFileStore store, final MongoFileUrl url, final MongoFile file,
             final MongoCollection<Document> chunksCollection) {
 
         this.store = store;

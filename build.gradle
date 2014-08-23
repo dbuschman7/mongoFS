@@ -20,6 +20,15 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'eclipse'
+apply plugin: 'groovy'
+apply plugin: 'codenarc'
+apply plugin: 'checkstyle'
+apply plugin: 'findbugs'
+apply plugin: 'jacoco'
+
+
+def configDir = new File(rootDir, 'config')
+
 
 group = 'me.lightspeed7'
 version = '0.8.0'
@@ -33,6 +42,10 @@ repositories{
 
 project.ext {
   springVersion = "4.0.3.RELEASE"
+}
+
+project.ext.buildingWith = { n ->
+    project.hasProperty(n) && project.property(n).toBoolean()
 }
 
 dependencies {
@@ -64,10 +77,37 @@ artifacts {
     archives javadocJar
 }
 
+/* Code quality */
+checkstyle {
+    configFile = new File("$configDir/checkstyle.xml")
+}
+
+tasks.withType(Checkstyle) {
+    exclude '**/me/lightspeed7/mongofs/gridfs/**'
+}
+
+findbugs {
+    excludeFilter = new File("$configDir/findbugs-exclude.xml")
+    sourceSets = [sourceSets.main]
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled = project.buildingWith('xmlReports.enabled')
+        html.enabled = !project.buildingWith('xmlReports.enabled')
+    }
+}
+
 signing {
     required { gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
 }
+
+codenarc {
+    toolVersion = '0.20'
+    reportFormat = project.buildingWith('xmlReports.enabled') ? 'xml' : 'html'
+}
+
 
 task wrapper(type: Wrapper) {
     gradleVersion = "1.10"
@@ -88,6 +128,7 @@ uploadArchives {
         repository(url: "file:///Users/dbusch/dev/dbuschman7/mvn-repo/")
     }
 }
+
 
 test {
         include "**/*Test.class"

@@ -25,7 +25,7 @@ public class MongoFileExpirationTest {
 
     // initializer
     @BeforeClass
-    public static void initial() throws IllegalArgumentException, IOException, InterruptedException {
+    public static void initial() throws IOException, InterruptedException {
 
         MongoClient mongoClient = MongoTestConfig.construct();
 
@@ -62,7 +62,8 @@ public class MongoFileExpirationTest {
     //
     // internal
     // //////////////////
-    private void createTempFile(MongoFileStore store, String filename, String mediaType, Date expiresAt) throws IOException {
+    private void createTempFile(final MongoFileStore store, final String filename, final String mediaType, final Date expiresAt)
+            throws IOException {
 
         MongoFileWriter writer = store.createNew(filename, mediaType, expiresAt, true);
         writer.write(new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes()));

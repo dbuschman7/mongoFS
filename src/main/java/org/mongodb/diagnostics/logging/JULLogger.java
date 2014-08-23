@@ -97,7 +97,6 @@ public class JULLogger implements Logger {
         log(WARNING, msg, t);
     }
 
-
     @Override
     public boolean isErrorEnabled() {
         return delegate.isLoggable(SEVERE);
@@ -112,7 +111,6 @@ public class JULLogger implements Logger {
     public void error(final String msg, final Throwable t) {
         log(SEVERE, msg, t);
     }
-
 
     private boolean isEnabled(final Level level) {
         return delegate.isLoggable(level);

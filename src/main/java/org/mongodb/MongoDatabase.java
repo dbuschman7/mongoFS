@@ -5,28 +5,36 @@ import com.mongodb.DBCollection;
 
 public class MongoDatabase {
 
-    public DB surrogate;
+    private DB surrogate;
 
-    public MongoDatabase(DB surrogate) {
-        this.surrogate = surrogate;
+    public MongoDatabase(final DB surrogate) {
+        this.setSurrogate(surrogate);
 
     }
 
-    public CommandResult executeCommand(Document cmd) {
+    public CommandResult executeCommand(final Document cmd) {
 
-        CommandResult result = new CommandResult(surrogate.command(cmd.surrogate));
+        CommandResult result = new CommandResult(getSurrogate().command(cmd.getSurrogate()));
         return result;
     }
 
     public Object getName() {
-        return surrogate.getName();
+        return getSurrogate().getName();
     }
 
-    public MongoCollection<Document> getCollection(String name, MongoCollectionOptions options) {
-        DBCollection collection = surrogate.getCollection(name);
-        collection.setReadPreference(options.readPreference);
-        collection.setWriteConcern(options.writeConcern);
+    public MongoCollection<Document> getCollection(final String name, final MongoCollectionOptions options) {
+        DBCollection collection = getSurrogate().getCollection(name);
+        collection.setReadPreference(options.getReadPreference());
+        collection.setWriteConcern(options.getWriteConcern());
         return new MongoCollection<Document>(collection);
+    }
+
+    public DB getSurrogate() {
+        return surrogate;
+    }
+
+    public void setSurrogate(final DB surrogate) {
+        this.surrogate = surrogate;
     }
 
 }

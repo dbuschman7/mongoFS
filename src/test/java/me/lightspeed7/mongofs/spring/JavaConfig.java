@@ -16,18 +16,18 @@ import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
 
 @Configuration
-@ComponentScan( "me.lightspeed7.mongofs.spring" )
+@ComponentScan("me.lightspeed7.mongofs.spring")
 public class JavaConfig {
 
     static final String COLLECTION_NAME = "MongoFS-JavaConfig";
 
-    @Bean( name = "mongoClient" )
+    @Bean(name = "mongoClient")
     public MongoClient client() {
 
         try {
             return new MongoClient(new MongoClientURI("mongodb://cayman-vm:27017")); // my vm server
         } catch (UnknownHostException e) {
-            System.out.println("Cayman-vm unavailable, trying localhost");
+            // System.out.println("Cayman-vm unavailable, trying localhost");
             try {
                 return new MongoClient(new MongoClientURI("mongodb://localhost:27017")); // most others
             } catch (UnknownHostException ex) {
@@ -49,7 +49,7 @@ public class JavaConfig {
         return config;
     }
 
-    @Bean( name = "mongoFileStore" )
+    @Bean(name = "mongoFileStore")
     public MongoFileStore store() {
 
         return new MongoFileStore(client().getDB(COLLECTION_NAME), configure());

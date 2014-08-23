@@ -22,7 +22,7 @@ public class BasicCrypto implements Crypto {
 
     private static final String CIHPER_NAME = "AES";
 
-    private static final Logger log = LoggerFactory.getLogger(Crypto.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Crypto.class);
 
     private Cipher cipher;
 
@@ -45,22 +45,22 @@ public class BasicCrypto implements Crypto {
             decipher.init(Cipher.DECRYPT_MODE, secret);
 
         } catch (Throwable t) {
-            log.error(String.format("Unable to initialize %s crypto", "AES"));
+            LOG.error(String.format("Unable to initialize %s crypto", "AES"));
         }
     }
 
-    public BasicCrypto(ChunkSize chunkSize) {
+    public BasicCrypto(final ChunkSize chunkSize) {
         this();
         this.chunkSize = chunkSize;
     }
 
     @Override
-    public byte[] encrypt(byte[] dataIn, int offset, int length) throws GeneralSecurityException {
+    public byte[] encrypt(final byte[] dataIn, final int offset, final int length) throws GeneralSecurityException {
         return cipher.doFinal(dataIn, offset, length);
     }
 
     @Override
-    public byte[] decrypt(byte[] dataIn, int offset, int length) throws GeneralSecurityException {
+    public byte[] decrypt(final byte[] dataIn, final int offset, final int length) throws GeneralSecurityException {
         return decipher.doFinal(dataIn, offset, length);
     }
 

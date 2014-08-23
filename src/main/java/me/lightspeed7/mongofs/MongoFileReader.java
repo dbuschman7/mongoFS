@@ -14,7 +14,7 @@ public class MongoFileReader {
     private final MongoFile file;
     private MongoFileStore store;
 
-    public MongoFileReader(MongoFileStore store, MongoFile mongoFile) {
+    public MongoFileReader(final MongoFileStore store, final MongoFile mongoFile) {
 
         if (store == null) {
             throw new IllegalArgumentException("store cannot be null");

@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 
-public class SpringContext {
+public final class SpringContext {
 
-    public static ApplicationContext ctx;
+    private static ApplicationContext ctx;
 
     private SpringContext() {
 
@@ -17,33 +17,32 @@ public class SpringContext {
     }
 
     // factory method
-    public static <T> T getBean(Class<T> beanClass) {
+    public static <T> T getBean(final Class<T> beanClass) {
 
-        if (ctx == null) {
+        if (getCtx() == null) {
             throw new IllegalStateException("Spring application context is not initialized");
         }
-        return ctx.getBean(beanClass);
+        return getCtx().getBean(beanClass);
     }
 
-    @SuppressWarnings( "unchecked" )
-    public static <T> T getBean(String beanName) {
+    @SuppressWarnings("unchecked")
+    public static <T> T getBean(final String beanName) {
 
-        if (ctx == null) {
+        if (getCtx() == null) {
             throw new IllegalStateException("Spring application context is not initialized");
         }
-        return (T) ctx.getBean(beanName);
+        return (T) getCtx().getBean(beanName);
     }
 
-    @SuppressWarnings( "unchecked" )
-    public static <T> T getBeanOptional(String beanName)
-            throws Exception {
+    @SuppressWarnings("unchecked")
+    public static <T> T getBeanOptional(final String beanName) throws Exception {
 
-        if (ctx == null) {
+        if (getCtx() == null) {
             throw new IllegalStateException("Spring application context is not initialized");
         }
 
         try {
-            return (T) ctx.getBean(beanName);
+            return (T) getCtx().getBean(beanName);
         } catch (Exception e) {
             if (e instanceof NoSuchBeanDefinitionException) {
                 return null;
@@ -54,7 +53,7 @@ public class SpringContext {
 
     public static boolean isInitialized() {
 
-        return ctx != null;
+        return getCtx() != null;
     }
 
     public static void dumpDefinedBeanNames() {
@@ -62,13 +61,21 @@ public class SpringContext {
         Logger log = LoggerFactory.getLogger(SpringContext.class.getName());
 
         log.info("=====================================================");
-        String[] beanDefinitionNames = ctx.getBeanDefinitionNames();
+        String[] beanDefinitionNames = getCtx().getBeanDefinitionNames();
         Arrays.sort(beanDefinitionNames, String.CASE_INSENSITIVE_ORDER);
 
         for (String name : beanDefinitionNames) {
             log.info(name);
         }
         log.info("=====================================================");
-        log.info("Spring Beans, count = " + ctx.getBeanDefinitionCount());
+        log.info("Spring Beans, count = " + getCtx().getBeanDefinitionCount());
+    }
+
+    public static ApplicationContext getCtx() {
+        return ctx;
+    }
+
+    public static void setCtx(final ApplicationContext ctx) {
+        SpringContext.ctx = ctx;
     }
 }

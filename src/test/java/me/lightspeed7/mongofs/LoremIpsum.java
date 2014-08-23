@@ -17,8 +17,8 @@ public final class LoremIpsum {
         writer.write(new ByteArrayInputStream(LOREM_IPSUM.getBytes()));
     }
 
-    public static void createTempFile(final MongoFileStore store, final String filename, final String mediaType,
-            final Date expiresAt) throws IOException {
+    public static void createTempFile(final MongoFileStore store, final String filename, final String mediaType, final Date expiresAt)
+            throws IOException {
 
         MongoFileWriter writer = store.createNew(filename, mediaType, expiresAt, true);
         writer.write(new ByteArrayInputStream(LOREM_IPSUM.getBytes()));

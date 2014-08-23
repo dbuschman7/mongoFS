@@ -1,7 +1,6 @@
 package me.lightspeed7.mongofs.reading;
 
 import java.io.DataInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -17,7 +16,7 @@ public class DecryptInputStream extends InputStream {
     private byte[] buffer = null;
     private long remainingBytes;
 
-    public DecryptInputStream(Crypto crypto, MongoFile file, InputStream inputStream) {
+    public DecryptInputStream(final Crypto crypto, final MongoFile file, final InputStream inputStream) {
         this.crypto = crypto;
         this.inputStream = new DataInputStream(inputStream);
         this.remainingBytes = file.getStorageLength();
@@ -66,7 +65,7 @@ public class DecryptInputStream extends InputStream {
 
     }
 
-    private int readEncryptedChunk(boolean readActualHeader) throws IOException, EOFException {
+    private int readEncryptedChunk(final boolean readActualHeader) throws IOException {
         int actualLength = readActualHeader ? inputStream.readInt() : -1;
         int chunkLength = inputStream.readInt();
         remainingBytes -= readActualHeader ? 8 : 4;
@@ -86,7 +85,7 @@ public class DecryptInputStream extends InputStream {
         return actualLength;
     }
 
-    private int fillBuffer(byte[] temp, int offset, int length) throws IOException, EOFException {
+    private int fillBuffer(final byte[] temp, final int offset, final int length) throws IOException {
         int read = inputStream.read(temp, offset, length);
         remainingBytes -= read;
         if (length != read) {
@@ -135,29 +134,6 @@ public class DecryptInputStream extends InputStream {
 
         }
 
-        // int leftInBuffer = buffer.length - offset;
-        // int bytesSkipped = leftInBuffer;
-        // if (bytesToSkip < leftInBuffer) {
-        // // within my buffer
-        // offset += bytesToSkip;
-        // }
-        // else {
-        // // more than my buffer
-        // long leftToSkip = bytesToSkip - leftInBuffer;
-        // while (leftToSkip > 0) {
-        // readEncryptedChunk();
-        //
-        // if (leftToSkip < buffer.length) { // last buffer to skip
-        // offset += leftToSkip;
-        // bytesSkipped += leftToSkip;
-        // leftToSkip = 0; // need to jump out here
-        // }
-        // else {
-        // leftToSkip -= buffer.length;
-        // bytesSkipped = buffer.length;
-        // }
-        // }
-        // }
         return bytesToSkip;
     }
 }

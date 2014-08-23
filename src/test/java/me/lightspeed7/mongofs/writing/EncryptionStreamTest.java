@@ -53,7 +53,7 @@ public class EncryptionStreamTest {
         MongoFile file = writer.write(new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes()));
         assertNotNull(file);
 
-        assertEquals(MongoFileUrl.ENCRYPTED, file.getURL().getCompressionFormat());
+        assertEquals(MongoFileUrl.ENCRYPTED, file.getURL().getFormat());
 
         // read the file
         ByteArrayOutputStream buf = new ByteArrayOutputStream(LoremIpsum.LOREM_IPSUM.length() * 2);
@@ -75,7 +75,7 @@ public class EncryptionStreamTest {
         MongoFile file = writer.write(new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes()));
         assertNotNull(file);
 
-        assertEquals(MongoFileUrl.ENCRYPTED, file.getURL().getCompressionFormat());
+        assertEquals(MongoFileUrl.ENCRYPTED, file.getURL().getFormat());
 
         // read the file
         ByteArrayOutputStream buf = new ByteArrayOutputStream(LoremIpsum.LOREM_IPSUM.length() * 2);
@@ -99,7 +99,7 @@ public class EncryptionStreamTest {
         MongoFile file = writer.write(new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes()));
         assertNotNull(file);
 
-        assertEquals(MongoFileUrl.ENCRYPTED, file.getURL().getCompressionFormat());
+        assertEquals(MongoFileUrl.ENCRYPTED, file.getURL().getFormat());
 
         // read the file
         ByteArrayOutputStream buf = new ByteArrayOutputStream(LoremIpsum.LOREM_IPSUM.length() * 2);

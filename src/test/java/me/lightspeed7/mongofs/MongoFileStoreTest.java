@@ -106,19 +106,19 @@ public class MongoFileStoreTest {
         assertEquals(compress, mongoFile.getURL().isStoredCompressed());
         assertEquals(LoremIpsum.LOREM_IPSUM.length(), mongoFile.getLength());
         if (compress) {
-            assertNotNull(mongoFile.get(MongoFileConstants.storageLength)); // verify compression
-            assertEquals(MongoFileUrl.GZIPPED, mongoFile.get(MongoFileConstants.compressionFormat)); // verify compression
-            assertNotNull(mongoFile.get(MongoFileConstants.compressionRatio)); // verify compression
+            assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify compression
+            assertEquals(MongoFileUrl.GZIPPED, mongoFile.get(MongoFileConstants.format)); // verify compression
+            assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify compression
         }
         else if (encrypt) {
-            assertEquals(MongoFileUrl.ENCRYPTED, mongoFile.get(MongoFileConstants.compressionFormat)); // verify encryption
-            assertNotNull(mongoFile.get(MongoFileConstants.storageLength)); // verify encryption
-            assertNotNull(mongoFile.get(MongoFileConstants.compressionRatio)); // verify encryption sets its ratio
+            assertEquals(MongoFileUrl.ENCRYPTED, mongoFile.get(MongoFileConstants.format)); // verify encryption
+            assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify encryption
+            assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify encryption sets its ratio
         }
         else {
-            assertNull(mongoFile.get(MongoFileConstants.storageLength)); // verify no compression
-            assertNull(mongoFile.get(MongoFileConstants.compressionFormat)); // verify no compression
-            assertNull(mongoFile.get(MongoFileConstants.compressionRatio)); // verify no compression
+            assertNull(mongoFile.get(MongoFileConstants.storage)); // verify no compression
+            assertNull(mongoFile.get(MongoFileConstants.format)); // verify no compression
+            assertNull(mongoFile.get(MongoFileConstants.ratio)); // verify no compression
         }
 
         ByteArrayOutputStream out2 = new ByteArrayOutputStream(32 * 1024);

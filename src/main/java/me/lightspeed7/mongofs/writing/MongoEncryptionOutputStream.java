@@ -19,7 +19,7 @@ public class MongoEncryptionOutputStream extends OutputStream {
         //
         // It will be constructed in reverse
         //
-        CountingOutputStream after = new CountingOutputStream(MongoFileConstants.storageLength, inputFile, given);
+        CountingOutputStream after = new CountingOutputStream(MongoFileConstants.storage, inputFile, given);
         EncryptChunkOutputStream encryption = new EncryptChunkOutputStream(config.getCrypto(), after);
         BufferedChunksOutputStream chunking = new BufferedChunksOutputStream(encryption, config.getCrypto().getChunkSize());
         CountingOutputStream before = new CountingOutputStream(MongoFileConstants.length, inputFile, chunking);
@@ -65,14 +65,14 @@ public class MongoEncryptionOutputStream extends OutputStream {
         } finally {
 
             long length = inputFile.getLong(MongoFileConstants.length, 0);
-            long compressed = inputFile.getLong(MongoFileConstants.storageLength, 0);
+            long compressed = inputFile.getLong(MongoFileConstants.storage, 0);
 
             double ratio = 0.0d;
             if (length > 0) {
                 ratio = (double) compressed / length;
             }
 
-            inputFile.put(MongoFileConstants.compressionRatio.toString(), ratio);
+            inputFile.put(MongoFileConstants.ratio.toString(), ratio);
             inputFile.save();
         }
     }

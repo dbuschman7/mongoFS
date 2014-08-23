@@ -20,10 +20,12 @@ public enum MongoFileConstants {
     md5(true), //
     metadata(true), //
     chunkCount(false), //
-    compressedLength(false), // deprecated, now uses storageLength
-    storageLength(false), //
-    compressionRatio(false), //
-    compressionFormat(false), //
+    compressedLength(false), // deprecated, now uses storage
+    storage(false), //
+    compressionRatio(false), // deprecated, now uses ratio
+    ratio(false), //
+    compressionFormat(false), // deprecated, now uses format
+    format(false), //
     expireAt(false), //
     deleted(false);
 

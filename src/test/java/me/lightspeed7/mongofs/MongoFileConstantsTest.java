@@ -32,7 +32,7 @@ public class MongoFileConstantsTest {
 
         Set<String> coreFields = MongoFileConstants.getFields(true);
         assertNotNull(coreFields);
-        assertEquals(16, coreFields.size());
+        assertEquals(18, coreFields.size());
         assertTrue(coreFields.contains(MongoFileConstants._id.name()));
         assertTrue(coreFields.contains(MongoFileConstants.filename.name()));
         assertTrue(coreFields.contains(MongoFileConstants.md5.name()));
@@ -44,9 +44,15 @@ public class MongoFileConstantsTest {
         assertTrue(coreFields.contains(MongoFileConstants.metadata.name()));
 
         assertTrue(coreFields.contains(MongoFileConstants.chunkCount.name()));
-        assertTrue(coreFields.contains(MongoFileConstants.compressionRatio.name()));
+        assertTrue(coreFields.contains(MongoFileConstants.compressionRatio.name())); // deprecated
+        assertTrue(coreFields.contains(MongoFileConstants.ratio.name()));
+
         assertTrue(coreFields.contains(MongoFileConstants.compressedLength.name())); // deprecated
-        assertTrue(coreFields.contains(MongoFileConstants.storageLength.name()));
+        assertTrue(coreFields.contains(MongoFileConstants.storage.name()));
+
+        assertTrue(coreFields.contains(MongoFileConstants.compressionFormat.name())); // deprecated
+        assertTrue(coreFields.contains(MongoFileConstants.format.name()));
+
         assertTrue(coreFields.contains(MongoFileConstants.expireAt.name()));
         assertTrue(coreFields.contains(MongoFileConstants.deleted.name()));
 

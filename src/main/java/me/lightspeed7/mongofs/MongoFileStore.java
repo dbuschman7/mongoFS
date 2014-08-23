@@ -269,7 +269,7 @@ public class MongoFileStore {
         MongoFileUrl mongoFileUrl = MongoFileUrl//
                 .construct(new ObjectId(), filename, mediaType, null, compress, config.isCryptoEnabled());
 
-        MongoFile mongoFile = new MongoFile(this, mongoFileUrl, config.getChunkSize().getChunkSize(), mongoFileUrl.isStoredCompressed());
+        MongoFile mongoFile = new MongoFile(this, mongoFileUrl, config.getChunkSize().getChunkSize());
         if (expiresAt != null) {
             mongoFile.setExpiresAt(expiresAt);
         }

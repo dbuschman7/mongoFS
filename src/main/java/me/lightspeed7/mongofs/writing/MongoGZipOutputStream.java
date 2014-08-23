@@ -23,7 +23,7 @@ public class MongoGZipOutputStream extends OutputStream {
         //
         // It will be constructed in reverse
         //
-        CountingOutputStream after = new CountingOutputStream(MongoFileConstants.storageLength, inputFile, given);
+        CountingOutputStream after = new CountingOutputStream(MongoFileConstants.storage, inputFile, given);
         GZIPOutputStream compression = new GZIPOutputStream(after);
         CountingOutputStream before = new CountingOutputStream(MongoFileConstants.length, inputFile, compression);
 
@@ -68,14 +68,14 @@ public class MongoGZipOutputStream extends OutputStream {
         } finally {
 
             long length = inputFile.getLong(MongoFileConstants.length, 0);
-            long compressed = inputFile.getLong(MongoFileConstants.storageLength, 0);
+            long compressed = inputFile.getLong(MongoFileConstants.storage, 0);
 
             double ratio = 0.0d;
             if (length > 0) {
                 ratio = (double) compressed / length;
             }
 
-            inputFile.put(MongoFileConstants.compressionRatio.toString(), ratio);
+            inputFile.put(MongoFileConstants.ratio.toString(), ratio);
             inputFile.save();
         }
     }

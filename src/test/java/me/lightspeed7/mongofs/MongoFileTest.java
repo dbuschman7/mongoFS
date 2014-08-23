@@ -30,7 +30,7 @@ public class MongoFileTest {
         assertEquals("fileName.pdf", url.getFileName());
         assertEquals("pdf", url.getExtension());
         assertTrue(url.isStoredCompressed());
-        assertFalse(url.isDataCompressed());
+        assertFalse(url.isDataCompressable());
         assertEquals(PDF, url.getMediaType());
     }
 
@@ -47,7 +47,7 @@ public class MongoFileTest {
         assertEquals("fileName.zip", url.getFileName());
         assertEquals("zip", url.getExtension());
         assertFalse(url.isStoredCompressed());
-        assertTrue(url.isDataCompressed());
+        assertTrue(url.isDataCompressable());
         assertEquals(ZIP, url.getMediaType());
     }
 
@@ -67,7 +67,7 @@ public class MongoFileTest {
         assertEquals("activeusers_19.PDF", url.getFileName());
         assertEquals("pdf", url.getExtension());
         assertFalse(url.isStoredCompressed());
-        assertFalse(url.isDataCompressed());
+        assertFalse(url.isDataCompressable());
 
         assertEquals(PDF, url.getMediaType());
     }
@@ -83,7 +83,7 @@ public class MongoFileTest {
         assertEquals("activeusers_19.ZIP", url.getFileName());
         assertEquals("zip", url.getExtension());
         assertFalse(url.isStoredCompressed());
-        assertTrue(url.isDataCompressed());
+        assertTrue(url.isDataCompressable());
 
         assertEquals(ZIP, url.getMediaType());
     }

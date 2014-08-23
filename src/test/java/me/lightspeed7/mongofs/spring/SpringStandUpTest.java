@@ -68,9 +68,9 @@ public class SpringStandUpTest {
         assertEquals(true, mongoFile.getURL().isStoredCompressed());
         assertEquals(LoremIpsum.LOREM_IPSUM.length(), mongoFile.getLength());
 
-        assertNotNull(mongoFile.get(MongoFileConstants.storageLength)); // verify compression
-        assertEquals(MongoFileUrl.GZIPPED, mongoFile.get(MongoFileConstants.compressionFormat)); // verify compression
-        assertNotNull(mongoFile.get(MongoFileConstants.compressionRatio)); // verify compression
+        assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify compression
+        assertEquals(MongoFileUrl.GZIPPED, mongoFile.get(MongoFileConstants.format)); // verify compression
+        assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify compression
 
         ByteArrayOutputStream out2 = new ByteArrayOutputStream(32 * 1024);
         new BytesCopier(new MongoFileReader(store, mongoFile).getInputStream(), out2).transfer(true);

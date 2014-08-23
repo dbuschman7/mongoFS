@@ -179,11 +179,11 @@ public class MongoFileUrl {
     }
 
     /**
-     * Returns the compression format to the stored data, null if not compression
+     * Returns the storage format to the stored data, null if not compression
      * 
-     * @return the compression format
+     * @return the storage format
      */
-    public String getCompressionFormat() {
+    public String getFormat() {
 
         return url.getHost();
     }
@@ -207,11 +207,24 @@ public class MongoFileUrl {
     }
 
     /**
+     * Is the data encrypted within the chunks
+     * 
+     * @return true if encrypted
+     */
+    public boolean isStoredEncrypted() {
+        if (url.getHost() != null && url.getHost().equals(ENCRYPTED)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Is the data compressible based on the media type of the file. This may differ from what is stored in the datasstore
      * 
      * @return true if the data is already compressed based on its media-type
      */
-    public boolean isDataCompressed() {
+    public boolean isDataCompressable() {
 
         return !CompressionMediaTypes.isCompressable(getMediaType());
     }
@@ -234,16 +247,4 @@ public class MongoFileUrl {
         return false;
     }
 
-    /**
-     * Is the data encrypted within the chunks
-     * 
-     * @return true if encrypted
-     */
-    public boolean isStoredEncrypted() {
-        if (url.getHost() != null && url.getHost().equals(ENCRYPTED)) {
-            return true;
-        }
-
-        return false;
-    }
 }

@@ -49,9 +49,17 @@ public class MongoFile implements InputFile {
 
         this.store = store;
         this.surrogate = surrogate;
-        String format = surrogate.getString(MongoFileConstants.compressionFormat);
+        String format = fetchFormat(surrogate);
         this.compress = MongoFileUrl.GZIPPED.equals(format);
         this.encrypted = MongoFileUrl.ENCRYPTED.equals(format);
+    }
+
+    private String fetchFormat(final Document surrogate) {
+        String format = surrogate.getString(MongoFileConstants.format);
+        if (format == null) {
+            format = surrogate.getString(MongoFileConstants.compressionFormat);
+        }
+        return format;
     }
 
     /**
@@ -60,10 +68,10 @@ public class MongoFile implements InputFile {
      * @param collection
      * @param url
      */
-    /* package */MongoFile(final MongoFileStore store, final MongoFileUrl url, final long chunkSize, final boolean compress) {
+    /* package */MongoFile(final MongoFileStore store, final MongoFileUrl url, final long chunkSize) {
 
         this.store = store;
-        this.compress = compress;
+        this.compress = url.isStoredCompressed();
         this.encrypted = url.isStoredEncrypted();
 
         surrogate = new Document();
@@ -73,8 +81,8 @@ public class MongoFile implements InputFile {
         surrogate.put(MongoFileConstants.chunkSize.toString(), chunkSize);
         surrogate.put(MongoFileConstants.filename.toString(), url.getFilePath());
         surrogate.put(MongoFileConstants.contentType.toString(), url.getMediaType());
-        if (url.getCompressionFormat() != null) {
-            surrogate.put(MongoFileConstants.compressionFormat.toString(), url.getCompressionFormat());
+        if (url.getFormat() != null) {
+            surrogate.put(MongoFileConstants.format.toString(), url.getFormat());
         }
     }
 
@@ -127,13 +135,13 @@ public class MongoFile implements InputFile {
 
     public MongoFileUrl getURL() throws MalformedURLException {
 
-        if (surrogate != null) {// compression and encrypted read from stored compressionformat
-            URL url = Parser.construct(getId(), getFilename(), getContentType(),
-                    (String) get(MongoFileConstants.compressionFormat.toString()), false, false);
-            return MongoFileUrl.construct(url);
+        if (surrogate == null) {
+            throw new IllegalStateException("MongoFile not constructed correctly");
         }
-        return MongoFileUrl.construct(getId(), getFilename(), getContentType(),
-                (String) get(MongoFileConstants.compressionFormat.toString()), compress, encrypted);
+
+        // compression and encrypted read from stored format
+        URL url = Parser.construct(getId(), getFilename(), getContentType(), fetchFormat(surrogate), this.compress, this.encrypted);
+        return MongoFileUrl.construct(url);
     }
 
     /**
@@ -233,8 +241,8 @@ public class MongoFile implements InputFile {
      */
     public long getStorageLength() {
 
-        if (containsKey(MongoFileConstants.storageLength.name())) {
-            return getLong(MongoFileConstants.storageLength);
+        if (containsKey(MongoFileConstants.storage.name())) {
+            return getLong(MongoFileConstants.storage);
         }
         else { // deprecated, files stored from 0.7.x versions and before
             return getLong(MongoFileConstants.compressedLength);

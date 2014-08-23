@@ -99,8 +99,8 @@ public class StorageComparisonTest {
         me.lightspeed7.mongofs.gridfs.GridFS gridFS = new me.lightspeed7.mongofs.gridfs.GridFS(database.getSurrogate(), bucket);
         me.lightspeed7.mongofs.gridfs.GridFSInputFile file = gridFS.createFile("refactoredGridFS.txt");
         file.put(MongoFileConstants.chunkCount.toString(), 0);
-        file.put(MongoFileConstants.compressionRatio.toString(), 0.0d);
-        file.put(MongoFileConstants.storageLength.toString(), 0);
+        file.put(MongoFileConstants.ratio.toString(), 0.0d);
+        file.put(MongoFileConstants.storage.toString(), 0);
         file.put("aliases", Arrays.asList("one", "two", "three"));
         file.setMetaData(new BasicDBObject("key", "value"));
 

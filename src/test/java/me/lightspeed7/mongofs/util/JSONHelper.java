@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
-public class JSONHelper {
+public final class JSONHelper {
 
     /**
      * Method to pretty print a JSON string got easier readability
@@ -12,7 +12,7 @@ public class JSONHelper {
      * @param marshal
      * @return the pretty printed version
      */
-    public static final String prettyPrint(final String marshal) {
+    public static String prettyPrint(final String marshal) {
 
         JsonParser jp = new JsonParser();
         JsonElement je = jp.parse(marshal);

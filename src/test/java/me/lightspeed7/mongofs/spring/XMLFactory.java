@@ -2,9 +2,9 @@ package me.lightspeed7.mongofs.spring;
 
 import me.lightspeed7.mongofs.MongoFileStore;
 
-public class XMLFactory {
+public final class XMLFactory {
 
-    public static final MongoFileStore initialize() {
+    public static MongoFileStore initialize() {
 
         JavaConfig javaConfig = new JavaConfig();
 

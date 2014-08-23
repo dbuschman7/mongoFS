@@ -9,7 +9,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 
 import me.lightspeed7.mongofs.crypto.BasicCrypto;
 import me.lightspeed7.mongofs.url.MongoFileUrl;
@@ -81,7 +80,7 @@ public class MongoFileStoreTest {
     // /////////////////
 
     private void doRoundTrip(final String bucket, final String filename, final ChunkSize chunkSize, final boolean compress,
-            final boolean encrypt) throws IOException, MalformedURLException {
+            final boolean encrypt) throws IOException {
 
         MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
                 .bucket(bucket).chunkSize(chunkSize)//

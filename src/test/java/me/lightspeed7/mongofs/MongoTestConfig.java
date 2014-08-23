@@ -5,9 +5,9 @@ import java.net.UnknownHostException;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 
-public class MongoTestConfig {
+public final class MongoTestConfig {
 
-    public static final MongoClient construct() {
+    public static MongoClient construct() {
 
         try {
             return new MongoClient(new MongoClientURI("mongodb://cayman-vm:27017")); // my vm server

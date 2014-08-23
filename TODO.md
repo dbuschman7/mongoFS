@@ -38,7 +38,12 @@
 * Finish out github pages project
 * Asynchronous file deletion file deletion ( mark then delete ) 
 
-## 0.8 Zip file support
+## 0.8 Encryption of file data
+* Encryption support, customer provided encryption
+* Configuration Builder object
+* Built to be compatible with the Mongo Java Driver 3.0.x APIs
+
+## 0.9 Zip archive support
 * store Zip archive files to allow for individual file retrieval
 * provide a manifest list for files inside the zip file 
 * searchable manifests list for files within zip archives 

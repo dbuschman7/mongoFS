@@ -1,8 +1,9 @@
 package org.mongodb.file;
 
-import org.mongodb.ReadPreference;
-import org.mongodb.WriteConcern;
-import org.mongodb.file.util.ChunkSize;
+import com.mongodb.ReadPreference;
+import com.mongodb.WriteConcern;
+import me.lightspeed7.mongofs.util.ChunkSize;
+import me.lightspeed7.mongofs.crypto.BasicCrypto;
 
 import spock.lang.Specification;
 
@@ -37,7 +38,7 @@ class MongoFileStoreConfigSpecification extends Specification {
 
      def "should throw when compression and encryption are both enabled"() {
         when:
-        def config = MongoFileStoreConfig.builder().enableCompression(tree).encryption(new BasicCrypto())//
+        MongoFileStoreConfig.builder().enableCompression(tree).encryption(new BasicCrypto())//
                 .build();
 
         then:

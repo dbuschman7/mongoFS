@@ -59,6 +59,11 @@ dependencies {
 	testCompile("org.springframework:spring-context:${project.springVersion}")
 	testCompile("org.springframework:spring-expression:${project.springVersion}")
 	testCompile("org.springframework:spring-test:${project.springVersion}")
+	
+	testCompile 'org.codehaus.groovy:groovy-all:2.0.8'
+    testCompile('org.spockframework:spock-core:0.6-groovy-1.8') {
+        exclude group: 'junit', module: 'junit-dep'
+    }
     
 }
 
@@ -109,8 +114,21 @@ codenarc {
 }
 
 
+jacoco {
+    toolVersion = "0.6.2.201302030002"
+    reportsDir = file("$buildDir/customJacocoReportDir")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}
+
 task wrapper(type: Wrapper) {
-    gradleVersion = "1.10"
+    gradleVersion = "2.0"
 }
 
 project.ext.mavenDeployers = []
@@ -137,6 +155,15 @@ test {
         logger.lifecycle("Running test: " + descriptor)
         }
 }
+
+    sourceSets {
+        test {
+            groovy { srcDirs = ['src/test/java'] }
+            //Note: no groovy/spock tests in acceptance, these are Java tests
+            java { srcDirs = ['src/test/java'] }
+        }
+    }
+
 
 
 pom {

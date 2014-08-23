@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://codenarc.org/ruleset/1.0 http://codenarc.org/ruleset-schema.xsd"
          xsi:noNamespaceSchemaLocation="http://codenarc.org/ruleset-schema.xsd">
 
-    <description>MongoDB Java driver rule set</description>
+    <description>MongoFS Library rule set</description>
 
     <ruleset-ref path='rulesets/imports.xml'>
         <rule-config name='MisorderedStaticImports'>

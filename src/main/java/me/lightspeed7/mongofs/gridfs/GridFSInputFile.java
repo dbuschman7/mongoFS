@@ -18,20 +18,22 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 
-import me.lightspeed7.mongofs.common.InputFile;
-import me.lightspeed7.mongofs.common.MongoFileConstants;
+import me.lightspeed7.mongofs.MongoFileConstants;
 import me.lightspeed7.mongofs.util.BytesCopier;
 import me.lightspeed7.mongofs.writing.BufferedChunksOutputStream;
 import me.lightspeed7.mongofs.writing.FileChunksOutputStreamSink;
+import me.lightspeed7.mongofs.writing.InputFile;
 
 import org.bson.types.ObjectId;
+import org.mongodb.Document;
+import org.mongodb.MongoCollection;
 
 import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
 
 /**
- * This class represents a GridFS file to be written to the database Operations include: - writing data obtained from an
- * InputStream - getting an OutputStream to stream the data out
+ * This class represents a GridFS file to be written to the database Operations include: - writing data obtained from an InputStream -
+ * getting an OutputStream to stream the data out
  * 
  * @author David Buschman
  * @author Eliot Horowitz and Guy K. Kloss
@@ -55,8 +57,7 @@ public class GridFSInputFile extends GridFSFile implements InputFile {
      * @param closeStreamOnPersist
      *            indicate the passed in input stream should be closed once the data chunk persisted
      */
-    protected GridFSInputFile(final GridFS fs, final InputStream in, final String filename,
-            final boolean closeStreamOnPersist) {
+    protected GridFSInputFile(final GridFS fs, final InputStream in, final String filename, final boolean closeStreamOnPersist) {
 
         this.fs = fs;
         this.inputStream = in;
@@ -72,7 +73,8 @@ public class GridFSInputFile extends GridFSFile implements InputFile {
 
         GridFSInputFileAdapter adapter = new GridFSInputFileAdapter(this);
 
-        FileChunksOutputStreamSink streamSink = new FileChunksOutputStreamSink(collection, this.id, adapter, null);
+        FileChunksOutputStreamSink streamSink = new FileChunksOutputStreamSink(new MongoCollection<Document>(collection), this.id, adapter,
+                null);
 
         BufferedChunksOutputStream stream = new BufferedChunksOutputStream(streamSink, this.chunkSize);
         return stream;
@@ -108,8 +110,8 @@ public class GridFSInputFile extends GridFSFile implements InputFile {
     }
 
     /**
-     * Minimal constructor that does not rely on the presence of an {@link java.io.InputStream}. An {@link java.io.OutputStream}
-     * can later be obtained for writing using the {@link #getOutputStream()} method.
+     * Minimal constructor that does not rely on the presence of an {@link java.io.InputStream}. An {@link java.io.OutputStream} can later
+     * be obtained for writing using the {@link #getOutputStream()} method.
      * 
      * @param fs
      *            The GridFS connection handle.
@@ -180,8 +182,7 @@ public class GridFSInputFile extends GridFSFile implements InputFile {
     }
 
     /**
-     * This method first calls saveChunks(long) if the file data has not been saved yet. Then it persists the file entry to
-     * GridFS.
+     * This method first calls saveChunks(long) if the file data has not been saved yet. Then it persists the file entry to GridFS.
      * 
      * @param chunkSize
      *            Size of chunks for file in bytes.
@@ -214,15 +215,14 @@ public class GridFSInputFile extends GridFSFile implements InputFile {
      *             on problems reading the new entry's {@link java.io.InputStream}.
      * @throws MongoException
      */
-    public int saveChunks()
-            throws IOException {
+    public int saveChunks() throws IOException {
 
         return saveChunks(chunkSize);
     }
 
     /**
-     * Saves all data into chunks from configured {@link java.io.InputStream} input stream to GridFS. A non-default chunk size can
-     * be specified. This method does NOT save the file object itself, one must call save() to do so.
+     * Saves all data into chunks from configured {@link java.io.InputStream} input stream to GridFS. A non-default chunk size can be
+     * specified. This method does NOT save the file object itself, one must call save() to do so.
      * 
      * @param chunkSize
      *            Size of chunks for file in bytes.
@@ -231,8 +231,7 @@ public class GridFSInputFile extends GridFSFile implements InputFile {
      *             on problems reading the new entry's {@link java.io.InputStream}.
      * @throws MongoException
      */
-    public int saveChunks(final int chunkSize)
-            throws IOException {
+    public int saveChunks(final int chunkSize) throws IOException {
 
         if (outputStream != null) {
             throw new MongoException("Cannot mix OutputStream and regular save()");

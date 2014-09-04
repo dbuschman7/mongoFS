@@ -4,16 +4,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import me.lightspeed7.mongofs.MongoFile;
-import me.lightspeed7.mongofs.common.MongoFileConstants;
+import me.lightspeed7.mongofs.MongoFileConstants;
 
 public class CountingOutputStream extends OutputStream {
 
-    long count = 0;
+    private long count = 0;
     private MongoFileConstants key;
     private MongoFile inputFile;
     private OutputStream out;
 
-    public CountingOutputStream(MongoFileConstants key, MongoFile inputFile, OutputStream out) {
+    public CountingOutputStream(final MongoFileConstants key, final MongoFile inputFile, final OutputStream out) {
 
         this.key = key;
         this.inputFile = inputFile;
@@ -21,28 +21,29 @@ public class CountingOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(int b)
-            throws IOException {
+    public void write(final int b) throws IOException {
 
         out.write(b);
         ++count;
     }
 
     @Override
-    public void write(byte[] b, int off, int len)
-            throws IOException {
+    public void write(final byte[] b, final int off, final int len) throws IOException {
 
         out.write(b, off, len);
         count += len;
     }
 
     @Override
-    public void close()
-            throws IOException {
+    public void close() throws IOException {
 
         out.close();
 
         inputFile.put(key.toString(), count);
         inputFile.save();
+    }
+
+    public long getCount() {
+        return count;
     }
 }

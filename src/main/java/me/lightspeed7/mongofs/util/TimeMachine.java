@@ -8,7 +8,7 @@ import java.util.Date;
  * @author David Buschman
  * 
  */
-public class TimeMachine {
+public final class TimeMachine {
 
     private long milliseconds;
     private long number;
@@ -18,23 +18,23 @@ public class TimeMachine {
         return new TimeMachine(new Date().getTime());
     }
 
-    public static TimeMachine from(long start) {
+    public static TimeMachine from(final long start) {
 
         return new TimeMachine(start);
     }
 
-    private TimeMachine(long milliseconds) {
+    private TimeMachine(final long milliseconds) {
 
         this.milliseconds = milliseconds;
     }
 
-    public TimeMachine forward(int number) {
+    public TimeMachine forward(final int number) {
 
         this.number = number;
         return this;
     }
 
-    public TimeMachine backward(int number) {
+    public TimeMachine backward(final int number) {
 
         this.number = 0 - number;
         return this;

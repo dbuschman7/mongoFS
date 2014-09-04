@@ -15,33 +15,26 @@ import me.lightspeed7.mongofs.util.BytesCopier;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mongodb.Document;
 
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DB;
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
-public class MongoFileCursorTest implements LoremIpsum {
+public class MongoFileCursorTest {
 
     private static final String DB_NAME = "MongoFSTest-cursor";
     private static final String BUCKET = "cursor";
 
-    private static DB database;
-
-    private static MongoClient mongoClient;
     private static MongoFileStore store;
 
     // initializer
     @BeforeClass
-    public static void initial()
-            throws IllegalArgumentException, IOException {
+    public static void initial() throws IOException {
 
-        mongoClient = MongoTestConfig.construct();
+        MongoClient mongoClient = MongoTestConfig.construct();
 
         mongoClient.dropDatabase(DB_NAME);
-        database = mongoClient.getDB(DB_NAME);
 
-        store = new MongoFileStore(database, new MongoFileStoreConfig(BUCKET));
+        store = new MongoFileStore(mongoClient.getDB(DB_NAME), MongoFileStoreConfig.builder().bucket(BUCKET).build());
 
         createFile(store, "/foo/bar1.txt", "text/plain");
         createFile(store, "/foo/bar4.txt", "text/plain");
@@ -50,43 +43,27 @@ public class MongoFileCursorTest implements LoremIpsum {
     }
 
     @Test
-    public void testSimpleList()
-            throws IllegalArgumentException, IOException {
-
-        MongoFileQuery query = store.query();
-        MongoFileCursor fileList = query.getFileList();
-        int count = 0;
-        for (MongoFile mongoFile : fileList) {
-            ++count;
-            assertNotNull(mongoFile.getURL());
-        }
-        assertEquals(4, count);
-    }
-
-    @Test
-    public void testFilterFileNameList()
-            throws IllegalArgumentException, IOException {
+    public void testFilterFileNameList() throws IOException {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
 
-        MongoFileCursor cursor = store.query().find("/foo/bar1.txt");
+        MongoFileCursor cursor = store.find("/foo/bar1.txt");
         int count = 0;
         for (MongoFile mongoFile : cursor) {
             ++count;
             assertNotNull(mongoFile.getURL());
             assertEquals("/foo/bar1.txt", mongoFile.getFilename());
-            InputStream in = store.read(mongoFile);
+            InputStream in = new MongoFileReader(store, mongoFile).getInputStream();
             new BytesCopier(in, out).transfer(true); // append more than one file together
         }
         assertEquals(2, count);
-        assertEquals(LOREM_IPSUM.length() * 2, out.toString().length());
+        assertEquals(LoremIpsum.LOREM_IPSUM.length() * 2, out.toString().length());
     }
 
     @Test
-    public void testSortedList()
-            throws IllegalArgumentException, IOException {
+    public void testSortedList() throws IOException {
 
-        MongoFileCursor fileList = store.query().getFileList().sort(BasicDBObjectBuilder.start("filename", "1").get());
+        MongoFileCursor fileList = store.find(new Document("contentType", "text/plain"), new Document("filename", 1));
 
         assertTrue(fileList.hasNext());
         assertEquals("/baz/bar3.txt", fileList.next().getFilename());
@@ -104,14 +81,11 @@ public class MongoFileCursorTest implements LoremIpsum {
     }
 
     @Test
-    public void testSortedFilteredList()
-            throws IllegalArgumentException, IOException {
+    public void testSortedFilteredList() throws IOException {
 
-        store.getFilesCollection().ensureIndex(BasicDBObjectBuilder.start("md5", 1).get());
-        DBObject q = BasicDBObjectBuilder.start("filename", "/foo/bar1.txt").get();
-        DBObject s = BasicDBObjectBuilder.start("filename", "1").get();
+        store.getFilesCollection().createIndex(new Document("md5", 1));
 
-        MongoFileCursor fileList = store.query().getFileList(q, s);
+        MongoFileCursor fileList = store.find(new Document("filename", "/foo/bar1.txt"), new Document("filename", 1));
 
         assertTrue(fileList.hasNext());
         assertEquals("/foo/bar1.txt", fileList.next().getFilename());
@@ -123,11 +97,9 @@ public class MongoFileCursorTest implements LoremIpsum {
     }
 
     @Test
-    public void testFindList()
-            throws IllegalArgumentException, IOException {
+    public void testFindList() throws IOException {
 
-        MongoFileQuery query = new MongoFileQuery(store);
-        List<MongoFile> fileList = query.find("/foo/bar1.txt").toList();
+        List<MongoFile> fileList = store.find("/foo/bar1.txt").toList();
 
         assertEquals(2, fileList.size());
         assertEquals("/foo/bar1.txt", fileList.get(0).getFilename());
@@ -137,10 +109,9 @@ public class MongoFileCursorTest implements LoremIpsum {
     //
     // internal
     // //////////////////
-    private static void createFile(MongoFileStore store, String filename, String mediaType)
-            throws IOException {
+    private static void createFile(final MongoFileStore store, final String filename, final String mediaType) throws IOException {
 
         MongoFileWriter writer = store.createNew(filename, mediaType, null, true);
-        writer.write(new ByteArrayInputStream(LOREM_IPSUM.getBytes()));
+        writer.write(new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes()));
     }
 }

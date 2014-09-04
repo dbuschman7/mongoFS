@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
 
-import me.lightspeed7.mongofs.common.MongoFileConstants;
+import me.lightspeed7.mongofs.MongoFileConstants;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
+import org.mongodb.Document;
+import org.mongodb.MongoCollection;
 
 /**
  * A sink object the absorbs all the chunks that are sent to it and create MongoDB chunks for each one.
@@ -20,13 +20,13 @@ import com.mongodb.DBCollection;
 public class FileChunksOutputStreamSink extends OutputStream {
 
     private Object id;
-    private DBCollection collection;
+    private MongoCollection<Document> collection;
     private int currentChunkNumber = 0;
     private ChunksStatisticsAdapter adapter;
     private Date expiresAt;
 
-    public FileChunksOutputStreamSink(DBCollection collection, Object fileId, ChunksStatisticsAdapter adapter,
-            Date expiresAt) {
+    public FileChunksOutputStreamSink(final MongoCollection<Document> collection, final Object fileId,
+            final ChunksStatisticsAdapter adapter, final Date expiresAt) {
 
         this.collection = collection;
         this.id = fileId;
@@ -35,15 +35,13 @@ public class FileChunksOutputStreamSink extends OutputStream {
     }
 
     @Override
-    public void write(int b)
-            throws IOException {
+    public void write(final int b) throws IOException {
 
         throw new IllegalStateException("Single byte writing not supported with this OutputStream");
     }
 
     @Override
-    public void write(byte[] b)
-            throws IOException {
+    public void write(final byte[] b) throws IOException {
 
         if (b == null) {
             throw new IllegalArgumentException("buffer cannot be null");
@@ -53,10 +51,10 @@ public class FileChunksOutputStreamSink extends OutputStream {
     }
 
     @Override
-    public void write(byte[] buffer, int offset, int length)
-            throws IOException {
+    public void write(final byte[] buffer, final int offset, final int length) throws IOException {
 
-        byte[] internal = buffer; // assume the whole passed in buffer for efficiency
+        byte[] internal = buffer; // assume the whole passed in buffer for
+                                  // efficiency
 
         // if partial buffer, then we have to copy the data until serialized
         if (offset != 0 || length != buffer.length) {
@@ -65,11 +63,13 @@ public class FileChunksOutputStreamSink extends OutputStream {
         }
 
         // construct the chunk
-        BasicDBObject dbObject = new BasicDBObject("files_id", id)//
-                .append("n", currentChunkNumber)// Sequence number of the chunk in the file
-                .append("sz", length)// length of the chunk data portion on the chunk
-                .append("data", internal)// the data encoded
-        ;
+        Document dbObject = new Document("files_id", id)//
+                .append("n", currentChunkNumber)// Sequence number of the chunk
+                                                // in the file
+                .append("sz", length)// length of the chunk data portion on the
+                                     // chunk
+                .append("data", internal); // the data encoded
+
         if (expiresAt != null) {
             dbObject.put(MongoFileConstants.expireAt.toString(), expiresAt);
         }
@@ -81,15 +81,13 @@ public class FileChunksOutputStreamSink extends OutputStream {
     }
 
     @Override
-    public void flush()
-            throws IOException {
+    public void flush() throws IOException {
 
         adapter.flush();
     }
 
     @Override
-    public void close()
-            throws IOException {
+    public void close() throws IOException {
 
         adapter.close();
     }

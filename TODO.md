@@ -38,10 +38,20 @@
 * Finish out github pages project
 * Asynchronous file deletion file deletion ( mark then delete ) 
 
-## 0.8 Zip file support
+## 0.8 Encryption of file data
+* Encryption support, customer provided encryption
+* Configuration Builder object
+* Built to be compatible with the Mongo Java Driver 3.0.x APIs
+
+## 0.9 Zip archive support
 * store Zip archive files to allow for individual file retrieval
 * provide a manifest list for files inside the zip file 
 * searchable manifests list for files within zip archives 
+
+## 1.0 Mongo-Java-Driver 3.0.x
+* Will move this  library to 1.0 when the official Mongo Java Driver 3.0.x is released
+* Remove support for the < 3.0.x drivers going forward
+* 0.9.x versions will be maintained for legacy driver support <= 2.12.x
 
 ## Futures ideas
 * auto-grow/shrink chunk size as "empty-space" entropy rises, maybe multiple collections 

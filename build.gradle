@@ -20,15 +20,32 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'eclipse'
+apply plugin: 'groovy'
+apply plugin: 'codenarc'
+apply plugin: 'checkstyle'
+apply plugin: 'findbugs'
+apply plugin: 'jacoco'
+
+
+def configDir = new File(rootDir, 'config')
+
 
 group = 'me.lightspeed7'
-version = '0.7.7'
+version = '0.8.0'
 
-sourceCompatibility = '1.7'
-targetCompatibility = '1.7'
+sourceCompatibility = '1.6'
+targetCompatibility = '1.6'
 
 repositories{
     mavenCentral()
+}
+
+project.ext {
+  springVersion = "4.0.3.RELEASE"
+}
+
+project.ext.buildingWith = { n ->
+    project.hasProperty(n) && project.property(n).toBoolean()
 }
 
 dependencies {
@@ -37,6 +54,17 @@ dependencies {
     testCompile 'org.mockito:mockito-all:1.9.5'
     testCompile 'com.google.guava:guava:16.0.1'   
     testCompile 'com.google.code.gson:gson:2.2.4'
+    
+    testCompile("org.springframework:spring-core:${project.springVersion}")
+	testCompile("org.springframework:spring-context:${project.springVersion}")
+	testCompile("org.springframework:spring-expression:${project.springVersion}")
+	testCompile("org.springframework:spring-test:${project.springVersion}")
+	
+	testCompile 'org.codehaus.groovy:groovy-all:2.0.8'
+    testCompile('org.spockframework:spock-core:0.6-groovy-1.8') {
+        exclude group: 'junit', module: 'junit-dep'
+    }
+    
 }
 
 task sourcesJar(type: Jar) {
@@ -54,13 +82,53 @@ artifacts {
     archives javadocJar
 }
 
+/* Code quality */
+checkstyle {
+    configFile = new File("$configDir/checkstyle.xml")
+}
+
+tasks.withType(Checkstyle) {
+    exclude '**/me/lightspeed7/mongofs/gridfs/**'
+}
+
+findbugs {
+    excludeFilter = new File("$configDir/findbugs-exclude.xml")
+    sourceSets = [sourceSets.main]
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled = project.buildingWith('xmlReports.enabled')
+        html.enabled = !project.buildingWith('xmlReports.enabled')
+    }
+}
+
 signing {
     required { gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
 }
 
+codenarc {
+    toolVersion = '0.20'
+    reportFormat = project.buildingWith('xmlReports.enabled') ? 'xml' : 'html'
+}
+
+
+jacoco {
+    toolVersion = "0.6.2.201302030002"
+    reportsDir = file("$buildDir/customJacocoReportDir")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}
+
 task wrapper(type: Wrapper) {
-    gradleVersion = "1.10"
+    gradleVersion = "2.0"
 }
 
 project.ext.mavenDeployers = []
@@ -79,6 +147,7 @@ uploadArchives {
     }
 }
 
+
 test {
         include "**/*Test.class"
 
@@ -86,6 +155,15 @@ test {
         logger.lifecycle("Running test: " + descriptor)
         }
 }
+
+    sourceSets {
+        test {
+            groovy { srcDirs = ['src/test/java'] }
+            //Note: no groovy/spock tests in acceptance, these are Java tests
+            java { srcDirs = ['src/test/java'] }
+        }
+    }
+
 
 
 pom {

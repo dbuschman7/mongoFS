@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import me.lightspeed7.mongofs.common.MongoFileConstants;
+import me.lightspeed7.mongofs.MongoFileConstants;
 
 import org.bson.BSONObject;
 
@@ -167,7 +167,7 @@ public abstract class GridFSFile implements DBObject {
      * 
      * @return list of aliases
      */
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<String> getAliases() {
 
         return (List<String>) extra.get("aliases");
@@ -222,21 +222,29 @@ public abstract class GridFSFile implements DBObject {
 
         if (key == null) {
             throw new RuntimeException("key should never be null");
-        } else if (key.equals("_id")) {
+        }
+        else if (key.equals("_id")) {
             id = v;
-        } else if (key.equals("filename")) {
+        }
+        else if (key.equals("filename")) {
             filename = v == null ? null : v.toString();
-        } else if (key.equals("contentType")) {
+        }
+        else if (key.equals("contentType")) {
             contentType = (String) v;
-        } else if (key.equals("length")) {
+        }
+        else if (key.equals("length")) {
             length = ((Number) v).longValue();
-        } else if (key.equals("chunkSize")) {
+        }
+        else if (key.equals("chunkSize")) {
             chunkSize = ((Number) v).intValue();
-        } else if (key.equals("uploadDate")) {
+        }
+        else if (key.equals("uploadDate")) {
             uploadDate = (Date) v;
-        } else if (key.equals("md5")) {
+        }
+        else if (key.equals("md5")) {
             md5 = (String) v;
-        } else {
+        }
+        else {
             extra.put(key, v);
         }
         return v;
@@ -247,19 +255,26 @@ public abstract class GridFSFile implements DBObject {
 
         if (key == null) {
             throw new IllegalArgumentException("Key should never be null");
-        } else if (key.equals("_id")) {
+        }
+        else if (key.equals("_id")) {
             return id;
-        } else if (key.equals("filename")) {
+        }
+        else if (key.equals("filename")) {
             return filename;
-        } else if (key.equals("contentType")) {
+        }
+        else if (key.equals("contentType")) {
             return contentType;
-        } else if (key.equals("length")) {
+        }
+        else if (key.equals("length")) {
             return length;
-        } else if (key.equals("chunkSize")) {
+        }
+        else if (key.equals("chunkSize")) {
             return chunkSize;
-        } else if (key.equals("uploadDate")) {
+        }
+        else if (key.equals("uploadDate")) {
             return uploadDate;
-        } else if (key.equals("md5")) {
+        }
+        else if (key.equals("md5")) {
             return md5;
         }
         return extra.get(key);
@@ -336,7 +351,7 @@ public abstract class GridFSFile implements DBObject {
     }
 
     @Override
-    public void putAll(@SuppressWarnings( "rawtypes" ) final Map m) {
+    public void putAll(@SuppressWarnings("rawtypes") final Map m) {
 
         throw new UnsupportedOperationException();
     }

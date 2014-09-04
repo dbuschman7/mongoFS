@@ -17,49 +17,41 @@ import me.lightspeed7.mongofs.util.TimeMachine;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class MongoFileExpirationTest implements LoremIpsum {
+public class MongoFileExpirationTest {
 
     private static final String DB_NAME = "MongoFSTest-expiration";
 
-    private static DB database;
-
-    private static MongoClient mongoClient;
     private static MongoFileStore store;
 
     // initializer
     @BeforeClass
-    public static void initial()
-            throws IllegalArgumentException, IOException, InterruptedException {
+    public static void initial() throws IOException, InterruptedException {
 
-        mongoClient = MongoTestConfig.construct();
+        MongoClient mongoClient = MongoTestConfig.construct();
 
         mongoClient.dropDatabase(DB_NAME);
-        database = mongoClient.getDB(DB_NAME);
 
-        MongoFileStoreConfig config = new MongoFileStoreConfig("expire");
-        config.setWriteConcern(WriteConcern.SAFE);
-        store = new MongoFileStore(database, config);
+        MongoFileStoreConfig config = MongoFileStoreConfig.builder().bucket("expire").writeConcern(WriteConcern.SAFE).build();
+        store = new MongoFileStore(mongoClient.getDB(DB_NAME), config);
 
         Thread.sleep(2000);
     }
 
     @Test
-    public void test()
-            throws IOException {
+    public void test() throws IOException {
 
         long now = System.currentTimeMillis();
 
         createTempFile(store, "/foo/bar1.txt", "text/plain", TimeMachine.now().backward(2).days().inTime());
         createTempFile(store, "/foo/bar1.txt", "text/plain", TimeMachine.from(now).forward(5).seconds().inTime());
 
-        MongoFileCursor cursor = store.query().find("/foo/bar1.txt");
+        MongoFileCursor cursor = store.find("/foo/bar1.txt");
         assertTrue(Math.abs(now - (2 * 24 * 60 * 60 * 1000) - cursor.next().getExpiresAt().getTime()) <= 1);
         assertTrue(Math.abs(now + (5 * 1000) - cursor.next().getExpiresAt().getTime()) <= 1);
     }
 
     @Test
-    public void testExpiresInThePast()
-            throws IOException, InterruptedException {
+    public void testExpiresInThePast() throws IOException, InterruptedException {
 
         //
         Date when = new Date();
@@ -70,10 +62,10 @@ public class MongoFileExpirationTest implements LoremIpsum {
     //
     // internal
     // //////////////////
-    private void createTempFile(MongoFileStore store, String filename, String mediaType, Date expiresAt)
+    private void createTempFile(final MongoFileStore store, final String filename, final String mediaType, final Date expiresAt)
             throws IOException {
 
         MongoFileWriter writer = store.createNew(filename, mediaType, expiresAt, true);
-        writer.write(new ByteArrayInputStream(LOREM_IPSUM.getBytes()));
+        writer.write(new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes()));
     }
 }

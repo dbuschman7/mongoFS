@@ -6,9 +6,8 @@ import java.io.InputStream;
 import me.lightspeed7.mongofs.MongoFile;
 import me.lightspeed7.mongofs.MongoFileStore;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.mongodb.MongoException;
+import org.mongodb.Document;
+import org.mongodb.MongoException;
 
 /**
  * This class is borrowed almost verbatim from the GridFS version, not need to change anything here for now.
@@ -26,7 +25,7 @@ public class FileChunksInputStreamSource extends InputStream {
     private int offset = 0;
     private byte[] buffer = null;
 
-    public FileChunksInputStreamSource(MongoFileStore store, MongoFile file) {
+    public FileChunksInputStreamSource(final MongoFileStore store, final MongoFile file) {
 
         this.store = store;
         this.file = file;
@@ -80,22 +79,22 @@ public class FileChunksInputStreamSource extends InputStream {
      * Will smartly skips over chunks without fetching them if possible.
      */
     @Override
-    public long skip(final long bytesToSkip)
-            throws IOException {
+    public long skip(final long bytesToSkip) throws IOException {
 
         if (bytesToSkip <= 0) {
             return 0;
         }
 
         if (currentChunkId == file.getChunkCount()) {
-            // We're actually skipping over the back end of the file, short-circuit here
+            // We're actually skipping over the back end of the file,
+            // short-circuit here
             // Don't count those extra bytes to skip in with the return value
             return 0;
         }
 
         // offset in the whole file
         long offsetInFile = 0;
-        long chunkSize = file.getChunkSize();
+        int chunkSize = file.getChunkSize();
         if (currentChunkId >= 0) {
             offsetInFile = currentChunkId * chunkSize + offset;
         }
@@ -121,8 +120,7 @@ public class FileChunksInputStreamSource extends InputStream {
             throw new IllegalStateException("No MongoFileStore instance defined!");
         }
 
-        DBObject chunk = store.getChunksCollection()
-                .findOne(new BasicDBObject("files_id", file.getId()).append("n", i));
+        Document chunk = store.getChunksCollection().find(new Document("files_id", file.getId()).append("n", i)).get().next();
         if (chunk == null) {
             throw new MongoException("Can't find a chunk!  file id: " + file.getId().toString() + " chunk: " + i);
         }

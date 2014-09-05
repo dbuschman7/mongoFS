@@ -51,6 +51,9 @@
                         <a href="#features">Features</a>
                     </li>
                     <li class="page-scroll">
+                        <a target="_new" href="https://github.com/dbuschman7/mongoFS/blob/master/usage.md">Getting Started</a>
+                    </li>
+                    <li class="page-scroll">
                         <a href="#migration">Migration</a>
                     </li>
                     <li class="page-scroll">
@@ -107,7 +110,7 @@
 					<tr>
 					<th>Feature</th>
 					<th>GridFS ( 2.11.4 )</th>
-					<th><i><small class="green">mongo</small><span class="beige" >FS</span></i> ( 0.7.x )</th> </tr>
+					<th><i><small class="green">mongo</small><span class="beige" >FS</span></i> ( 0.8.x )</th> </tr>
 					
 					<tr><td>Built into the MongoDB driver</td><td><i class="fa fa-check" ></i></td><td>&nbsp;</td> </tr>
 					<tr><td>Store files in MongoDB</td><td><i class="fa fa-check" ></i></td><td><i class="fa fa-check" ></i></td> </tr>
@@ -119,9 +122,9 @@
 					<tr><td>Temporary file storage ( expiration )</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>Provides URL for easy file reference</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>Space saving data compression ( gzip )</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
-					<tr><td>Storing files with customer defined encryption</td><td>&nbsp;</td><td>Coming ( 0.8.x )</td> </tr>
-					<tr><td>Uses a 3.0.x compatible API bridge </td><td>&nbsp;</td><td>Coming ( 0.8.x )</td> </tr>
-					<tr><td>ZIP archives and serachable manifests</td><td>&nbsp;</td><td>Coming ( 0.8.x )</td> </tr>
+					<tr><td>Storing files with customer defined encryption</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
+					<tr><td>Uses a 3.0.x driver compatible API bridge </td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
+					<tr><td>ZIP archives and serachable manifests</td><td>&nbsp;</td><td>Coming ( 0.9.x )</td> </tr>
 				
 				</table>
                 <div class="page-scroll hidden-xs">
@@ -140,7 +143,7 @@
 				<p>Simply point MongoFileStore to the existing GridFS collections and gain the new compression and URL functionality. </p><p><strong>NOTE:</strong> This is a one-way process. Once <i><small class="green">mongo</small><span class="beige" >FS</span></i> starts writing compressed and/or encrypted file chunks, the data read from GridFS directly will be a Gzip compressed and/or encrypted stream that you will have to handle to get the raw data back. Also, <i><small class="green">mongo</small><span class="beige" >FS</span></i> adds fields to the documents that help it know what to do with the file and chunk data in the DB collections.</p>  
 				
 				<h2>Migrating from <i><small class="green">mongo</small><span class="beige" >FS</span></i> 0.7.x to 0.8.x</h2>
-				<p>This migration will require some coding changes need to unsure compatiblity with the uncoming 3.0.x driver. The code changes allow for the upcoming change from DBObject to the new Document base object found in the 3.0.x driver. Most of the changes fro the 3.0.x driver are hidden from the user but some changes to my API were needed to support the new class structure in the 3.0.x driver.</p>
+				<p>This migration will require some coding changes need to unsure compatiblity with the uncoming MongoDB 3.0.x Java driver. The code changes allow for the upcoming change from DBObject to the new Document base object found in the 3.0.x driver. Most of the changes fro the 3.0.x driver are hidden from the user but some changes to my API were needed to support the new class structure in the 3.0.x driver.</p>
 				
 				
                 <div class="page-scroll hidden-xs">

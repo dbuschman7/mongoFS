@@ -735,7 +735,7 @@ public class MongoFileStore {
                 .append(MongoFileConstants.expireAt.toString(), when);
         chunksUpdate = new Document("$set", chunksUpdate);
 
-        getFilesCollection().find(chunksQuery)//
+        getChunksCollection().find(chunksQuery)//
                 .withWriteConcern(WriteConcern.JOURNALED)//
                 .update(chunksUpdate);
     }

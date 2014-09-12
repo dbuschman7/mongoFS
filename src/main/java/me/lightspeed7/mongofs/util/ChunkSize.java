@@ -23,6 +23,11 @@ public enum ChunkSize {
     small_64K(64),
 
     /**
+     * good compromise, mixed files
+     */
+    medium_128K(128),
+
+    /**
      * good compromise, NOTE: this is the default
      */
     medium_256K(256),

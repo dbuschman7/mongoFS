@@ -7,10 +7,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
-import me.lightspeed7.mongofs.MongoFile;
-import me.lightspeed7.mongofs.MongoFileStore;
-import me.lightspeed7.mongofs.MongoFileStoreConfig;
-import me.lightspeed7.mongofs.MongoFileWriter;
 import me.lightspeed7.mongofs.crypto.BasicCrypto;
 import me.lightspeed7.mongofs.url.MongoFileUrl;
 import me.lightspeed7.mongofs.util.BytesCopier;

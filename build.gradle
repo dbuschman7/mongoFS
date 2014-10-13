@@ -31,7 +31,7 @@ def configDir = new File(rootDir, 'config')
 
 
 group = 'me.lightspeed7'
-version = '0.8.1'
+version = '0.9.0'
 
 sourceCompatibility = '1.6'
 targetCompatibility = '1.6'

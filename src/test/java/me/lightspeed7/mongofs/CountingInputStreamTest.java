@@ -6,8 +6,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import me.lightspeed7.mongofs.CountingInputStream;
-import me.lightspeed7.mongofs.MongoFile;
 import me.lightspeed7.mongofs.util.BytesCopier;
 
 import org.junit.Test;

@@ -5,10 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import me.lightspeed7.mongofs.CountingOutputStream;
-import me.lightspeed7.mongofs.MongoFile;
-import me.lightspeed7.mongofs.MongoFileConstants;
-
 import org.junit.Test;
 import org.mockito.Mockito;
 

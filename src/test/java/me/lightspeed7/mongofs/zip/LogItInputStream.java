@@ -7,7 +7,7 @@ public class LogItInputStream extends InputStream {
 
     private InputStream surrogate;
 
-    public LogItInputStream(InputStream input) {
+    public LogItInputStream(final InputStream input) {
         this.surrogate = input;
         log("logging class", input.getClass().getName());
     }
@@ -18,7 +18,7 @@ public class LogItInputStream extends InputStream {
         return surrogate.read();
     }
 
-    private void log(String method, Object... args) {
+    private void log(final String method, final Object... args) {
         StringBuilder buf = new StringBuilder();
         buf.append(method).append(" - ");
         if (args != null) {
@@ -27,23 +27,25 @@ public class LogItInputStream extends InputStream {
             }
         }
 
+        // CHECKSTYLE:OFF
         System.out.println(buf.toString());
+        // CHECKSTYLE:ON
     }
 
     @Override
-    public int read(byte[] b) throws IOException {
+    public int read(final byte[] b) throws IOException {
         log("read(byte[] b)", 0, b.length);
         return super.read(b);
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(final byte[] b, final int off, final int len) throws IOException {
         log("read(byte[] b, int off, int len)", off, len);
         return super.read(b, off, len);
     }
 
     @Override
-    public long skip(long n) throws IOException {
+    public long skip(final long n) throws IOException {
         log("skip(long n)", n);
         return super.skip(n);
     }
@@ -62,7 +64,7 @@ public class LogItInputStream extends InputStream {
     }
 
     @Override
-    public synchronized void mark(int readlimit) {
+    public synchronized void mark(final int readlimit) {
         log("mark(int readlimit)", readlimit);
         super.mark(readlimit);
     }

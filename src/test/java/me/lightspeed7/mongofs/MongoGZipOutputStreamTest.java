@@ -4,10 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import me.lightspeed7.mongofs.MongoFile;
-import me.lightspeed7.mongofs.MongoFileConstants;
-import me.lightspeed7.mongofs.MongoGZipOutputStream;
-
 import org.junit.Test;
 import org.mockito.Mockito;
 

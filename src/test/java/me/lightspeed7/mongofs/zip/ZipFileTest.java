@@ -23,7 +23,7 @@ public class ZipFileTest {
     private static final String TEST_ZIP = "/Users/dbusch/test.zip";
 
     @BeforeClass
-    static public void before() throws IOException {
+    public static void before() throws IOException {
 
         final File f = new File(TEST_ZIP);
         f.delete();
@@ -31,7 +31,7 @@ public class ZipFileTest {
         try {
             createFile(out, "file1.txt", LoremIpsum.LOREM_IPSUM.getBytes());
             createFile(out, "file2.txt", LoremIpsum.LOREM_IPSUM.getBytes());
-            createFile(out, "manifest.xml", xml.getBytes());
+            createFile(out, "manifest.xml", XML.getBytes());
         } finally {
             if (out != null) {
                 out.close();
@@ -39,7 +39,7 @@ public class ZipFileTest {
         }
     }
 
-    private static void createFile(final ZipOutputStream out, String fileName, byte[] data) throws IOException {
+    private static void createFile(final ZipOutputStream out, final String fileName, final byte[] data) throws IOException {
         ZipEntry e = new ZipEntry(fileName);
         out.putNextEntry(e);
 
@@ -74,14 +74,20 @@ public class ZipFileTest {
                 // long size = entry.getSize();
                 counter = 0;
                 // write buffer to file
+                // CHECKSTYLE:OFF
                 System.out.println(String.format("Reading file %s", name));
+                // CHECKSTYLE:ON
                 int l = zipStream.read(buff);
                 while (l > 0) {
                     counter += l;
+                    // CHECKSTYLE:OFF
                     System.out.println("Read Bytes = " + l);
+                    // CHECKSTYLE:ON
                     l = zipStream.read(buff);
                 }
+                // CHECKSTYLE:OFF
                 System.out.println(String.format("File read %s - length = %d", name, counter));
+                // CHECKSTYLE:ON
                 zipEntry = zipStream.getNextEntry();
             }
 
@@ -95,7 +101,7 @@ public class ZipFileTest {
     //
     // ///////////////////
     //
-    private static final String xml = "" //
+    private static final String XML = "" //
             + " <card xmlns=\"http://businesscard.org\">\n" //
             + "   <name>John Doe</name>\n" //
             + "   <title>CEO, Widget Inc.</title>\n" //

@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import me.lightspeed7.mongofs.writing.InputFile;
+import me.lightspeed7.mongofs.InputFile;
 
 import org.bson.types.ObjectId;
 

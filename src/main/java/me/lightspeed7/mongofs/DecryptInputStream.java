@@ -1,11 +1,10 @@
-package me.lightspeed7.mongofs.reading;
+package me.lightspeed7.mongofs;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 
-import me.lightspeed7.mongofs.MongoFile;
 import me.lightspeed7.mongofs.crypto.Crypto;
 
 public class DecryptInputStream extends InputStream {

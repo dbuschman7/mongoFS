@@ -1,11 +1,8 @@
-package me.lightspeed7.mongofs.reading;
+package me.lightspeed7.mongofs;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import me.lightspeed7.mongofs.MongoFile;
-import me.lightspeed7.mongofs.MongoFileConstants;
 
 public class CountingInputStream extends FilterInputStream {
 

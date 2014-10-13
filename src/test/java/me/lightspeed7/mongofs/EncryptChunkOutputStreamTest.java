@@ -1,4 +1,4 @@
-package me.lightspeed7.mongofs.writing;
+package me.lightspeed7.mongofs;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,7 +8,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.lightspeed7.mongofs.LoremIpsum;
+import me.lightspeed7.mongofs.BufferedChunksOutputStream;
+import me.lightspeed7.mongofs.EncryptChunkOutputStream;
 import me.lightspeed7.mongofs.crypto.BasicCrypto;
 import me.lightspeed7.mongofs.util.BytesCopier;
 import me.lightspeed7.mongofs.util.ChunkSize;

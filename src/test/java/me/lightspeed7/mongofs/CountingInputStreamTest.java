@@ -1,4 +1,4 @@
-package me.lightspeed7.mongofs.reading;
+package me.lightspeed7.mongofs;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,7 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import me.lightspeed7.mongofs.LoremIpsum;
+import me.lightspeed7.mongofs.CountingInputStream;
 import me.lightspeed7.mongofs.MongoFile;
 import me.lightspeed7.mongofs.util.BytesCopier;
 

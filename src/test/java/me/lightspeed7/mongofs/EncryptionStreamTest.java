@@ -1,4 +1,4 @@
-package me.lightspeed7.mongofs.writing;
+package me.lightspeed7.mongofs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -7,12 +7,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
-import me.lightspeed7.mongofs.LoremIpsum;
 import me.lightspeed7.mongofs.MongoFile;
 import me.lightspeed7.mongofs.MongoFileStore;
 import me.lightspeed7.mongofs.MongoFileStoreConfig;
 import me.lightspeed7.mongofs.MongoFileWriter;
-import me.lightspeed7.mongofs.MongoTestConfig;
 import me.lightspeed7.mongofs.crypto.BasicCrypto;
 import me.lightspeed7.mongofs.url.MongoFileUrl;
 import me.lightspeed7.mongofs.util.BytesCopier;

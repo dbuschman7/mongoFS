@@ -18,11 +18,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 
+import me.lightspeed7.mongofs.BufferedChunksOutputStream;
+import me.lightspeed7.mongofs.FileChunksOutputStreamSink;
+import me.lightspeed7.mongofs.InputFile;
 import me.lightspeed7.mongofs.MongoFileConstants;
 import me.lightspeed7.mongofs.util.BytesCopier;
-import me.lightspeed7.mongofs.writing.BufferedChunksOutputStream;
-import me.lightspeed7.mongofs.writing.FileChunksOutputStreamSink;
-import me.lightspeed7.mongofs.writing.InputFile;
 
 import org.bson.types.ObjectId;
 import org.mongodb.Document;

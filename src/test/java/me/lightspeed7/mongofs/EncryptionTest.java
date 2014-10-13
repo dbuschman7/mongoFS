@@ -1,4 +1,4 @@
-package me.lightspeed7.mongofs.writing;
+package me.lightspeed7.mongofs;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,7 +7,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
-import me.lightspeed7.mongofs.LoremIpsum;
 import me.lightspeed7.mongofs.crypto.BasicCrypto;
 
 import org.junit.Test;

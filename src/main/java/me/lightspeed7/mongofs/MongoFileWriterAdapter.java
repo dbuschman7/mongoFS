@@ -1,7 +1,5 @@
 package me.lightspeed7.mongofs;
 
-import me.lightspeed7.mongofs.writing.ChunksStatisticsAdapter;
-import me.lightspeed7.mongofs.writing.InputFile;
 
 /**
  * Adapter to handle the custom parts of data collection from each chunk

@@ -11,13 +11,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
-import me.lightspeed7.mongofs.reading.CountingInputStream;
-import me.lightspeed7.mongofs.reading.DecryptInputStream;
-import me.lightspeed7.mongofs.reading.FileChunksInputStreamSource;
 import me.lightspeed7.mongofs.url.MongoFileUrl;
 import me.lightspeed7.mongofs.url.Parser;
 import me.lightspeed7.mongofs.util.BytesCopier;
-import me.lightspeed7.mongofs.writing.InputFile;
 
 import org.bson.types.ObjectId;
 import org.mongodb.Document;
@@ -95,7 +91,7 @@ public class MongoFile implements InputFile {
     }
 
     /**
-     * Saves the file entry to the files collection
+     * Saves the file entry meta data to the files collection
      * 
      * @throws MongoException
      */

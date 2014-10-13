@@ -6,11 +6,6 @@ import java.io.OutputStream;
 
 import me.lightspeed7.mongofs.url.MongoFileUrl;
 import me.lightspeed7.mongofs.util.BytesCopier;
-import me.lightspeed7.mongofs.writing.BufferedChunksOutputStream;
-import me.lightspeed7.mongofs.writing.CountingOutputStream;
-import me.lightspeed7.mongofs.writing.FileChunksOutputStreamSink;
-import me.lightspeed7.mongofs.writing.MongoEncryptionOutputStream;
-import me.lightspeed7.mongofs.writing.MongoGZipOutputStream;
 
 import org.mongodb.Document;
 import org.mongodb.MongoCollection;

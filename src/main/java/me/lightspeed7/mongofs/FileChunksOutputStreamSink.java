@@ -1,10 +1,8 @@
-package me.lightspeed7.mongofs.writing;
+package me.lightspeed7.mongofs;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
-
-import me.lightspeed7.mongofs.MongoFileConstants;
 
 import org.mongodb.Document;
 import org.mongodb.MongoCollection;

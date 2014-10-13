@@ -1,4 +1,4 @@
-package me.lightspeed7.mongofs.writing;
+package me.lightspeed7.mongofs;
 
 public interface InputFile {
 

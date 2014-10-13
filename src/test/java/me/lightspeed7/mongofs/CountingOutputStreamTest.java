@@ -1,33 +1,32 @@
-package me.lightspeed7.mongofs.writing;
+package me.lightspeed7.mongofs;
+
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
-import me.lightspeed7.mongofs.LoremIpsum;
+import me.lightspeed7.mongofs.CountingOutputStream;
 import me.lightspeed7.mongofs.MongoFile;
 import me.lightspeed7.mongofs.MongoFileConstants;
 
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class MongoGZipOutputStreamTest {
+public class CountingOutputStreamTest {
 
     @Test
     public void test() throws IOException {
 
         MongoFile mock = Mockito.mock(MongoFile.class);
-        Mockito.when(mock.get(MongoFileConstants.length.toString())).thenReturn(Integer.valueOf(100));
-        Mockito.when(mock.get(MongoFileConstants.storage.toString())).thenReturn(Integer.valueOf(50));
-
         ByteArrayOutputStream out = new ByteArrayOutputStream(1024 * 1024);
 
-        OutputStream stream = new MongoGZipOutputStream(mock, out);
+        CountingOutputStream stream = new CountingOutputStream(MongoFileConstants.chunkSize, mock, out);
         try {
             byte[] bytes = LoremIpsum.LOREM_IPSUM.getBytes();
             stream.write(bytes);
             stream.write(123);
 
+            assertTrue(stream.getCount() == bytes.length + 1);
         } finally {
             stream.close();
         }

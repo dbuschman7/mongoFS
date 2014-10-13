@@ -1,11 +1,7 @@
-package me.lightspeed7.mongofs.writing;
+package me.lightspeed7.mongofs;
 
 import java.io.IOException;
 import java.io.OutputStream;
-
-import me.lightspeed7.mongofs.MongoFile;
-import me.lightspeed7.mongofs.MongoFileConstants;
-import me.lightspeed7.mongofs.MongoFileStoreConfig;
 
 public class MongoEncryptionOutputStream extends OutputStream {
 

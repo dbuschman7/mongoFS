@@ -1,6 +1,6 @@
 package me.lightspeed7.mongofs.gridfs;
 
-import me.lightspeed7.mongofs.writing.ChunksStatisticsAdapter;
+import me.lightspeed7.mongofs.ChunksStatisticsAdapter;
 
 /**
  * Adapter to handle the custom pars of data collection from each chunk

@@ -757,7 +757,7 @@ public class MongoFileStore {
      * 
      * @return the DBCollection object
      */
-    public MongoCollection<Document> getFilesCollection() {
+    /* package */MongoCollection<Document> getFilesCollection() {
 
         return filesCollection;
     }
@@ -767,7 +767,7 @@ public class MongoFileStore {
      * 
      * @return the DBCollection object
      */
-    public MongoCollection<Document> getChunksCollection() {
+    /* package */MongoCollection<Document> getChunksCollection() {
 
         return chunksCollection;
     }

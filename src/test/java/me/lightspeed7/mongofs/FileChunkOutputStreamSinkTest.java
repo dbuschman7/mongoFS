@@ -1,4 +1,4 @@
-package me.lightspeed7.mongofs.writing;
+package me.lightspeed7.mongofs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -6,7 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
-import me.lightspeed7.mongofs.MongoTestConfig;
+import me.lightspeed7.mongofs.ChunksStatisticsAdapter;
+import me.lightspeed7.mongofs.FileChunksOutputStreamSink;
 import me.lightspeed7.mongofs.gridfs.GridFS;
 import me.lightspeed7.mongofs.gridfs.GridFSInputFile;
 import me.lightspeed7.mongofs.gridfs.GridFSInputFileAdapter;

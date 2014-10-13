@@ -56,13 +56,13 @@ dependencies {
     testCompile 'com.google.code.gson:gson:2.2.4'
     
     testCompile("org.springframework:spring-core:${project.springVersion}")
-	testCompile("org.springframework:spring-context:${project.springVersion}")
-	testCompile("org.springframework:spring-expression:${project.springVersion}")
-	testCompile("org.springframework:spring-test:${project.springVersion}")
+    testCompile("org.springframework:spring-context:${project.springVersion}")
+    testCompile("org.springframework:spring-expression:${project.springVersion}")
+    testCompile("org.springframework:spring-test:${project.springVersion}")
 	
-	testCompile 'org.codehaus.groovy:groovy-all:2.0.8'
-    	//testCompile('org.spockframework:spock-core:0.6-groovy-1.8') {
-    	testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
+    testCompile 'org.codehaus.groovy:groovy-all:2.0.8'
+    //testCompile('org.spockframework:spock-core:0.6-groovy-1.8') {
+    testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
         exclude group: 'junit', module: 'junit-dep'
     }
     
@@ -134,17 +134,44 @@ task wrapper(type: Wrapper) {
 
 project.ext.mavenDeployers = []
 
-def pom = { config ->
-    project.mavenDeployers*.pom config
-}
 
 install {
     project.mavenDeployers << repositories.mavenInstaller
 }
 
+
 uploadArchives {
 	repositories.mavenDeployer {
         repository(url: "file:///Users/dbusch/dev/dbuschman7/mvn-repo/")
+		pom.project {
+	        name 'me.lightspeed7:MongoFS'
+	        description =
+	        '''
+	        An extension to the MongoDB Java Driver library that goes beyond what the GridFS feature supports.
+	        Compressed file storage, zip files, temporary files
+	        '''
+	        url 'http://github.com/dbuschman7/mongoFS'
+	        scm {
+	            url 'git@github.com:dbuschman7/mongoFS.git'
+	            connection 'scm:git:git@github.com:dbuschman7/mongoFS.git'
+	            developerConnection 'scm:git:git@github.com:dbuschman7/mongoFS.git'
+	
+	        }
+	        licenses {
+	            license {
+	                name 'The Apache Software License, Version 2.0'
+	                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+	                distribution 'repo'
+	            }
+	        }
+	        developers {
+	            developer {
+	                id 'dbuschman7'
+	                name 'David Buschman'
+	                url = 'http://github.com/dbuschman7'
+	            }
+	        }
+		}
     }
 }
 
@@ -157,46 +184,14 @@ test {
         }
 }
 
-    sourceSets {
-        test {
-            groovy { srcDirs = ['src/test/java'] }
-            //Note: no groovy/spock tests in acceptance, these are Java tests
-            java { srcDirs = ['src/test/java'] }
-        }
-    }
-
-
-
-pom {
-    project {
-
-        name 'MongoFS'
-        description =
-        '''
-        An extension to the MongoDB Java Driver library that goes beyond what the GridFS feature supports.
-        Compressed file storage, zip files, temporary files
-        '''
-        url 'http://github.com/dbuschman7/mongoFS'
-        scm {
-            url 'git@github.com:dbuschman7/mongoFS.git'
-            connection 'scm:git:git@github.com:dbuschman7/mongoFS.git'
-            developerConnection 'scm:git:git@github.com:dbuschman7/mongoFS.git'
-
-        }
-
-        licenses {
-            license {
-                name 'The Apache Software License, Version 2.0'
-                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                distribution 'repo'
-            }
-        }
-        developers {
-            developer {
-                id 'dbuschman7'
-                name 'David Buschman'
-                url = 'http://github.com/dbuschman7'
-            }
-        }
+sourceSets {
+    test {
+        groovy { srcDirs = ['src/test/java'] }
+        //Note: no groovy/spock tests in acceptance, these are Java tests
+        java { srcDirs = ['src/test/java'] }
     }
 }
+
+
+
+

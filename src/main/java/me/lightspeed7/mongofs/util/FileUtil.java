@@ -1,6 +1,8 @@
 package me.lightspeed7.mongofs.util;
 
 import java.io.File;
+import java.net.FileNameMap;
+import java.net.URLConnection;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -62,6 +64,17 @@ public final class FileUtil {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Error - this implementation of Java doesn't support MD5.");
         }
+    }
+
+    /**
+     * Return the contentType for a given filename if it is defined inside the JVM
+     * 
+     * @param filename
+     * @return the content type
+     */
+    public static String getContentType(final String filename) {
+        FileNameMap mapNew = URLConnection.getFileNameMap();
+        return mapNew.getContentTypeFor("." + getExtension(filename));
     }
 
 }

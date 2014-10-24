@@ -1,14 +1,31 @@
 package me.lightspeed7.mongofs;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 
 // Test data for testing chunking in MongoFile impl
 public final class LoremIpsum {
 
+    private static final String TEXT_FILE = "./src/test/resources/loremIpsum.txt";
+
     private LoremIpsum() {
         // hidden
+    }
+
+    public static File getFile() throws IOException {
+        File file = new File(TEXT_FILE);
+        if (!file.exists()) {
+            FileOutputStream out = new FileOutputStream(file);
+            try {
+                out.write(LoremIpsum.getBytes(), 0, LoremIpsum.LOREM_IPSUM.length());
+            } finally {
+                out.close();
+            }
+        }
+        return file;
     }
 
     public static void createFile(final MongoFileStore store, final String filename, final String mediaType) throws IOException {

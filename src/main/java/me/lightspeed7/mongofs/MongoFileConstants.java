@@ -27,7 +27,10 @@ public enum MongoFileConstants {
     compressionFormat(false), // deprecated, now uses format
     format(false), //
     expireAt(false), //
-    deleted(false);
+    deleted(false), //
+    manifestId(false), // expanded zip file support
+    manifestNum(false); // expanded zip file support
+    //
 
     private boolean core = false;
 

@@ -32,7 +32,7 @@ public class MongoFileConstantsTest {
 
         Set<String> coreFields = MongoFileConstants.getFields(true);
         assertNotNull(coreFields);
-        assertEquals(18, coreFields.size());
+        assertEquals(20, coreFields.size());
         assertTrue(coreFields.contains(MongoFileConstants._id.name()));
         assertTrue(coreFields.contains(MongoFileConstants.filename.name()));
         assertTrue(coreFields.contains(MongoFileConstants.md5.name()));
@@ -56,5 +56,7 @@ public class MongoFileConstantsTest {
         assertTrue(coreFields.contains(MongoFileConstants.expireAt.name()));
         assertTrue(coreFields.contains(MongoFileConstants.deleted.name()));
 
+        assertTrue(coreFields.contains(MongoFileConstants.manifestId.name()));
+        assertTrue(coreFields.contains(MongoFileConstants.manifestNum.name()));
     }
 }

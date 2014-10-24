@@ -86,11 +86,15 @@ public class MongoFileStore {
 
         chunksCollection = database.getCollection(config.getBucket() + ".chunks", chunksOptions);
 
+        // INDEXES
         // make sure the expiration index is present
         // files go first, within a minute according to MongoDB
         // then the chunks follow 1 minute after the file objects
         checkForExpireAtIndex(filesCollection, 0);
         checkForExpireAtIndex(chunksCollection, 60);
+
+        // make sure the zip manifest index exists
+        checkForManifestIndex(filesCollection);
 
         // ensure standard indexes as long as collections are small
         try {
@@ -124,6 +128,27 @@ public class MongoFileStore {
                 .addKey("expireAt", OrderBy.ASC)//
                 .expireAfterSeconds(secondsDelay)//
                 .name("ttl")//
+                .sparse() //
+                .background(true)//
+                .build();
+
+        coll.tools().createIndexes(java.util.Collections.singletonList(idx));
+    }
+
+    private void checkForManifestIndex(final MongoCollection<Document> coll) {
+        String name = MongoFileConstants.manifestId.name();
+
+        // check for existing
+        for (Document document : coll.tools().getIndexes()) {
+            if (name.equals(document.get("name"))) {
+                return;
+            }
+        }
+
+        // build one
+        Index idx = Index.builder()//
+                .addKey(name, OrderBy.ASC)//
+                .name(name)//
                 .sparse() //
                 .background(true)//
                 .build();
@@ -298,12 +323,7 @@ public class MongoFileStore {
      */
     public MongoFile upload(final File file, final String mediaType) throws IOException {
 
-        FileInputStream inputStream = new FileInputStream(file);
-        try {
-            return upload(file.toPath().toString(), mediaType, null, true, inputStream);
-        } finally {
-            inputStream.close();
-        }
+        return upload(file, mediaType, config.isCompressionEnabled(), null);
     }
 
     /**
@@ -400,6 +420,49 @@ public class MongoFileStore {
             final InputStream inputStream) throws IOException {
 
         return createNew(filename, mediaType, expiresAt, compress).write(inputStream);
+    }
+
+    //
+    // manifest
+    // ////////////////////
+    public MongoManifest getManifest(final MongoFile file) throws IOException {
+        if (file == null) {
+            throw new IllegalArgumentException("file cannot be null");
+        }
+
+        if (!file.isExpandedZipFile()) {
+            throw new IllegalStateException("");
+        }
+
+        //
+        Document query = new Document(MongoFileConstants.manifestId.name(), file.getId());
+        Document sort = new Document(MongoFileConstants.manifestNum.name(), 1);
+
+        MongoFileCursor mongoFileCursor = find(query, sort);
+        if (!mongoFileCursor.hasNext()) {
+            throw new IllegalStateException("Cannot generate manifest correctly");
+        }
+
+        // generate the manifest
+        MongoManifest manifest = new MongoManifest(mongoFileCursor.next());
+        while (mongoFileCursor.hasNext()) {
+            manifest.addMongoFile(mongoFileCursor.next());
+        }
+
+        return manifest;
+    }
+
+    public MongoManifest getManifest(final MongoFileUrl url) throws IOException {
+        if (url == null) {
+            throw new IllegalArgumentException("file cannot be null");
+        }
+        MongoFile mongoFile = findOne(url);
+        if (mongoFile == null) {
+            return null;
+        }
+
+        return getManifest(mongoFile);
+
     }
 
     //

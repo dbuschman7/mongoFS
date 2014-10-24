@@ -85,6 +85,20 @@ public class MongoFileWriter {
     }
 
     /**
+     * Read the given stream as a zip file and split the files inside into separate file objects
+     * 
+     * @param in
+     * 
+     * @return MongoManifest file
+     * 
+     * @throws IOException
+     */
+    public MongoManifest uploadZipFile(final InputStream in) throws IOException {
+
+        return new MongoZipFileExpander(store, file).expandFrom(in);
+    }
+
+    /**
      * The the MongoFile object to write to
      * 
      * @return the MongoFile object

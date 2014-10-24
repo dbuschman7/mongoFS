@@ -1,5 +1,6 @@
 package me.lightspeed7.mongofs;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -192,6 +193,22 @@ public class MongoFile implements InputFile {
         new BytesCopier(getInputStream(), out).transfer(flush);
 
         return out;
+    }
+
+    /**
+     * Read the contents on the file into a String
+     * 
+     * NOTE : This uses heap memory to store the contents on the file, the user is responsible to know that the file can safely fit into the
+     * memory space of the running application. The memory allocated is chunkSize * chunkCount
+     * 
+     * @return the file contents as a string
+     * @throws IOException
+     */
+    public String readIntoString() throws IOException {
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream(this.getChunkSize() * this.getChunkCount());
+        new BytesCopier(getInputStream(), out).transfer(true);
+        return out.toString("UTF-8");
     }
 
     //
@@ -684,6 +701,14 @@ public class MongoFile implements InputFile {
 
     public boolean isEncrypted() {
         return encrypted;
+    }
+
+    public boolean isExpandedZipFile() {
+
+        if (0 == this.getInt(MongoFileConstants.manifestNum, -1)) {
+            return true;
+        }
+        return false;
     }
 
 }

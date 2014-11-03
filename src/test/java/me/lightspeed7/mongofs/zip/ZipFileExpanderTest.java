@@ -36,9 +36,9 @@ import com.mongodb.WriteConcern;
 
 public class ZipFileExpanderTest {
 
-    private static final String TEST_ZIP = "./src/test/resources/test.zip";
+    static final String TEST_ZIP = "./src/test/resources/test.zip";
 
-    private static final String DB_NAME = "MongoFSTest-zipExpander";
+    static final String DB_NAME = "MongoFSTest-zipExpander";
 
     private static MongoDatabase database;
 
@@ -95,7 +95,7 @@ public class ZipFileExpanderTest {
 
     private void runTests(final MongoFileStore store, final File file) throws IOException {
 
-        String filename = file.getAbsolutePath();
+        String filename = file.getCanonicalPath();
 
         MongoFileWriter writer = store.createNew(filename, FileUtil.getContentType(filename));
 
@@ -164,7 +164,7 @@ public class ZipFileExpanderTest {
     // Internal
     // ///////////////////
     //
-    private static void createFile(final ZipOutputStream out, final String fileName, final byte[] data) throws IOException {
+    /* package */static void createFile(final ZipOutputStream out, final String fileName, final byte[] data) throws IOException {
         ZipEntry e = new ZipEntry(fileName);
         out.putNextEntry(e);
 

@@ -426,7 +426,7 @@ public class MongoFileStore {
     //
     // manifest
     // ////////////////////
-    public MongoManifest getManifest(final MongoFile file) throws IOException {
+    public MongoManifest getManifest(final MongoFile file) {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be null");
         }
@@ -741,6 +741,7 @@ public class MongoFileStore {
      *            the selection criteria
      * @param async
      *            - can the file be deleted asynchronously
+     * @throws
      * 
      * @throws IllegalArgumentException
      *             if required parameters are null
@@ -753,18 +754,25 @@ public class MongoFileStore {
         // can't remove chunks without files_id thus keep them
         List<ObjectId> filesIds = new ArrayList<ObjectId>();
         for (MongoFile f : find(query)) {
+            // add all files in from the expanded zip file
+            if (f.isExpandedZipFile()) {
+                for (MongoFile f2 : this.getManifest(f).getFiles()) {
+                    filesIds.add(f2.getId());
+                }
+            }
             filesIds.add(f.getId());
         }
 
+        Document filesQuery = new Document("_id", new Document("$in", filesIds));
         Document chunksQuery = new Document("files_id", new Document("$in", filesIds));
 
         // flag delete always for quick "logically" removal
-        setExpiresAt(query, chunksQuery, TimeMachine.now().backward(1).seconds().inTime(), true);
+        setExpiresAt(filesQuery, chunksQuery, TimeMachine.now().backward(1).seconds().inTime(), true);
 
         // do the real delete if requested
         if (!async) {
             // remove files from bucket
-            WriteResult writeResult = getFilesCollection().remove(query);
+            WriteResult writeResult = getFilesCollection().remove(filesQuery);
             if (writeResult.getCount() > 0) {
                 // then remove chunks, for those file objects
                 getChunksCollection().remove(chunksQuery);

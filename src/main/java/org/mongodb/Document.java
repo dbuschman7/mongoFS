@@ -43,8 +43,8 @@ public class Document {
         return wrap(getSurrogate().get(key));
     }
 
-    public String getString(final MongoFileConstants compressionformat) {
-        return this.getString(compressionformat.name());
+    public String getString(final MongoFileConstants constant) {
+        return this.getString(constant.name());
     }
 
     @SuppressWarnings("deprecation")

@@ -148,6 +148,7 @@ public class StorageComparisonTest {
         String bucket = "mongofs";
         MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().bucket(bucket).build());
         MongoFileWriter writer = store.createNew("mongoFS.txt", "text/plain");
+        assertNotNull(writer.toString());
         MongoFile file = writer.getMongoFile();
 
         file.put("aliases", Arrays.asList("one", "two", "three"));
@@ -184,9 +185,11 @@ public class StorageComparisonTest {
         assertNotNull(findOne);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
-        new BytesCopier(new MongoFileReader(store, file).getInputStream(), out).transfer(true);
+        MongoFileReader reader = new MongoFileReader(store, file);
+        assertNotNull(reader.toString());
+        new BytesCopier(reader.getInputStream(), out).transfer(true);
         assertEquals(LoremIpsum.LOREM_IPSUM, out.toString());
-
+        assertNotNull(reader.getMongoFile());
     }
 
     // internal

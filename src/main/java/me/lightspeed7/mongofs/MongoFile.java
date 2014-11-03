@@ -28,9 +28,9 @@ import org.mongodb.MongoException;
  */
 public class MongoFile implements InputFile {
 
-    private Document surrogate;
+    private final Document surrogate;
 
-    private MongoFileStore store;
+    private final MongoFileStore store;
 
     private final boolean compress;
 
@@ -132,10 +132,6 @@ public class MongoFile implements InputFile {
 
     public MongoFileUrl getURL() throws MalformedURLException {
 
-        if (surrogate == null) {
-            throw new IllegalStateException("MongoFile not constructed correctly");
-        }
-
         // compression and encrypted read from stored format
         URL url = Parser.construct(getId(), getFilename(), getContentType(), fetchFormat(surrogate), this.compress, this.encrypted);
         return MongoFileUrl.construct(url);
@@ -221,10 +217,6 @@ public class MongoFile implements InputFile {
      * @return number of chunks
      */
     public int getChunkCount() {
-
-        if (surrogate == null) {
-            throw new IllegalArgumentException("Cannot get chunk count before data is written");
-        }
 
         // for compatibility with legacy GridFS implementations, if -1 comes
         // back, then legacy file
@@ -423,7 +415,7 @@ public class MongoFile implements InputFile {
     public Object put(final String key, final Object value) {
 
         if (key == null) {
-            throw new RuntimeException("key should never be null");
+            throw new IllegalArgumentException("key should never be null");
         }
 
         return surrogate.put(key, value);
@@ -439,10 +431,10 @@ public class MongoFile implements InputFile {
     public Object put(final MongoFileConstants key, final Object value) {
 
         if (key == null) {
-            throw new RuntimeException("key should never be null");
+            throw new IllegalArgumentException("key should never be null");
         }
 
-        return surrogate.put(key.toString(), value);
+        return surrogate.put(key.name(), value);
     }
 
     /**
@@ -470,7 +462,7 @@ public class MongoFile implements InputFile {
         if (key == null) {
             throw new IllegalArgumentException("Key should never be null");
         }
-        return surrogate.get(key.toString());
+        return surrogate.get(key.name());
     }
 
     /**
@@ -482,7 +474,7 @@ public class MongoFile implements InputFile {
      */
     public String getString(final MongoFileConstants key) {
 
-        return (String) surrogate.get(key.toString());
+        return (String) surrogate.get(key.name());
     }
 
     /**
@@ -498,7 +490,7 @@ public class MongoFile implements InputFile {
             throw new IllegalArgumentException("key cannot be null");
         }
 
-        Object value = surrogate.get(key.toString());
+        Object value = surrogate.get(key.name());
         if (value == null) {
             return -1;
         }
@@ -519,7 +511,7 @@ public class MongoFile implements InputFile {
             throw new IllegalArgumentException("key cannot be null");
         }
 
-        Object value = surrogate.get(key.toString());
+        Object value = surrogate.get(key.name());
         if (value == null) {
             return -1;
         }
@@ -538,11 +530,7 @@ public class MongoFile implements InputFile {
      */
     public int getInt(final MongoFileConstants key, final int def) {
 
-        if (surrogate == null) {
-            return def;
-        }
-
-        Integer value = surrogate.getInteger(key.toString());
+        Integer value = surrogate.getInteger(key.name());
         return value != null ? value : def;
     }
 
@@ -557,11 +545,7 @@ public class MongoFile implements InputFile {
      */
     public long getLong(final MongoFileConstants key, final long def) {
 
-        if (surrogate == null) {
-            return def;
-        }
-
-        Long value = surrogate.getLong(key.toString());
+        Long value = surrogate.getLong(key.name());
         return value != null ? value : def;
     }
 
@@ -576,11 +560,7 @@ public class MongoFile implements InputFile {
      */
     public double getDouble(final MongoFileConstants key, final double def) {
 
-        if (surrogate == null) {
-            return def;
-        }
-
-        return surrogate.getDouble(key.toString(), def);
+        return surrogate.getDouble(key.name(), def);
     }
 
     /**
@@ -594,11 +574,7 @@ public class MongoFile implements InputFile {
      */
     public String getString(final MongoFileConstants key, final String def) {
 
-        if (surrogate == null) {
-            return def;
-        }
-
-        String value = surrogate.getString(key.toString());
+        String value = surrogate.getString(key.name());
         return value != null ? value : def;
     }
 
@@ -613,11 +589,7 @@ public class MongoFile implements InputFile {
      */
     public boolean getBoolean(final MongoFileConstants key, final boolean def) {
 
-        if (surrogate == null) {
-            return def;
-        }
-
-        Object foo = surrogate.get(key.toString());
+        Object foo = surrogate.get(key.name());
         if (foo == null) {
             return def;
         }
@@ -641,10 +613,6 @@ public class MongoFile implements InputFile {
      */
     public ObjectId getObjectId(final MongoFileConstants field, final ObjectId def) {
 
-        if (surrogate == null) {
-            return def;
-        }
-
         final Object foo = surrogate.get(field.toString());
         return (foo != null) ? (ObjectId) foo : def;
     }
@@ -659,10 +627,6 @@ public class MongoFile implements InputFile {
      * @return The field object value or def if not set.
      */
     public Date getDate(final MongoFileConstants field, final Date def) {
-
-        if (surrogate == null) {
-            return def;
-        }
 
         final Object foo = surrogate.get(field.toString());
         return (foo != null) ? (Date) foo : def;

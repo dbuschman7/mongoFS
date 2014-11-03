@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
@@ -17,8 +19,8 @@ import me.lightspeed7.mongofs.util.BytesCopier;
 import me.lightspeed7.mongofs.util.ChunkSize;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.mongodb.Document;
 import org.mongodb.MongoDatabase;
 
 import com.mongodb.MongoClient;
@@ -43,28 +45,24 @@ public class MongoFileStoreTest {
     }
 
     @Test
-    @Ignore
     public void testBasicUncompressedRoundTrip() throws IOException {
 
         doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, false, false);
     }
 
     @Test
-    @Ignore
     public void testBasicCompressedRoundTrip() throws IOException {
 
         doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, true, false);
     }
 
     @Test
-    @Ignore
     public void testLotsOfChunksUncompressedRoundTrip() throws IOException {
 
         doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, false);
     }
 
     @Test
-    @Ignore
     public void testLotsOfChunksCompressedRoundTrip() throws IOException {
 
         doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true, false);
@@ -74,6 +72,12 @@ public class MongoFileStoreTest {
     public void testLotsOfChunksEncryptedRoundTrip() throws IOException {
 
         doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, true);
+    }
+
+    @Test
+    public void testLotsOfChunksNoCompNoEncryptRoundTrip() throws IOException {
+
+        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, false);
     }
 
     private void doRoundTrip(final String bucket, final String filename, final ChunkSize chunkSize, final boolean compress,
@@ -100,6 +104,7 @@ public class MongoFileStoreTest {
         // verify it exists
         MongoFile mongoFile = writer.getMongoFile();
         assertTrue(store.exists(mongoFile.getURL()));
+        assertNotNull(mongoFile.getMD5());
 
         // read a file
         assertEquals(compress, mongoFile.getURL().isStoredCompressed());
@@ -127,7 +132,7 @@ public class MongoFileStoreTest {
     }
 
     @Test
-    public void testUpload() throws IOException {
+    public void testUpload1() throws IOException {
         MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
         assertNotNull(store.toString());
 
@@ -140,6 +145,42 @@ public class MongoFileStoreTest {
         MongoFile file2 = store.findOne(file.getURL().getUrl());
         assertNotNull(file2);
 
+    }
+
+    @Test
+    public void testUpload2() throws IOException {
+        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+        assertNotNull(store.toString());
+
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(LoremIpsum.getBytes());
+        try {
+            MongoFile file = store.upload(LoremIpsum.getFile().getAbsolutePath(), "text/plain", inputStream);
+            assertNotNull(file);
+            assertEquals(LoremIpsum.LOREM_IPSUM.length(), file.getLength());
+            assertTrue(store.exists(file.getURL()));
+            assertTrue(store.exists(file.getId()));
+
+        } finally {
+            inputStream.close();
+        }
+
+    }
+
+    @Test(expected = FileNotFoundException.class)
+    public void testUpload3() throws IOException {
+        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+        assertNotNull(store.toString());
+
+        File file2 = new File("file.does.not.exist");
+        store.upload(file2, "text/plain", false, null);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testUpload4() throws IOException {
+        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().enableEncryption(new BasicCrypto()).build());
+        assertNotNull(store.toString());
+
+        store.upload(LoremIpsum.getFile(), "text/plain", true, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -253,4 +294,31 @@ public class MongoFileStoreTest {
         store.exists((MongoFileUrl) null);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testException17() throws IOException {
+
+        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+        store.createNew("filename", "test/plain").write(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testException18() throws IOException {
+
+        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+        store.remove((Document) null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testException19() throws IOException {
+
+        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+        store.remove((MongoFileUrl) null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testException20() throws IOException {
+
+        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+        store.remove((MongoFile) null);
+    }
 }

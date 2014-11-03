@@ -13,6 +13,7 @@ import java.util.List;
 
 import me.lightspeed7.mongofs.url.MongoFileUrl;
 import me.lightspeed7.mongofs.util.ChunkSize;
+import me.lightspeed7.mongofs.util.TimeMachine;
 
 import org.bson.types.ObjectId;
 import org.mongodb.CommandResult;
@@ -716,19 +717,7 @@ public class MongoFileStore {
             throw new IllegalArgumentException("mongoFileUrl cannot be null");
         }
 
-        Document filesQuery = new Document().append("_id", url.getMongoFileId());
-
-        Document chunksQuery = new Document("files_id", url.getMongoFileId());
-
-        if (async) {
-            setExpiresAt(filesQuery, chunksQuery, new Date(), false);
-        }
-        else {
-            WriteResult writeResult = filesCollection.remove(filesQuery);
-            if (writeResult.getCount() > 0) {
-                chunksCollection.remove(chunksQuery);
-            }
-        }
+        remove(new Document("_id", url.getMongoFileId()), async);
     }
 
     /**
@@ -769,10 +758,11 @@ public class MongoFileStore {
 
         Document chunksQuery = new Document("files_id", new Document("$in", filesIds));
 
-        if (async) {
-            setExpiresAt(query, chunksQuery, new Date(), true);
-        }
-        else {
+        // flag delete always for quick "logically" removal
+        setExpiresAt(query, chunksQuery, TimeMachine.now().backward(1).seconds().inTime(), true);
+
+        // do the real delete if requested
+        if (!async) {
             // remove files from bucket
             WriteResult writeResult = getFilesCollection().remove(query);
             if (writeResult.getCount() > 0) {

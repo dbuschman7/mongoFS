@@ -12,7 +12,7 @@ import me.lightspeed7.mongofs.url.MongoFileUrl;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
-public class MongoFileTest {
+public class MongoFileUrlTest {
 
     public static final String PDF = "application/pdf";
     public static final String ZIP = "application/zip";

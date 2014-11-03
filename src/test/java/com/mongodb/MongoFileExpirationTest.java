@@ -46,7 +46,8 @@ public class MongoFileExpirationTest {
         createTempFile(store, "/foo/bar1.txt", "text/plain", TimeMachine.from(now).forward(5).seconds().inTime());
 
         MongoFileCursor cursor = store.find("/foo/bar1.txt");
-        assertTrue(Math.abs(now - (2 * 24 * 60 * 60 * 1000) - cursor.next().getExpiresAt().getTime()) <= 1);
+        long abs = Math.abs(now - (2 * 24 * 60 * 60 * 1000) - cursor.next().getExpiresAt().getTime());
+        assertTrue(abs <= 1);
         assertTrue(Math.abs(now + (5 * 1000) - cursor.next().getExpiresAt().getTime()) <= 1);
     }
 

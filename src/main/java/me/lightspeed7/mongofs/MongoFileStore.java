@@ -741,8 +741,6 @@ public class MongoFileStore {
      *            the selection criteria
      * @param async
      *            - can the file be deleted asynchronously
-     * @throws
-     * 
      * @throws IllegalArgumentException
      *             if required parameters are null
      */

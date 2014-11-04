@@ -92,7 +92,7 @@
             <div class="col-lg-8 col-lg-offset-2">
                 <h2>About <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
                 <p>This project came out of a need in my company to extend the current GridFS functionality to include compression of file data. After spending a day or so trying to work with the existing implementation, I determined that the existing implementation was not going to be extendible due to the current use of inner classes and heavy cross-class collusion. So I decided to re-write the existing implementation in order to extend it and publish those enhancements for anyone else who will like to make use of it.</p>
-                <p> Also the "coming soon" Mongo-Java-Driver 3.0.x which is an almost complete re-write by the MonogDB folks has a new and much cleaner API and Object Model, I need a way to bridge the gap seamlessly at my current company because we are making heavy use of the library using the 2.10.x thru 2.12.x drivers. I need to be able to migrate these systems to the new 3.0.x driver when it is released.</p> 
+                <p> Also the "coming soon" Mongo-Java-Driver 3.0.x which is an almost complete re-write by the MonogDB folks has a new and much cleaner API and Object Model means that I need a way to bridge the gap seamlessly at my current company because we are making heavy use of the library using the 2.10.x thru 2.12.x drivers. I need to be able to migrate these systems to the new 3.0.x driver when it is released.</p> 
 				<p>Goto the <a href="#download" >downloads</a> section to see the latest version and how to get it. Check out my task list under the <a href="https://github.com/dbuschman7/mongoFS/blob/master/TODO.md" >TODO</a> to check the progress.</p>
                 <div class="page-scroll hidden-xs">
                     <a href="#features" class="btn btn-circle">
@@ -117,14 +117,16 @@
 					<tr><td>MD5 data checksums</td><td><i class="fa fa-check" ></i></td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>Available in JVM based languages</td><td><i class="fa fa-check" ></i></td><td><i class="fa fa-check" ></i></td></tr>
 					<tr><td>Available in other languages</td><td><i class="fa fa-check" ></i></td><td>Not Yet</i></td> </tr>
-					<tr><td>Optimized for usePowerOf2Sizes storage</td><td>starting in 2.6</td><td><i class="fa fa-check" ></i></td> </tr>
+					<tr><td>Optimized for usePowerOf2Sizes storage</td><td>starting in 2.6</td><td>supported in 2.4+</td> </tr>
 					<tr><td>Background deletes ( asynchronous )</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>Temporary file storage ( expiration )</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
-					<tr><td>Provides URL for easy file reference</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
+					<tr><td>Provides URL syntax for easy file reference</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>Space saving data compression ( gzip )</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
 					<tr><td>Storing files with customer defined encryption</td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
-					<tr><td>Uses a 3.0.x driver compatible API bridge </td><td>&nbsp;</td><td><i class="fa fa-check" ></i></td> </tr>
-					<tr><td>ZIP archives and serachable manifests</td><td>&nbsp;</td><td>Coming ( 0.9.x )</td> </tr>
+					<tr><td>3.0.x driver compatible objects with 2.12.x driver</td><td>&nbsp;</td><td>0.8.x</td></tr>
+					<tr><td>ZIP archive expansion and manifests</td><td>&nbsp;</td><td>0.9.x</td></tr>
+					<tr><td>Java 3.0 driver compatible</td><td>&nbsp;</td><td>Coming ( 1.0.x )</td></tr>
+					<tr><td>Non-blocking IO and reactive</td><td>&nbsp;</td><td>Coming ( 1.1.x )</td></tr>
 				
 				</table>
                 <div class="page-scroll hidden-xs">
@@ -140,10 +142,11 @@
             <div class="col-lg-8 col-lg-offset-2">
                 <h2>Migrating a G<small>rid</small>FS store to <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
 				<p><i><small class="green">mongo</small><span class="beige" >FS</span></i> was built to be compatible with an existing GridFS collections. There is even an implementation of GridFS inside of <i><small class="green">mongo</small><span class="beige" >FS</span></i> that has been refactored to use some <i><small class="green">mongo</small><span class="beige" >FS</span></i> classes underneath.</p>
-				<p>Simply point MongoFileStore to the existing GridFS collections and gain the new compression and URL functionality. </p><p><strong>NOTE:</strong> This is a one-way process. Once <i><small class="green">mongo</small><span class="beige" >FS</span></i> starts writing compressed and/or encrypted file chunks, the data read from GridFS directly will be a Gzip compressed and/or encrypted stream that you will have to handle to get the raw data back. Also, <i><small class="green">mongo</small><span class="beige" >FS</span></i> adds fields to the documents that help it know what to do with the file and chunk data in the DB collections.</p>  
+				<p>Simply point MongoFileStore to the existing GridFS collections and gain the new compression, excryption and MongoFile URL functionality. A GridFS compatiable configuration is provided to disable the encryption and compression support.</p>  
+				<p><strong>NOTE:</strong> Once compression or encryption is enabled, this is a one-way process. Once <i><small class="green">mongo</small><span class="beige" >FS</span></i> starts writing compressed and/or encrypted file chunks, the data read from GridFS directly will be a Gzip compressed and/or an encrypted stream that you will have to handle manually to get the raw data back. Also, <i><small class="green">mongo</small><span class="beige" >FS</span></i> adds fields to the documents that help it know what to do with the file and chunk data in the DB collections.</p>  
 				
 				<h2>Migrating from <i><small class="green">mongo</small><span class="beige" >FS</span></i> 0.7.x to 0.8.x</h2>
-				<p>This migration will require some coding changes need to unsure compatiblity with the uncoming MongoDB 3.0.x Java driver. The code changes allow for the upcoming change from DBObject to the new Document base object found in the 3.0.x driver. Most of the changes fro the 3.0.x driver are hidden from the user but some changes to my API were needed to support the new class structure in the 3.0.x driver.</p>
+				<p>This migration will require some coding changes need to ensure compatiblity with the uncoming MongoDB 3.0.x Java driver. The code changes allow for the upcoming change from DBObject to the new Document base object found in the 3.0.x driver. Most of the changes fro the 3.0.x driver are hidden from the user but some changes to my API were needed to support the new class structure in the 3.0.x driver.</p>
 				
 				
                 <div class="page-scroll hidden-xs">
@@ -160,19 +163,20 @@
         <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 download-padding">
                     <h2>Download <i><small class="green">mongo</small><span class="beige" >FS</span></i></h2>
-                    <p>I will be working on getting this in the main Maven Repository in the near future</p>
-                    <p>My maven based repo is hosted on GitHub, repo url is <br/>https://github.com/dbuschman7/mvn-repo/raw/master</p>
+                    <p><i><small class="green">mongo</small><span class="beige" >FS</span></i> is now available in the Maven Central Repository</p>
+                    <p>Older versions can be found in my maven based repo is hosted on GitHub, <br/>the resolver URL for that repo is <br/>https://github.com/dbuschman7/mvn-repo/raw/master</p>
+                    <p>To see all versions available in Maven Central, go to <a href="http://mvnrepository.com/artifact/me.lightspeed7/mongoFS" target="_new">MvnRepository.com</a>
                     <div class="row">
                     <div class="col-xs-12 col-sm-offset-2 col-sm-8 col-md-offset-3 col-md-6 col-lg-offset-3 col-lg-6" >
 <pre class=""><code>&lt;dependency>
 	&lt;groupId&gt;me.lightspeed7&lt;/groupId&gt;
 	&lt;artifactId&gt;mongoFS&lt;/artifactId&gt;
-	&lt;version&gt;0.7.6&lt;/version&gt;
+	&lt;version&gt;0.8.1&lt;/version&gt;
 &lt;/dependency&gt;
 </code></pre> 
                     </div>
 					</div>
-                    <p>Download manually <a href="https://github.com/dbuschman7/mvn-repo/tree/master/me/lightspeed7/mongoFS" >here</a>. You can get the source code directly from GitHub.</p>
+                    <p>You can get the source code directly from GitHub.</p>
                     <a href="https://github.com/dbuschman7/mongoFS" target="_blank" class="btn btn-default btn-lg">Visit Github Page</a>
                     <div class="page-scroll hidden-xs">
 	                    <a href="#contact" class="btn btn-circle">

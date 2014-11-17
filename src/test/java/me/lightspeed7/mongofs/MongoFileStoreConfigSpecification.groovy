@@ -55,22 +55,21 @@ class MongoFileStoreConfigSpecification extends Specification {
         true == config.isEncryptionEnabled();
     }
 
-     def "should throw when compression and encryption are both enabled - encryption first"() {
-        when:
-        MongoFileStoreConfig.builder().encryption(new BasicCrypto()).enableCompression(tree)//
+
+    def "should create config with both encryption and compression enabled"() {
+        expect:
+        def config = MongoFileStoreConfig.builder().asyncDeletes(false).bucket('foo')//
+                .chunkSize(ChunkSize.huge_4M).enableCompression(true).enableEncryption(new BasicCrypto())//
+                .readPreference(ReadPreference.SECONDARY_PREFERRED).writeConcern(WriteConcern.FSYNCED)//
                 .build();
 
-        then:
-        thrown(IllegalStateException)
-    }
-
-    def "should throw when compression and encryption are both enabled - compression first"() {
-        when:
-        MongoFileStoreConfig.builder().enableCompression(tree).encryption(new BasicCrypto())//
-                .build();
-
-        then:
-        thrown(IllegalStateException)
+        'foo' == config.getBucket();
+        ChunkSize.huge_4M.getChunkSize() == config.getChunkSize();
+        ReadPreference.secondaryPreferred() == config.getReadPreference();
+        WriteConcern.FSYNCED == config.getWriteConcern();
+        false == config.isAsyncDeletes();
+        true == config.isCompressionEnabled();
+        true == config.isEncryptionEnabled();
     }
 
     def "should be compatible with existing GridFS filestores"()  {

@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import me.lightspeed7.mongofs.crypto.BasicCrypto;
-import me.lightspeed7.mongofs.url.MongoFileUrl;
+import me.lightspeed7.mongofs.url.StorageFormat;
 import me.lightspeed7.mongofs.util.BytesCopier;
 import me.lightspeed7.mongofs.util.ChunkSize;
 
@@ -75,6 +75,12 @@ public class MongoFileStoreTest {
         doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, true);
     }
 
+    @Test
+    public void testLotsOfChunksEncryptedAndCompressedRoundTrip() throws IOException {
+
+        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true, true);
+    }
+
     //
     // internal
     // /////////////////
@@ -105,13 +111,18 @@ public class MongoFileStoreTest {
         // read a file
         assertEquals(compress, mongoFile.getURL().isStoredCompressed());
         assertEquals(LoremIpsum.LOREM_IPSUM.length(), mongoFile.getLength());
-        if (compress) {
+        if (compress && encrypt) {
+            assertEquals(StorageFormat.ECRYPTED_GZIP.getCode(), mongoFile.get(MongoFileConstants.format)); // verify compression
             assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify compression
-            assertEquals(MongoFileUrl.GZIPPED, mongoFile.get(MongoFileConstants.format)); // verify compression
+            assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify compression
+        }
+        else if (compress) {
+            assertEquals(StorageFormat.GZIPPED.getCode(), mongoFile.get(MongoFileConstants.format)); // verify compression
+            assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify compression
             assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify compression
         }
         else if (encrypt) {
-            assertEquals(MongoFileUrl.ENCRYPTED, mongoFile.get(MongoFileConstants.format)); // verify encryption
+            assertEquals(StorageFormat.ENCRYPTED.getCode(), mongoFile.get(MongoFileConstants.format)); // verify encryption
             assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify encryption
             assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify encryption sets its ratio
         }

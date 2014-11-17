@@ -13,21 +13,22 @@ public final class Parser {
         // hidden
     }
 
-    public static URL construct(final ObjectId id, final String fileName, final String mediaType, final String compressionFormat,
-            final boolean compress, final boolean encrypted) throws MalformedURLException {
+    public static URL construct(final ObjectId id, final String fileName, final String mediaType, final StorageFormat format)
+            throws MalformedURLException {
 
         String protocol = MongoFileUrl.PROTOCOL;
-        if (compressionFormat != null) {
-            protocol += ":" + compressionFormat;
+
+        boolean compressed = format.isCompressed() && CompressionMediaTypes.isCompressable(mediaType);
+        if (compressed && format.isEncrypted()) {
+            protocol += ":" + StorageFormat.ECRYPTED_GZIP.getCode();
         }
-        else {
-            if (compress && CompressionMediaTypes.isCompressable(mediaType)) {
-                protocol += ":" + MongoFileUrl.GZIPPED;
-            }
-            else if (encrypted) {
-                protocol += ":" + MongoFileUrl.ENCRYPTED;
-            }
+        else if (compressed) {
+            protocol += ":" + StorageFormat.GZIPPED.getCode();
         }
+        else if (format.isEncrypted()) {
+            protocol += ":" + StorageFormat.ENCRYPTED.getCode();
+        }
+
         return construct(String.format("%s:%s?%s#%s", protocol, fileName, id.toString(), mediaType == null ? "" : mediaType.toString()));
     }
 

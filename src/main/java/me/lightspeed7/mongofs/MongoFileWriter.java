@@ -73,11 +73,12 @@ public class MongoFileWriter {
 
         OutputStream sink = new BufferedChunksOutputStream(chunks, file.getChunkSize());
 
+        if (url.isStoredEncrypted()) {
+            sink = new MongoEncryptionOutputStream(store.getConfig(), file, sink);
+        }
+
         if (url.isStoredCompressed()) {
             return new MongoGZipOutputStream(file, sink);
-        }
-        else if (url.isStoredEncrypted()) {
-            return new MongoEncryptionOutputStream(store.getConfig(), file, sink);
         }
         else {
             return new CountingOutputStream(MongoFileConstants.length, file, sink);

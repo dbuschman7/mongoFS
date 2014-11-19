@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 import me.lightspeed7.mongofs.url.MongoFileUrl;
+import me.lightspeed7.mongofs.url.StorageFormat;
 import me.lightspeed7.mongofs.util.ChunkSize;
 import me.lightspeed7.mongofs.util.TimeMachine;
 
@@ -287,13 +288,9 @@ public class MongoFileStore {
             throw new IllegalStateException("This data store has compression disabled");
         }
 
-        if (compress && config.isEncryptionEnabled()) {
-            throw new IllegalStateException("This data store has encryption enabled, cannot use compression");
-        }
-
         // send wrapper object
-        MongoFileUrl mongoFileUrl = MongoFileUrl//
-                .construct(new ObjectId(), filename, mediaType, null, compress, config.isEncryptionEnabled());
+        StorageFormat format = StorageFormat.detect(compress, config.isEncryptionEnabled());
+        MongoFileUrl mongoFileUrl = MongoFileUrl.construct(new ObjectId(), filename, mediaType, format);
 
         MongoFile mongoFile = new MongoFile(this, mongoFileUrl, config.getChunkSize().getChunkSize());
         if (expiresAt != null) {

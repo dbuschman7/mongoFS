@@ -62,18 +62,18 @@ public class MongoGZipOutputStream extends OutputStream {
             throw e; // re-throw it
         } catch (Throwable t) {
             throw new RuntimeException("Unhandled exception caught", t);
-        } finally {
-
-            long length = inputFile.getLong(MongoFileConstants.length, 0);
-            long compressed = inputFile.getLong(MongoFileConstants.storage, 0);
-
-            double ratio = 0.0d;
-            if (length > 0) {
-                ratio = (double) compressed / length;
-            }
-
-            inputFile.put(MongoFileConstants.ratio.toString(), ratio);
-            inputFile.save();
         }
+
+        long length = inputFile.getLong(MongoFileConstants.length, 0);
+        long compressed = inputFile.getLong(MongoFileConstants.storage, 0);
+
+        double ratio = 0.0d;
+        if (length > 0) {
+            ratio = (double) compressed / length;
+        }
+
+        inputFile.put(MongoFileConstants.ratio.toString(), ratio);
+        inputFile.save();
+
     }
 }

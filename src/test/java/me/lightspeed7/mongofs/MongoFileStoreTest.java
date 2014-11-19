@@ -15,6 +15,7 @@ import java.net.URL;
 
 import me.lightspeed7.mongofs.crypto.BasicCrypto;
 import me.lightspeed7.mongofs.url.MongoFileUrl;
+import me.lightspeed7.mongofs.url.StorageFormat;
 import me.lightspeed7.mongofs.util.BytesCopier;
 import me.lightspeed7.mongofs.util.ChunkSize;
 
@@ -80,6 +81,39 @@ public class MongoFileStoreTest {
         doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, false);
     }
 
+    public void testLotsOfChunksEncryptedAndCompressedRoundTrip() throws IOException {
+
+        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true, true);
+    }
+
+    @Test
+    public void testSingleChunkEncryptedAndCompressedRoundTrip() throws IOException {
+
+        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.large_1M, true, true);
+    }
+
+    @Test
+    public void testUpload() throws IOException {
+
+        MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
+                .bucket("mongofs").chunkSize(ChunkSize.medium_256K)//
+                .enableCompression(true).enableEncryption(new BasicCrypto())//
+                .writeConcern(WriteConcern.SAFE) //
+                .build();
+        MongoFileStore store = new MongoFileStore(database, config);
+
+        ByteArrayInputStream in = new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes());
+        MongoFile mongoFile = store.upload("loremIpsum.txt", "test/plain", null, false, in);
+        assertNotNull(mongoFile);
+
+        assertEquals(32087, mongoFile.getLength());
+
+    }
+
+    //
+    // internal
+    // /////////////////
+
     private void doRoundTrip(final String bucket, final String filename, final ChunkSize chunkSize, final boolean compress,
             final boolean encrypt) throws IOException {
 
@@ -109,13 +143,18 @@ public class MongoFileStoreTest {
         // read a file
         assertEquals(compress, mongoFile.getURL().isStoredCompressed());
         assertEquals(LoremIpsum.LOREM_IPSUM.length(), mongoFile.getLength());
-        if (compress) {
+        if (compress && encrypt) {
+            assertEquals(StorageFormat.ECRYPTED_GZIP.getCode(), mongoFile.get(MongoFileConstants.format)); // verify compression
             assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify compression
-            assertEquals(MongoFileUrl.GZIPPED, mongoFile.get(MongoFileConstants.format)); // verify compression
+            assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify compression
+        }
+        else if (compress) {
+            assertEquals(StorageFormat.GZIPPED.getCode(), mongoFile.get(MongoFileConstants.format)); // verify compression
+            assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify compression
             assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify compression
         }
         else if (encrypt) {
-            assertEquals(MongoFileUrl.ENCRYPTED, mongoFile.get(MongoFileConstants.format)); // verify encryption
+            assertEquals(StorageFormat.ENCRYPTED.getCode(), mongoFile.get(MongoFileConstants.format)); // verify encryption
             assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify encryption
             assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify encryption sets its ratio
         }

@@ -8,7 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 import me.lightspeed7.mongofs.crypto.BasicCrypto;
-import me.lightspeed7.mongofs.url.MongoFileUrl;
+import me.lightspeed7.mongofs.url.StorageFormat;
 import me.lightspeed7.mongofs.util.BytesCopier;
 import me.lightspeed7.mongofs.util.ChunkSize;
 
@@ -47,7 +47,7 @@ public class EncryptionStreamTest {
         MongoFile file = writer.write(new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes()));
         assertNotNull(file);
 
-        assertEquals(MongoFileUrl.ENCRYPTED, file.getURL().getFormat());
+        assertEquals(StorageFormat.ENCRYPTED, file.getURL().getFormat());
 
         // read the file
         ByteArrayOutputStream buf = new ByteArrayOutputStream(LoremIpsum.LOREM_IPSUM.length() * 2);
@@ -69,7 +69,7 @@ public class EncryptionStreamTest {
         MongoFile file = writer.write(new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes()));
         assertNotNull(file);
 
-        assertEquals(MongoFileUrl.ENCRYPTED, file.getURL().getFormat());
+        assertEquals(StorageFormat.ENCRYPTED, file.getURL().getFormat());
 
         // read the file
         ByteArrayOutputStream buf = new ByteArrayOutputStream(LoremIpsum.LOREM_IPSUM.length() * 2);
@@ -93,7 +93,7 @@ public class EncryptionStreamTest {
         MongoFile file = writer.write(new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes()));
         assertNotNull(file);
 
-        assertEquals(MongoFileUrl.ENCRYPTED, file.getURL().getFormat());
+        assertEquals(StorageFormat.ENCRYPTED, file.getURL().getFormat());
 
         // read the file
         ByteArrayOutputStream buf = new ByteArrayOutputStream(LoremIpsum.LOREM_IPSUM.length() * 2);

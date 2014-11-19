@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -130,7 +131,16 @@ public class MongoFSOnTopOfGridFSTest {
         MongoFile findOne = store.findOne((ObjectId) ID.get(MongoFileConstants._id.name()));
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
-        new BytesCopier(new MongoFileReader(store, findOne).getInputStream(), out).transfer(true);
+        MongoFileReader mongoFileReader = new MongoFileReader(store, findOne);
+
+        InputStream inputStream = mongoFileReader.getInputStream();
+        try {
+            new BytesCopier(inputStream, out).transfer(true);
+        } finally {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+        }
         assertEquals(LoremIpsum.LOREM_IPSUM, out.toString());
 
         System.out.println("Passed - MongoFS");

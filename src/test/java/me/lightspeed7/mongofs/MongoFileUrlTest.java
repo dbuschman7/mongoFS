@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 
 import me.lightspeed7.mongofs.url.MongoFileUrl;
+import me.lightspeed7.mongofs.url.StorageFormat;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
@@ -21,7 +22,7 @@ public class MongoFileUrlTest {
     public void testGZipFactoriesItemized() throws IOException {
 
         ObjectId id = new ObjectId();
-        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", PDF, true, false);
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", PDF, StorageFormat.GZIPPED);
         assertNotNull(url);
         assertEquals(String.format("mongofile:gz:fileName.pdf?%s#application/pdf", id.toString()), url.getUrl().toString());
 
@@ -30,7 +31,7 @@ public class MongoFileUrlTest {
         assertEquals("fileName.pdf", url.getFileName());
         assertEquals("pdf", url.getExtension());
         assertTrue(url.isStoredCompressed());
-        assertFalse(url.isDataCompressable());
+        assertTrue(url.isDataCompressable());
         assertEquals(PDF, url.getMediaType());
     }
 
@@ -38,7 +39,7 @@ public class MongoFileUrlTest {
     public void testFactoriesItemized() throws IOException {
 
         ObjectId id = new ObjectId();
-        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.zip", ZIP, true, false);
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.zip", ZIP, StorageFormat.GRIDFS);
         assertNotNull(url);
         assertEquals(String.format("mongofile:fileName.zip?%s#application/zip", id.toString()), url.getUrl().toString());
 
@@ -47,8 +48,44 @@ public class MongoFileUrlTest {
         assertEquals("fileName.zip", url.getFileName());
         assertEquals("zip", url.getExtension());
         assertFalse(url.isStoredCompressed());
-        assertTrue(url.isDataCompressable());
+        assertFalse(url.isDataCompressable());
         assertEquals(ZIP, url.getMediaType());
+    }
+
+    @Test
+    public void testEncryptedFactoriesItemized() throws IOException {
+
+        ObjectId id = new ObjectId();
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.zip", ZIP, StorageFormat.ENCRYPTED);
+        assertNotNull(url);
+        assertEquals(String.format("mongofile:enc:fileName.zip?%s#application/zip", id.toString()), url.getUrl().toString());
+
+        assertEquals(id, url.getMongoFileId());
+        assertEquals("fileName.zip", url.getFilePath());
+        assertEquals("fileName.zip", url.getFileName());
+        assertEquals("zip", url.getExtension());
+        assertFalse(url.isStoredCompressed());
+        assertFalse(url.isDataCompressable());
+        assertTrue(url.isStoredEncrypted());
+        assertEquals(ZIP, url.getMediaType());
+    }
+
+    @Test
+    public void testBothFactoriesItemized() throws IOException {
+
+        ObjectId id = new ObjectId();
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", PDF, StorageFormat.ECRYPTED_GZIP);
+        assertNotNull(url);
+        assertEquals(String.format("mongofile:encgz:fileName.pdf?%s#application/pdf", id.toString()), url.getUrl().toString());
+
+        assertEquals(id, url.getMongoFileId());
+        assertEquals("fileName.pdf", url.getFilePath());
+        assertEquals("fileName.pdf", url.getFileName());
+        assertEquals("pdf", url.getExtension());
+        assertTrue(url.isStoredCompressed());
+        assertTrue(url.isDataCompressable());
+        assertTrue(url.isStoredEncrypted());
+        assertEquals(PDF, url.getMediaType());
     }
 
     @Test
@@ -67,7 +104,7 @@ public class MongoFileUrlTest {
         assertEquals("activeusers_19.PDF", url.getFileName());
         assertEquals("pdf", url.getExtension());
         assertFalse(url.isStoredCompressed());
-        assertFalse(url.isDataCompressable());
+        assertTrue(url.isDataCompressable());
 
         assertEquals(PDF, url.getMediaType());
     }
@@ -83,7 +120,7 @@ public class MongoFileUrlTest {
         assertEquals("activeusers_19.ZIP", url.getFileName());
         assertEquals("zip", url.getExtension());
         assertFalse(url.isStoredCompressed());
-        assertTrue(url.isDataCompressable());
+        assertFalse(url.isDataCompressable());
 
         assertEquals(ZIP, url.getMediaType());
     }

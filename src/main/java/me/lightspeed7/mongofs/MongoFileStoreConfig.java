@@ -165,6 +165,7 @@ public final class MongoFileStoreConfig {
             config.chunkSize = ChunkSize.medium_256K;
             config.crypto = null;
             config.enableCompression = false;
+            config.crypto = null;
             config.readPreference = null;
             config.writeConcern = null;
             return config;
@@ -193,9 +194,6 @@ public final class MongoFileStoreConfig {
          */
         public Builder enableCompression(final boolean value) {
 
-            if (value && config.crypto != null) {
-                throw new IllegalStateException("Compression and Encryption cannot be enabled at the same time");
-            }
             config.setEnableCompression(value);
             return this;
         }
@@ -210,10 +208,6 @@ public final class MongoFileStoreConfig {
          */
 
         public Builder enableEncryption(final Crypto crypto) {
-
-            if (config.enableCompression && crypto != null) {
-                throw new IllegalStateException("Compression and Encryption cannot be enabled at the same time");
-            }
 
             if (crypto == null) {
                 return this;

@@ -23,28 +23,14 @@ import org.bson.types.ObjectId;
 public class MongoFileUrl {
 
     public static final String PROTOCOL = "mongofile";
-    public static final String GZIPPED = "gz";
-    public static final String ENCRYPTED = "enc";
 
     private URL url;
 
     // factories and helpers
-    public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType, final boolean compress,
-            final boolean encrypted) throws MalformedURLException {
+    public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType, final StorageFormat format)
+            throws MalformedURLException {
 
-        return construct(Parser.construct(id, fileName, mediaType, null, compress, encrypted));
-    }
-
-    public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType,
-            final String compressionFormat) throws MalformedURLException {
-
-        return construct(id, fileName, mediaType, compressionFormat, true, false);
-    }
-
-    public static final MongoFileUrl construct(final ObjectId id, final String fileName, final String mediaType,
-            final String compressionFormat, final boolean compress, final boolean encrypted) throws MalformedURLException {
-
-        return construct(Parser.construct(id, fileName, mediaType, compressionFormat, compress, encrypted));
+        return construct(Parser.construct(id, fileName, mediaType, format));
     }
 
     public static final MongoFileUrl construct(final String spec) throws MalformedURLException {
@@ -183,9 +169,9 @@ public class MongoFileUrl {
      * 
      * @return the storage format
      */
-    public String getFormat() {
+    public StorageFormat getFormat() {
 
-        return url.getHost();
+        return StorageFormat.find(url.getHost());
     }
 
     //
@@ -199,11 +185,8 @@ public class MongoFileUrl {
      */
     public boolean isStoredCompressed() {
 
-        if (url.getHost() != null && url.getHost().equals(GZIPPED)) {
-            return true;
-        }
-
-        return false;
+        StorageFormat fmt = StorageFormat.find(url.getHost());
+        return fmt != null ? fmt.isCompressed() : false;
     }
 
     /**
@@ -212,11 +195,8 @@ public class MongoFileUrl {
      * @return true if encrypted
      */
     public boolean isStoredEncrypted() {
-        if (url.getHost() != null && url.getHost().equals(ENCRYPTED)) {
-            return true;
-        }
-
-        return false;
+        StorageFormat fmt = StorageFormat.find(url.getHost());
+        return fmt != null ? fmt.isEncrypted() : false;
     }
 
     /**
@@ -226,7 +206,7 @@ public class MongoFileUrl {
      */
     public boolean isDataCompressable() {
 
-        return !CompressionMediaTypes.isCompressable(getMediaType());
+        return CompressionMediaTypes.isCompressable(getMediaType());
     }
 
     /**

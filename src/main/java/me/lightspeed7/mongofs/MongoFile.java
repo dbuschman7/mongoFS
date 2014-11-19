@@ -14,6 +14,7 @@ import java.util.zip.GZIPInputStream;
 
 import me.lightspeed7.mongofs.url.MongoFileUrl;
 import me.lightspeed7.mongofs.url.Parser;
+import me.lightspeed7.mongofs.url.StorageFormat;
 import me.lightspeed7.mongofs.util.BytesCopier;
 
 import org.bson.types.ObjectId;
@@ -32,9 +33,7 @@ public class MongoFile implements InputFile {
 
     private final MongoFileStore store;
 
-    private final boolean compress;
-
-    private final boolean encrypted;
+    private StorageFormat format;
 
     /**
      * Construct a MongoFile object for reading data
@@ -46,17 +45,18 @@ public class MongoFile implements InputFile {
 
         this.store = store;
         this.surrogate = surrogate;
-        String format = fetchFormat(surrogate);
-        this.compress = MongoFileUrl.GZIPPED.equals(format);
-        this.encrypted = MongoFileUrl.ENCRYPTED.equals(format);
+        this.format = fetchFormat(surrogate);
     }
 
-    private String fetchFormat(final Document surrogate) {
+    private StorageFormat fetchFormat(final Document surrogate) {
         String format = surrogate.getString(MongoFileConstants.format);
         if (format == null) {
             format = surrogate.getString(MongoFileConstants.compressionFormat);
         }
-        return format;
+        if (format == null) {
+            return StorageFormat.GRIDFS;
+        }
+        return StorageFormat.find(format);
     }
 
     /**
@@ -68,8 +68,7 @@ public class MongoFile implements InputFile {
     /* package */MongoFile(final MongoFileStore store, final MongoFileUrl url, final long chunkSize) {
 
         this.store = store;
-        this.compress = url.isStoredCompressed();
-        this.encrypted = url.isStoredEncrypted();
+        this.format = url.getFormat();
 
         surrogate = new Document();
         surrogate.put(MongoFileConstants._id.toString(), url.getMongoFileId());
@@ -79,7 +78,7 @@ public class MongoFile implements InputFile {
         surrogate.put(MongoFileConstants.filename.toString(), url.getFilePath());
         surrogate.put(MongoFileConstants.contentType.toString(), url.getMediaType());
         if (url.getFormat() != null) {
-            surrogate.put(MongoFileConstants.format.toString(), url.getFormat());
+            surrogate.put(MongoFileConstants.format.toString(), url.getFormat().getCode());
         }
     }
 
@@ -133,7 +132,7 @@ public class MongoFile implements InputFile {
     public MongoFileUrl getURL() throws MalformedURLException {
 
         // compression and encrypted read from stored format
-        URL url = Parser.construct(getId(), getFilename(), getContentType(), fetchFormat(surrogate), this.compress, this.encrypted);
+        URL url = Parser.construct(getId(), getFilename(), getContentType(), this.format);
         return MongoFileUrl.construct(url);
     }
 
@@ -152,22 +151,23 @@ public class MongoFile implements InputFile {
         // Plain Text -- returned <- counting <- chunks
         // Compressed -- returned <- gzip <- counting <- chunks
         // Encryption -- returned <- decrypt <- counting <- chunks
+        // Enc + Comp -- returned <- gzip <- decrypt <- counting <- chunks
         //
         // /////////////////////////////////////////////////////////
         InputStream returned = new FileChunksInputStreamSource(store, this);
         returned = new CountingInputStream(this, returned);
 
-        if (getURL().isStoredCompressed()) {
-            returned = new GZIPInputStream(returned);
-        }
-        else if (getURL().isStoredEncrypted()) {
+        if (getURL().isStoredEncrypted()) {
 
             if (store.getConfig().getEncryption() == null) {
                 throw new IllegalStateException("File is stored in ecrypted but store is not configured for decryption");
             }
 
             returned = new DecryptInputStream(store.getConfig().getEncryption(), this, returned);
+        }
 
+        if (getURL().isStoredCompressed()) {
+            returned = new GZIPInputStream(returned);
         }
 
         return returned;
@@ -660,11 +660,11 @@ public class MongoFile implements InputFile {
 
     public boolean isCompressed() {
 
-        return compress;
+        return this.format.isCompressed();
     }
 
     public boolean isEncrypted() {
-        return encrypted;
+        return this.format.isEncrypted();
     }
 
     public boolean isExpandedZipFile() {

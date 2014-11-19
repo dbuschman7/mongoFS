@@ -37,7 +37,7 @@ public class MongoFileProtocolTest {
     public void testHandlerOpenConnection() throws IOException {
 
         ObjectId id = new ObjectId();
-        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", MongoFileUrlTest.PDF, true, false);
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", MongoFileUrlTest.PDF, StorageFormat.GZIPPED);
         URLConnection connection = url.getUrl().openConnection();
 
         fail("This test should throw an exception");
@@ -48,7 +48,7 @@ public class MongoFileProtocolTest {
     public void testHandlerGetContent() throws IOException {
 
         ObjectId id = new ObjectId();
-        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", MongoFileUrlTest.PDF, true, false);
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", MongoFileUrlTest.PDF, StorageFormat.GZIPPED);
         Object object = url.getUrl().getContent();
 
         fail("This test should throw an exception");

@@ -45,7 +45,7 @@ MongoFileStoreConfig config = MongoFileStoreConfig.builder()// start builder
         .bucket(bucket) // <bucket>.files and <bucket>.chunks
         .chunkSize(ChunkSize.medium_256K) // default
         .enableCompression(true) //  default
-        .enableEncryption(null) // must be null if compression is enabled
+        .enableEncryption(null) // provide an encryption/decryption instance 
         .writeConcern(WriteConcern.SAFE) // default
         .readPreference(ReadPreference.primary()) // default
         .build(); // generate the configuration

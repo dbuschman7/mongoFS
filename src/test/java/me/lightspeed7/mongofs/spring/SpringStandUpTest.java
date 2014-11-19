@@ -16,7 +16,7 @@ import me.lightspeed7.mongofs.MongoFileConstants;
 import me.lightspeed7.mongofs.MongoFileReader;
 import me.lightspeed7.mongofs.MongoFileStore;
 import me.lightspeed7.mongofs.MongoFileWriter;
-import me.lightspeed7.mongofs.url.MongoFileUrl;
+import me.lightspeed7.mongofs.url.StorageFormat;
 import me.lightspeed7.mongofs.util.BytesCopier;
 
 import org.junit.BeforeClass;
@@ -69,7 +69,7 @@ public class SpringStandUpTest {
         assertEquals(LoremIpsum.LOREM_IPSUM.length(), mongoFile.getLength());
 
         assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify compression
-        assertEquals(MongoFileUrl.GZIPPED, mongoFile.get(MongoFileConstants.format)); // verify compression
+        assertEquals(StorageFormat.GZIPPED.getCode(), mongoFile.get(MongoFileConstants.format)); // verify compression
         assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify compression
 
         ByteArrayOutputStream out2 = new ByteArrayOutputStream(32 * 1024);

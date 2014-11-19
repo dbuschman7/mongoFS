@@ -81,6 +81,30 @@ public class MongoFileStoreTest {
         doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true, true);
     }
 
+    @Test
+    public void testSingleChunkEncryptedAndCompressedRoundTrip() throws IOException {
+
+        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.large_1M, true, true);
+    }
+
+    @Test
+    public void testUpload() throws IOException {
+
+        MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
+                .bucket("mongofs").chunkSize(ChunkSize.medium_256K)//
+                .enableCompression(true).enableEncryption(new BasicCrypto())//
+                .writeConcern(WriteConcern.SAFE) //
+                .build();
+        MongoFileStore store = new MongoFileStore(database, config);
+
+        ByteArrayInputStream in = new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes());
+        MongoFile mongoFile = store.upload("loremIpsum.txt", "test/plain", null, false, in);
+        assertNotNull(mongoFile);
+
+        assertEquals(32087, mongoFile.getLength());
+
+    }
+
     //
     // internal
     // /////////////////

@@ -33,6 +33,10 @@ public enum StorageFormat {
 
     public static final StorageFormat find(final String str) {
 
+        if (str == null) {
+            return GRIDFS;
+        }
+
         for (StorageFormat fmt : StorageFormat.values()) {
             if (fmt.name().equals(str)) {
                 return fmt;

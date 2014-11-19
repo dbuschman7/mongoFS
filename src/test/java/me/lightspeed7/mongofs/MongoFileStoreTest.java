@@ -118,8 +118,10 @@ public class MongoFileStoreTest {
             final boolean encrypt) throws IOException {
 
         MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket(bucket).chunkSize(chunkSize)//
-                .enableCompression(compress).enableEncryption(encrypt ? new BasicCrypto(chunkSize) : null)//
+                .bucket(bucket)//
+                .chunkSize(chunkSize)//
+                .enableCompression(compress)//
+                .enableEncryption(encrypt ? new BasicCrypto(chunkSize) : null)//
                 .writeConcern(WriteConcern.SAFE) //
                 .build();
         MongoFileStore store = new MongoFileStore(database, config);
@@ -212,14 +214,6 @@ public class MongoFileStoreTest {
 
         File file2 = new File("file.does.not.exist");
         store.upload(file2, "text/plain", false, null);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void testUpload4() throws IOException {
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().enableEncryption(new BasicCrypto()).build());
-        assertNotNull(store.toString());
-
-        store.upload(LoremIpsum.getFile(), "text/plain", true, null);
     }
 
     @Test(expected = IllegalArgumentException.class)

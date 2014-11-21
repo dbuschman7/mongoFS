@@ -125,7 +125,7 @@ Using a stored URL string
 
 ```Java
 MongoFileUrl url = MongoFileUrl.construct("mongofile:gz:README.md?52fb1e7b36707d6d13ebfda9#text/plain");
-MongoFile mongoFile = store.getFile(url); // lookup the file by its url
+MongoFile mongoFile = store.findOne(url); // lookup the file by its url
   
 ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
 store.read(mongoFile, out, true); // true == flush output stream when done

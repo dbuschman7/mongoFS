@@ -128,7 +128,7 @@ MongoFileUrl url = MongoFileUrl.construct("mongofile:gz:README.md?52fb1e7b36707d
 MongoFile mongoFile = store.findOne(url); // lookup the file by its url
   
 ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
-store.read(mongoFile, out, true); // true == flush output stream when done
+mongoFile.readInto(ByteArrayOutputStream, true); // true == flush output stream when done
 
 String fileText = out.toString();       
 ```

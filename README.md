@@ -15,3 +15,4 @@ version available shortly. Check out my task list under the [TODO](TODO.md) to
 check the progress. I need to have this code into production by end of March so 
 keep checking back to see the progress..
 
+Check out the [Usage](usage.md) page on how to use the library.

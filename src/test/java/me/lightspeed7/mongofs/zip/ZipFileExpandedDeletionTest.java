@@ -112,11 +112,13 @@ public class ZipFileExpandedDeletionTest {
         assertEquals(3, manifest.getFiles().size());
 
         MongoFileUrl url = manifest.getZip().getURL();
-        store.remove(url, false);
+        store.remove(url);
 
         for (MongoFile mongoFile : manifest.getFiles()) {
             MongoFileUrl mongoFileUrl = mongoFile.getURL();
             assertNull(store.findOne(mongoFileUrl));
+            assertNull(store.findOne(mongoFile.getURL().getMongoFileId()));
+
             MongoFile file2 = FileStoreHelper.internalFind(store, mongoFileUrl);
             assertNull(file2);
         }

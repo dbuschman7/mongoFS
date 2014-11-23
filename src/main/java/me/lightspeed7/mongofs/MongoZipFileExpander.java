@@ -43,39 +43,38 @@ public class MongoZipFileExpander {
 
                 // name of next entry
                 String name = zipEntry.getName();
-                if (zipEntry.isDirectory()) {
-                    continue;
-                }
+                if (!zipEntry.isDirectory()) {
 
-                MongoFileWriter writer = store.createNew(name, FileUtil.getContentType(name));
+                    MongoFileWriter writer = store.createNew(name, FileUtil.getContentType(name));
 
-                // set the manifest info
-                MongoFile mongoFile = writer.getMongoFile();
-                mongoFile.put(MongoFileConstants.manifestId, zip.get(MongoFileConstants._id));
-                mongoFile.put(MongoFileConstants.manifestNum, fileNumber);
-                manifest.addMongoFile(mongoFile);
+                    // set the manifest info
+                    MongoFile mongoFile = writer.getMongoFile();
+                    mongoFile.put(MongoFileConstants.manifestId, zip.get(MongoFileConstants._id));
+                    mongoFile.put(MongoFileConstants.manifestNum, fileNumber);
+                    manifest.addMongoFile(mongoFile);
 
-                OutputStream out = writer.getOutputStream();
-                try {
-                    // write file
-                    int l = zipStream.read(buff);
-                    while (l > 0) {
-                        out.write(buff, 0, l);
-                        readBytesTotal += l;
-                        l = zipStream.read(buff);
+                    OutputStream out = writer.getOutputStream();
+                    try {
+                        // write file
+                        int l = zipStream.read(buff);
+                        while (l > 0) {
+                            out.write(buff, 0, l);
+                            readBytesTotal += l;
+                            l = zipStream.read(buff);
+                        }
+                        out.flush();
+
+                    } finally {
+                        if (out != null) {
+                            out.close();
+                        }
+                        storageBytesTotal += mongoFile.getStorageLength();
                     }
-                    out.flush();
-
-                } finally {
-                    if (out != null) {
-                        out.close();
-                    }
-                    storageBytesTotal += mongoFile.getStorageLength();
+                    ++fileNumber;
                 }
 
                 // setup next file
                 zipEntry = zipStream.getNextEntry();
-                ++fileNumber;
             }
 
         } finally {

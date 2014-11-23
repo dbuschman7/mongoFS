@@ -7,9 +7,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import me.lightspeed7.mongofs.url.MongoFileUrl;
@@ -20,6 +18,8 @@ import me.lightspeed7.mongofs.util.BytesCopier;
 import org.bson.types.ObjectId;
 import org.mongodb.Document;
 import org.mongodb.MongoException;
+
+import com.mongodb.BasicDBObject;
 
 /**
  * Object to hold the state of the file's metatdata. To persist this outside of MongoFS, use the getURL() and persist that.
@@ -351,7 +351,12 @@ public class MongoFile implements InputFile {
      */
     public Document getMetaData() {
 
-        return (Document) get(MongoFileConstants.metadata);
+        Object object = get(MongoFileConstants.metadata);
+        if (object == null) {
+            return null;
+        }
+
+        return new Document((BasicDBObject) object);
     }
 
     /**
@@ -373,7 +378,7 @@ public class MongoFile implements InputFile {
      */
     public Object setInMetaData(final String key, final Object value) {
 
-        Document object = (Document) get(MongoFileConstants.metadata);
+        Document object = getMetaData();
         if (object == null) {
             object = new Document();
             setMetaData(object);
@@ -485,17 +490,7 @@ public class MongoFile implements InputFile {
      * @return the key's value as an integer
      */
     public int getInt(final MongoFileConstants key) {
-
-        if (key == null) {
-            throw new IllegalArgumentException("key cannot be null");
-        }
-
-        Object value = surrogate.get(key.name());
-        if (value == null) {
-            return -1;
-        }
-
-        return Integer.parseInt(value.toString());
+        return getInt(key, -1);
     }
 
     /**
@@ -506,17 +501,7 @@ public class MongoFile implements InputFile {
      * @return the value as a long
      */
     public long getLong(final MongoFileConstants key) {
-
-        if (key == null) {
-            throw new IllegalArgumentException("key cannot be null");
-        }
-
-        Object value = surrogate.get(key.name());
-        if (value == null) {
-            return -1;
-        }
-
-        return Long.parseLong(value.toString());
+        return getLong(key, -1);
     }
 
     /**
@@ -530,8 +515,16 @@ public class MongoFile implements InputFile {
      */
     public int getInt(final MongoFileConstants key, final int def) {
 
-        Integer value = surrogate.getInteger(key.name());
-        return value != null ? value : def;
+        if (key == null) {
+            throw new IllegalArgumentException("key cannot be null");
+        }
+
+        Object value = surrogate.get(key.name());
+        if (value == null) {
+            return def;
+        }
+
+        return Integer.parseInt(value.toString());
     }
 
     /**
@@ -544,9 +537,16 @@ public class MongoFile implements InputFile {
      * @return the field value (or default)
      */
     public long getLong(final MongoFileConstants key, final long def) {
+        if (key == null) {
+            throw new IllegalArgumentException("key cannot be null");
+        }
 
-        Long value = surrogate.getLong(key.name());
-        return value != null ? value : def;
+        Object value = surrogate.get(key.name());
+        if (value == null) {
+            return def;
+        }
+
+        return Long.parseLong(value.toString());
     }
 
     /**
@@ -560,7 +560,16 @@ public class MongoFile implements InputFile {
      */
     public double getDouble(final MongoFileConstants key, final double def) {
 
-        return surrogate.getDouble(key.name(), def);
+        if (key == null) {
+            throw new IllegalArgumentException("key cannot be null");
+        }
+
+        Object value = surrogate.get(key.name());
+        if (value == null) {
+            return def;
+        }
+
+        return Double.parseDouble(value.toString());
     }
 
     /**
@@ -574,8 +583,16 @@ public class MongoFile implements InputFile {
      */
     public String getString(final MongoFileConstants key, final String def) {
 
-        String value = surrogate.getString(key.name());
-        return value != null ? value : def;
+        if (key == null) {
+            throw new IllegalArgumentException("key cannot be null");
+        }
+
+        Object value = surrogate.get(key.name());
+        if (value == null) {
+            return def;
+        }
+
+        return value.toString();
     }
 
     /**
@@ -605,30 +622,30 @@ public class MongoFile implements InputFile {
     /**
      * Returns the object id or def if not set.
      * 
-     * @param field
+     * @param key
      *            The field to return
      * @param def
      *            the default value in case the field is not found
      * @return The field object value or def if not set.
      */
-    public ObjectId getObjectId(final MongoFileConstants field, final ObjectId def) {
+    public ObjectId getObjectId(final MongoFileConstants key, final ObjectId def) {
 
-        final Object foo = surrogate.get(field.toString());
+        final Object foo = surrogate.get(key.toString());
         return (foo != null) ? (ObjectId) foo : def;
     }
 
     /**
      * Returns the date or def if not set.
      * 
-     * @param field
-     *            The field to return
+     * @param key
+     *            The key to return
      * @param def
      *            the default value in case the field is not found
      * @return The field object value or def if not set.
      */
-    public Date getDate(final MongoFileConstants field, final Date def) {
+    public Date getDate(final MongoFileConstants key, final Date def) {
 
-        final Object foo = surrogate.get(field.toString());
+        final Object foo = surrogate.get(key.toString());
         return (foo != null) ? (Date) foo : def;
     }
 
@@ -641,16 +658,16 @@ public class MongoFile implements InputFile {
      */
     public boolean containsKey(final String key) {
 
-        return keySet().contains(key);
+        return this.surrogate.containsKey(key);
     }
 
-    private Set<String> keySet() {
-
-        Set<String> keys = new HashSet<String>();
-        keys.addAll(MongoFileConstants.getFields(true));
-        keys.addAll(surrogate.keySet());
-        return keys;
-    }
+    // private Set<String> keySet() {
+    //
+    // Set<String> keys = new HashSet<String>();
+    // keys.addAll(MongoFileConstants.getFields(true));
+    // keys.addAll(surrogate.keySet());
+    // return keys;
+    // }
 
     @Override
     public String toString() {

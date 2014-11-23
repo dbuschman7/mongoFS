@@ -551,11 +551,12 @@ public class MongoFileStore {
      */
     public MongoFile findOne(final ObjectId id) {
 
-        Document one = this.getFilesCollection().find(new Document("_id", id)).getOne();
-        if (one == null) {
+        MongoCursor<Document> cursor = this.getFilesCollection().find(new Document("_id", id)).get();
+        if (!cursor.hasNext()) {
             return null;
+
         }
-        one = deletedFileCheck(one);
+        Document one = deletedFileCheck(cursor.next());
         if (one == null) {
             return null;
         }
@@ -616,6 +617,28 @@ public class MongoFileStore {
 
         MongoCursor<Document> cursor = c.get();
         return new MongoFileCursor(this, cursor);
+    }
+
+    /**
+     * Find a file within a list of file uploaded from a given zip archive
+     * 
+     * @param zipFile
+     * @return MongoZipArchiveQuery object
+     * @throws Exception
+     */
+    public MongoZipArchiveQuery findInZipArchive(final MongoFile zipFile) throws Exception {
+        return findInZipArchive(zipFile.getURL());
+    }
+
+    /**
+     * Find a file within a list of file uploaded from a given zip archive url
+     * 
+     * @param zipFileUrl
+     * @return MongoZipArchiveQuery object
+     * @throws Exception
+     */
+    public MongoZipArchiveQuery findInZipArchive(final MongoFileUrl zipFileUrl) {
+        return new MongoZipArchiveQuery(this, zipFileUrl);
     }
 
     //

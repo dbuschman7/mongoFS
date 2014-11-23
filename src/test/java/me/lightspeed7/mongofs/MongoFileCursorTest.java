@@ -3,6 +3,7 @@ package me.lightspeed7.mongofs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -78,6 +79,25 @@ public class MongoFileCursorTest {
         assertEquals("/foo/bar4.txt", fileList.next().getFilename());
 
         assertFalse(fileList.hasNext());
+        assertNull(fileList.next());
+        fileList.close();
+
+        assertNotNull(fileList.getServerAddress());
+        assertNotNull(fileList.toString());
+
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testRemoveUnsupported() {
+        MongoFileCursor fileList = store.find(new Document("contentType", "text/plain"), new Document("filename", 1));
+        fileList.remove();
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testServerCursorUnsupported() {
+        MongoFileCursor fileList = store.find(new Document("contentType", "text/plain"), new Document("filename", 1));
+        assertNotNull("", fileList.getServerCursor());
+
     }
 
     @Test

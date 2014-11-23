@@ -152,7 +152,8 @@ public class StorageComparisonTest {
         MongoFile file = writer.getMongoFile();
 
         file.put("aliases", Arrays.asList("one", "two", "three"));
-        file.setInMetaData("key", "value");
+        file.setInMetaData("key1", "value1");
+        file.setInMetaData("key2", "value2");
 
         writer.write(new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes()));
 
@@ -183,6 +184,8 @@ public class StorageComparisonTest {
 
         MongoFile findOne = store.findOne(file.getId());
         assertNotNull(findOne);
+        assertEquals("value1", findOne.getMetaData().get("key1"));
+        assertEquals("value2", findOne.getMetaData().get("key2"));
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
         MongoFileReader reader = new MongoFileReader(store, file);

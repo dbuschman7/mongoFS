@@ -9,14 +9,15 @@ Gzip compression is automatically detected based on media type of the file unles
 Optional encryption is also supported by providing the Encryption class to perform the encryption and decryption of file chunks while storing and reading the file. The use of encryption will automatically detected from the storage format store with the file, however the correct decryption algorithm is required to be provided with the configuration in order to succesfully. 
 
 
-Also TTL expiration ( deletion ) will allow for usage as a cache to store objects that have a finite lifespan.
+Also TTL file expiration ( deletion ) will allow for usage as a cache to store objects that have a finite lifespan.
 
 ## URL 
 A mongofile URL protocol has also been implemented to allow a single string to to represent all the info need to fetch the file back as well as give some metadata to the user wihtout having to query the store for basic metadata. Several examples look like this 
 
 ```
-mongofile:/home/myself/foo/filename.zip?52fb1e7b36707d6d13ebfda9#application/zip
+mongofile:/home/me/foo/filename.zip?52fb1e7b36707d6d13ebfda9#application/zip
 mongofile:gz:/mypath/fileName.pdf?52fb1e7b36707d6d13ebfda9#application/pdf
+mongofile:enc:/mypath/fileName2.pdf?52fb1e7b36707d6d13ebfda9#application/pdf
 ```
 
 For the second example above, the parts of the URL represent :
@@ -30,14 +31,16 @@ For the second example above, the parts of the URL represent :
 | application/pdf | the media type for the data |
 
 ## The API
-THe API for this library has changed a bit from the 0.7.x version to allow for migration to the new objects that are present in the upcoming Mongo-Java-Driver 3.0.x. This library now uses surrogate objects to conform it to the same objects used by the 3.0.x driver so that when the 3.0.x driver is released, this library will be ready to work with it. I plan for this library to go 1.0.x shortly after the 3.0.x driver is released.
+The API for this library has changed a bit from the 0.7.x version to allow for migration to the new objects that are present in the upcoming Mongo-Java-Driver 3.0.x. It will require some minro refactoring of your existing code that should not be too painful.
 
-# Stand up a MongoFileStore
+This library now uses surrogate objects to conform it to the same objects used by the 3.0.x driver so that when the 3.0.x driver is released, this library will be ready to work with it. I plan for this library to go 1.0.x shortly after the 3.0.x driver is released.
+
+# Standing up a MongoFileStore
 
 ## MongoClient and the database 
 Configure the connection to the MongoDB server and database in whatever fashion is available to you. Consult the MongoClient class from the driver for more Info.
 
-The database object below is a traditional com.mongodb.DB object.
+The database object below is a normal com.mongodb.DB or org.mongodb.MongoDatabase object.
 
 ## Configuration
 ```Java
@@ -52,16 +55,18 @@ MongoFileStoreConfig config = MongoFileStoreConfig.builder()// start builder
 
 MongoFileStore store = new MongoFileStore(database, config);
 ```
-Keep the store handy, it is the core of all operations with file stored in MongoFS. If you are using Spring, use Java or XML configuration to make it a Spring bean and inject this object where you need to access files.
 
-> NOTE : Compression and encryption are *not* allowed to be used at the same time. This could cause a severe expansion of the storage size on disk if used together, choose one or the other on a per "bucket" basis. 
+Keep the store handy, it is the core of all operations with file stored in MongoFS. If you are using Spring, use Java or XML configuration to make it a singleton Spring bean and inject this object where you need to access files.
 
-## GridFS compatiable configuration
+> NOTE : Compression and encryption are allowed to be used at the same time and you can choose one, the other, or both on a per file store basis. 
+
+> NOTE : IF both are enabled, compression will be applied first, then the compressed bytes will be encrypted9 before chunking and saving.
+
+## GridFS compatable configuration
 ```Java
 MongoFileStoreConfig config = MongoFileStoreConfig.builder().gridFSCompatible('test');
 
 MongoFileStore store = new MongoFileStore(database, config);
-
 ```
 
 ## File expiration
@@ -119,6 +124,36 @@ Store the url string how you like and use it to fetch the file back from the sto
 
 > REMEMBER : Filenames are *NOT* unique in the system, you can have many files with the same path and file name.
 
+## Zip Archive Expansion
+Support is available to have a zip archive automatically expanded into individual files during the upload process and return a Manifest with a list of all the files in the zip archive. 
+
+```
+MongoFileWriter writer = store.createNew(filename, "application/pdf");
+
+MongoManifest manifest = writer.uploadZipFile(new FileInputStream(filename));
+
+assertEquals(filename, manifest.getZip().getFilename());
+assertEquals(3, manifest.getFiles().size());
+
+MongoFile file1 = manifest.getFiles().get(0);
+assertEquals("file1.txt", file1.getFilename());
+
+```
+
+Both compression and encryption will be applied if configured and applicable for each file read from the zip archive. No data will be stored on the archvie file itself so the data is only stored once. 
+
+Expanding the zip archive will results in unique files being added to the file store and currently, there is no support to read the original archive back out of the store. You can obtain a manifest from the original file as follows: 
+
+```
+MongoManifest manifest2 = store.getManifest(mongoFileUrl);
+
+assertTrue(manifest2.getZip().isExpandedZipFile());
+assertEquals(3, manifest2.getFiles().size());
+
+MongoFile file1 = manifest2.getFiles().get(0);
+```
+
+Each file can then be read from the file store individually.
 
 ## Finding and reading files
 Using a stored URL string 
@@ -129,6 +164,7 @@ MongoFile mongoFile = store.getFile(url); // lookup the file by its url
   
 ByteArrayOutputStream out = new ByteArrayOutputStream(32 * 1024);
 store.read(mongoFile, out, true); // true == flush output stream when done
+// close your stream :) 
 
 String fileText = out.toString();       
 ```
@@ -158,12 +194,14 @@ assertEquals(LoremIpsum.LOREM_IPSUM.length() * 2, out.toString().length());
 String storedSomewhereElse = "mongofile:gz:README.md?52fb1e7b36707d6d13ebfda9#text/plain";
 
 MongoFileUrl url = MongoFileUrl.construct(storedSomewhereElse);
-store.remove(url);
+
+boolean async = true;
+store.remove(url, async); // mark the file for deletion
 ```
 
-You can also asynchronously delete files if the store is configured for that, this feature utilizes the file expiration feature to delete the files, so  
+You can asynchronously delete files if the store is configured for that or express it explicilty as in the code above. This feature utilizes the TTL index feature on MongoDb collecitons to delete the files, so it may take 60 seconds or longer to actually delete the file. 
 
-
+> NOTE : Evne if a file has been deleted but not removed by the server, the MongoFS will not return the file object to the use so it is effectively treated as if it was already removed from the repository.
 
 ##Where to find more
 Check out the integration tests in the source code, there are many examples of how to do things with mongoFS. I am trying to all of the features in the library with an integration test.

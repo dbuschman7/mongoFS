@@ -83,6 +83,9 @@ public class CountingInputStream extends FilterInputStream {
             else if (file.containsKey(MongoFileConstants.compressedLength.name())) {
                 expected = file.getLong(MongoFileConstants.compressedLength);
             }
+            else {
+                throw new IllegalStateException("No compressed length stored on object");
+            }
         }
 
         if (expected != count) {

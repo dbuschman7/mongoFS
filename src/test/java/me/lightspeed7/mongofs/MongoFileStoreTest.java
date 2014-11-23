@@ -8,7 +8,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
@@ -19,6 +21,7 @@ import me.lightspeed7.mongofs.url.StorageFormat;
 import me.lightspeed7.mongofs.util.BytesCopier;
 import me.lightspeed7.mongofs.util.ChunkSize;
 
+import org.bson.types.ObjectId;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mongodb.Document;
@@ -107,6 +110,61 @@ public class MongoFileStoreTest {
         assertNotNull(mongoFile);
 
         assertEquals(32087, mongoFile.getLength());
+
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testGetInputStreamThrows() throws Exception {
+        MongoFileUrl url = MongoFileUrl.construct("mongofile:enc:fileName.pdf?52fb1e7b36707d6d13ebfda9#application/pdf");
+
+        MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
+                .bucket("mongofs").enableEncryption(null)//
+                .writeConcern(null).readPreference(null)//
+                .build();
+        MongoFileStore store = new MongoFileStore(database, config);
+
+        new MongoFile(store, url, 1234).getInputStream();
+    }
+
+    @Test
+    public void testFindOneReturnsNull() {
+
+        MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
+                .bucket("mongofs").enableEncryption(null)//
+                .writeConcern(null).readPreference(null)//
+                .build();
+        MongoFileStore store = new MongoFileStore(database, config);
+
+        assertNull(store.findOne(new ObjectId()));
+
+    }
+
+    @Test
+    public void testRemoveWithQuery() {
+
+        MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
+                .bucket("mongofs").enableEncryption(null)//
+                .writeConcern(null).readPreference(null)//
+                .build();
+        MongoFileStore store = new MongoFileStore(database, config);
+
+        store.remove(new Document(MongoFileConstants._id.name(), new ObjectId()));
+
+    }
+
+    @Test
+    public void testGetManifestReturnsNull() throws Exception {
+
+        MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
+                .bucket("mongofs").enableEncryption(null)//
+                .writeConcern(null).readPreference(null)//
+                .build();
+        MongoFileStore store = new MongoFileStore(database, config);
+
+        MongoFileUrl url = MongoFileUrl
+                .construct("mongofile:/home/oildex/x0064660/invoice/report/activeusers_19.PDF?52fb1e7b36707d6d13ebfda9#application/pdf");
+
+        assertNull(store.getManifest(url));
 
     }
 
@@ -207,8 +265,41 @@ public class MongoFileStoreTest {
 
     }
 
-    @Test(expected = FileNotFoundException.class)
+    @Test
     public void testUpload3() throws IOException {
+        MongoFileStore store = new MongoFileStore(database, //
+                MongoFileStoreConfig.builder()//
+                        .enableEncryption(new BasicCrypto())//
+                        .enableCompression(false)//
+                        .build());
+        assertNotNull(store.toString());
+
+        MongoFileUrl url = MongoFileUrl
+                .construct("mongofile:/home/oildex/x0064660/invoice/report/activeusers_19.PDF?52fb1e7b36707d6d13ebfda9#application/pdf");
+
+        MongoFile file = new MongoFile(store, url, ChunkSize.small_32K.getChunkSize());
+
+        MongoFileWriterAdapter adapter = new MongoFileWriterAdapter(file);
+
+        FileChunksOutputStreamSink chunks = new FileChunksOutputStreamSink(//
+                store.getChunksCollection(), file.getId(), adapter, file.getExpiresAt());
+
+        OutputStream sink = new BufferedChunksOutputStream(chunks, file.getChunkSize());
+
+        sink = new MongoEncryptionOutputStream(store.getConfig(), file, sink);
+
+        sink.write("foo".getBytes());
+        sink.write('c');
+        sink.flush();
+        sink.close();
+
+        assertEquals(59, sink.toString().length());
+        sink.close();
+
+    }
+
+    @Test(expected = FileNotFoundException.class)
+    public void testUpload4() throws IOException {
         MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
         assertNotNull(store.toString());
 
@@ -353,5 +444,57 @@ public class MongoFileStoreTest {
 
         MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
         store.remove((MongoFile) null);
+    }
+
+    @Test(expected = IOException.class)
+    public void testException21() throws IOException {
+
+        MongoFileStore store = new MongoFileStore(database, //
+                MongoFileStoreConfig.builder().enableEncryption(new BasicCrypto()).build());
+
+        MongoFile file = store.upload(LoremIpsum.getFile().getAbsolutePath(), "text/plain", new FileInputStream(LoremIpsum.getFile()));
+
+        OutputStream out = new ThrowIOOnCloseException(new ByteArrayOutputStream());
+        store.findOne(file.getURL()).readInto(out, true);
+        out.close();
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testException22() throws IOException {
+
+        MongoFileStoreConfig config = MongoFileStoreConfig.builder().enableEncryption(new BasicCrypto()).build();
+        MongoFileStore store = new MongoFileStore(database, config);
+
+        MongoFile file = store.upload(LoremIpsum.getFile().getAbsolutePath(), "text/plain", new FileInputStream(LoremIpsum.getFile()));
+
+        OutputStream out = new ThrowRunOnCloseException(new ByteArrayOutputStream());
+        store.findOne(file.getURL()).readInto(out, true);
+        out.close();
+    }
+
+    class ThrowIOOnCloseException extends FilterOutputStream {
+
+        public ThrowIOOnCloseException(final OutputStream out) {
+            super(out);
+        }
+
+        @Override
+        public void close() throws IOException {
+            throw new IOException("test");
+        }
+
+    }
+
+    class ThrowRunOnCloseException extends FilterOutputStream {
+
+        public ThrowRunOnCloseException(final OutputStream out) {
+            super(out);
+        }
+
+        @Override
+        public void close() throws IOException {
+            throw new RuntimeException("test");
+        }
+
     }
 }

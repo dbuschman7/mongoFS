@@ -24,6 +24,7 @@ import me.lightspeed7.mongofs.MongoFileWriter;
 import me.lightspeed7.mongofs.MongoManifest;
 import me.lightspeed7.mongofs.MongoTestConfig;
 import me.lightspeed7.mongofs.crypto.BasicCrypto;
+import me.lightspeed7.mongofs.url.MongoFileUrl;
 import me.lightspeed7.mongofs.util.BytesCopier;
 import me.lightspeed7.mongofs.util.FileUtil;
 
@@ -44,6 +45,8 @@ public class ZipFileExpanderTest {
 
     private static MongoClient mongoClient;
 
+    private static File file;
+
     // initializer
     @BeforeClass
     public static void initial() throws IOException {
@@ -53,44 +56,58 @@ public class ZipFileExpanderTest {
         mongoClient.dropDatabase(DB_NAME);
         database = new MongoDatabase(mongoClient.getDB(DB_NAME));
 
-        final File f = new File(TEST_ZIP);
-        if (!f.exists()) {
-            f.delete();
-            final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(f));
-            try {
-                createFile(out, "file1.txt", LoremIpsum.LOREM_IPSUM.getBytes());
-                createFile(out, "file2.txt", LoremIpsum.LOREM_IPSUM.getBytes());
-                createFile(out, "manifest.xml", XML.getBytes());
-            } finally {
-                if (out != null) {
-                    out.close();
-                }
-            }
-        }
+        file = generateZipFile();
     }
 
     @Test
     public void testUpload() throws IOException {
         MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket("mongofs").chunkSize(MongoFileStoreConfig.DEFAULT_CHUNKSIZE)//
+                .bucket("mongofs")//
+                .chunkSize(MongoFileStoreConfig.DEFAULT_CHUNKSIZE)//
                 .enableCompression(true)//
                 .writeConcern(WriteConcern.SAFE) //
                 .build();
 
-        runTests(new MongoFileStore(database, config), new File(TEST_ZIP));
+        runTests(new MongoFileStore(database, config), file);
     }
 
     @Test
     public void testUploadEncrypted() throws IOException {
 
         MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket("mongofs").chunkSize(MongoFileStoreConfig.DEFAULT_CHUNKSIZE)//
+                .bucket("mongofs")//
+                .chunkSize(MongoFileStoreConfig.DEFAULT_CHUNKSIZE)//
                 .enableCompression(false) //
                 .enableEncryption(new BasicCrypto())//
                 .writeConcern(WriteConcern.SAFE) //
                 .build();
 
-        runTests(new MongoFileStore(database, config), new File(TEST_ZIP));
+        runTests(new MongoFileStore(database, config), file);
+    }
+
+    @Test
+    public void testUploadBoth() throws IOException {
+
+        MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
+                .bucket("mongofs")//
+                .chunkSize(MongoFileStoreConfig.DEFAULT_CHUNKSIZE)//
+                .enableCompression(true) //
+                .enableEncryption(new BasicCrypto())//
+                .writeConcern(WriteConcern.SAFE) //
+                .build();
+
+        runTests(new MongoFileStore(database, config), file);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testZipExanderNullInputStream() throws IOException {
+
+        MongoFileStoreConfig config = MongoFileStoreConfig.builder().bucket("mongofs").build();
+
+        new MongoFileStore(database, config)//
+                .createNew("foo.txt", "text/plain")//
+                .uploadZipFile(null);
+
     }
 
     private void runTests(final MongoFileStore store, final File file) throws IOException {
@@ -131,11 +148,12 @@ public class ZipFileExpanderTest {
         assertEquals(LoremIpsum.LOREM_IPSUM, file2.readIntoString());
 
         MongoFile file3 = manifest.getFiles().get(2);
-        assertEquals("manifest.xml", file3.getFilename());
+        assertEquals("/dir/manifest.xml", file3.getFilename());
         assertEquals(XML, file3.readIntoString());
 
         // read manifest from MongoDB
-        MongoManifest manifest2 = store.getManifest(zip.getURL());
+        MongoFileUrl mongoFileUrl = zip.getURL();
+        MongoManifest manifest2 = store.getManifest(mongoFileUrl);
         assertTrue(manifest2.getZip().isExpandedZipFile());
         assertEquals(3, manifest2.getFiles().size());
 
@@ -149,7 +167,7 @@ public class ZipFileExpanderTest {
         assertEquals(LoremIpsum.LOREM_IPSUM, file2.readIntoString());
 
         file3 = manifest2.getFiles().get(2);
-        assertEquals("manifest.xml", file3.getFilename());
+        assertEquals("/dir/manifest.xml", file3.getFilename());
         assertEquals(XML, file3.readIntoString());
     }
 
@@ -170,6 +188,28 @@ public class ZipFileExpanderTest {
 
         out.write(data, 0, data.length);
         out.closeEntry();
+    }
+
+    /* package */static File generateZipFile() throws IOException {
+        final File f = new File(TEST_ZIP);
+        if (!f.exists()) {
+            f.delete();
+            final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(f));
+            try {
+                createFile(out, "file1.txt", LoremIpsum.LOREM_IPSUM.getBytes());
+                createFile(out, "file2.txt", LoremIpsum.LOREM_IPSUM.getBytes());
+                createFile(out, "/dir/manifest.xml", XML.getBytes());
+                ZipEntry e = new ZipEntry("directory/");
+                out.putNextEntry(e);
+                out.closeEntry();
+
+            } finally {
+                if (out != null) {
+                    out.close();
+                }
+            }
+        }
+        return f;
     }
 
     /* package */static final String XML = "" //

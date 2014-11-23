@@ -31,3 +31,4 @@ To get started, checkout the [Usage](https://github.com/dbuschman7/mongoFS/blob/
 
 Check out my task list on the [TODO](https://github.com/dbuschman7/mongoFS/blob/master/TODO.md " TODO") page to check the progress.
 
+Check out the [Usage](usage.md) page on how to use the library.

@@ -22,4 +22,9 @@ public class FileUtilTest {
     public void testContentType() {
         assertEquals("application/zip", FileUtil.getContentType(filename));
     }
+
+    @Test
+    public void testMd5() {
+        assertEquals("8d777f385d3dfec8815d20f7496026dc", FileUtil.hexMD5("data".getBytes()));
+    }
 }

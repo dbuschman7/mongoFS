@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import me.lightspeed7.mongofs.url.MongoFileUrl;
 import me.lightspeed7.mongofs.url.StorageFormat;
@@ -115,6 +117,9 @@ public class MongoFileUrlTest {
         MongoFileUrl url = MongoFileUrl.construct("mongofile:/home/myself/foo/activeusers_19.ZIP?52fb1e7b36707d6d13ebfda9#application/zip");
         assertNotNull(url);
 
+        assertTrue(MongoFileUrl.isValidUrl(url.getUrl().toString()));
+        assertEquals(MongoFileUrl.PROTOCOL, url.getProtocol());
+
         assertEquals(new ObjectId("52fb1e7b36707d6d13ebfda9"), url.getMongoFileId());
         assertEquals("/home/myself/foo/activeusers_19.ZIP", url.getFilePath());
         assertEquals("activeusers_19.ZIP", url.getFileName());
@@ -125,4 +130,15 @@ public class MongoFileUrlTest {
         assertEquals(ZIP, url.getMediaType());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testNUlMongoFileUrl() {
+
+        MongoFileUrl.construct((URL) null);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testIncorrectProtocol() throws MalformedURLException {
+
+        MongoFileUrl.construct(new URL("file:///your/file/here"));
+    }
 }

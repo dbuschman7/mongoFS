@@ -72,12 +72,6 @@ public class MongoFileUrl {
 
     }
 
-    // CTOR - not visible, use construct methods above
-    /* package */MongoFileUrl(final String spec) throws MalformedURLException {
-
-        this.url = new URL(null, spec, new Handler());
-    }
-
     // CTOR- not visible, use construct methods above
     /* package */MongoFileUrl(final URL url) {
 
@@ -207,24 +201,6 @@ public class MongoFileUrl {
     public boolean isDataCompressable() {
 
         return CompressionMediaTypes.isCompressable(getMediaType());
-    }
-
-    /**
-     * Is the given protocol supported by this library
-     * 
-     * @param protocol
-     * 
-     * @return true if supported
-     * 
-     */
-    public boolean isSupportedProtocol(final String protocol) {
-
-        if (url.getProtocol().equals(PROTOCOL)) {
-            return true;
-        }
-
-        // unknown
-        return false;
     }
 
 }

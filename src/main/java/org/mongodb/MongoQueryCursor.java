@@ -1,6 +1,5 @@
 package org.mongodb;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.mongodb.connection.ServerAddress;
 
 import com.mongodb.DBCursor;
@@ -42,6 +41,6 @@ public class MongoQueryCursor<T> implements MongoCursor<T> {
 
     @Override
     public ServerCursor getServerCursor() {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 }

@@ -60,7 +60,7 @@ public class ParserTest {
     public void testAssignedCompressionAndEncryption() throws IOException {
 
         ObjectId id = new ObjectId();
-        URL url = Parser.construct(id, "fileName.pdf", MongoFileUrlTest.PDF, StorageFormat.ECRYPTED_GZIP);
+        URL url = Parser.construct(id, "fileName.pdf", MongoFileUrlTest.PDF, StorageFormat.ENCRYPTED_GZIP);
 
         assertNotNull(url);
         assertEquals(String.format("mongofile:encgz:fileName.pdf?%s#application/pdf", id.toString()), url.toString());

@@ -31,8 +31,8 @@ public class StorageFormatTest {
 
     @Test
     public void testECRYPTEDGZIP() {
-        assertEquals("encgz", StorageFormat.ECRYPTED_GZIP.getCode());
-        assertTrue(StorageFormat.ECRYPTED_GZIP.isCompressed());
-        assertTrue(StorageFormat.ECRYPTED_GZIP.isEncrypted());
+        assertEquals("encgz", StorageFormat.ENCRYPTED_GZIP.getCode());
+        assertTrue(StorageFormat.ENCRYPTED_GZIP.isCompressed());
+        assertTrue(StorageFormat.ENCRYPTED_GZIP.isEncrypted());
     }
 }

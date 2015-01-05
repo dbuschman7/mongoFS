@@ -74,7 +74,7 @@ public final class FileUtil {
      */
     public static String getContentType(final String filename) {
         FileNameMap mapNew = URLConnection.getFileNameMap();
-        return mapNew.getContentTypeFor("." + getExtension(filename));
+        String temp = mapNew.getContentTypeFor("." + getExtension(filename));
+        return (temp == null) ? "application/octet-stream" : temp;
     }
-
 }

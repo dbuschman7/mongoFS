@@ -5,7 +5,7 @@ public enum StorageFormat {
     GRIDFS(null, false, false), //
     GZIPPED("gz", true, false), //
     ENCRYPTED("enc", false, true), //
-    ECRYPTED_GZIP("encgz", true, true) //
+    ENCRYPTED_GZIP("encgz", true, true) //
     //
     /* */;
 

@@ -38,12 +38,12 @@ public class StorageFormatTest {
     }
 
     @Test
-    public void testECRYPTEDGZIP() {
+    public void testENCRYPTEDGZIP() {
 
-        assertEquals(StorageFormat.ECRYPTED_GZIP, StorageFormat.find("ECRYPTED_GZIP"));
-        assertTrue(StorageFormat.ECRYPTED_GZIP.isCompressed());
-        assertTrue(StorageFormat.ECRYPTED_GZIP.isEncrypted());
-        assertEquals("encgz", StorageFormat.ECRYPTED_GZIP.getCode());
+        assertEquals(StorageFormat.ENCRYPTED_GZIP, StorageFormat.find("ENCRYPTED_GZIP"));
+        assertTrue(StorageFormat.ENCRYPTED_GZIP.isCompressed());
+        assertTrue(StorageFormat.ENCRYPTED_GZIP.isEncrypted());
+        assertEquals("encgz", StorageFormat.ENCRYPTED_GZIP.getCode());
     }
 
     @Test
@@ -51,7 +51,7 @@ public class StorageFormatTest {
         assertEquals(StorageFormat.GRIDFS, StorageFormat.find(null));
         assertNull(StorageFormat.find("foo"));
 
-        assertEquals(StorageFormat.ECRYPTED_GZIP, StorageFormat.find("encgz"));
+        assertEquals(StorageFormat.ENCRYPTED_GZIP, StorageFormat.find("encgz"));
 
     }
 
@@ -61,7 +61,7 @@ public class StorageFormatTest {
         assertEquals(StorageFormat.GRIDFS, StorageFormat.detect(false, false));
         assertEquals(StorageFormat.GZIPPED, StorageFormat.detect(true, false));
         assertEquals(StorageFormat.ENCRYPTED, StorageFormat.detect(false, true));
-        assertEquals(StorageFormat.ECRYPTED_GZIP, StorageFormat.detect(true, true));
+        assertEquals(StorageFormat.ENCRYPTED_GZIP, StorageFormat.detect(true, true));
     }
 
 }

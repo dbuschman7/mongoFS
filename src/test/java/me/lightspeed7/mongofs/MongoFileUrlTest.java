@@ -76,7 +76,7 @@ public class MongoFileUrlTest {
     public void testBothFactoriesItemized() throws IOException {
 
         ObjectId id = new ObjectId();
-        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", PDF, StorageFormat.ECRYPTED_GZIP);
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", PDF, StorageFormat.ENCRYPTED_GZIP);
         assertNotNull(url);
         assertEquals(String.format("mongofile:encgz:fileName.pdf?%s#application/pdf", id.toString()), url.getUrl().toString());
 

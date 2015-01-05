@@ -20,7 +20,7 @@ public final class Parser {
 
         boolean compressed = format.isCompressed() && CompressionMediaTypes.isCompressable(mediaType);
         if (compressed && format.isEncrypted()) {
-            protocol += ":" + StorageFormat.ECRYPTED_GZIP.getCode();
+            protocol += ":" + StorageFormat.ENCRYPTED_GZIP.getCode();
         }
         else if (compressed) {
             protocol += ":" + StorageFormat.GZIPPED.getCode();

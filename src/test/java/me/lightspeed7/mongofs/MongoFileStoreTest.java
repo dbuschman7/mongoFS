@@ -204,7 +204,7 @@ public class MongoFileStoreTest {
         assertEquals(compress, mongoFile.getURL().isStoredCompressed());
         assertEquals(LoremIpsum.LOREM_IPSUM.length(), mongoFile.getLength());
         if (compress && encrypt) {
-            assertEquals(StorageFormat.ECRYPTED_GZIP.getCode(), mongoFile.get(MongoFileConstants.format)); // verify compression
+            assertEquals(StorageFormat.ENCRYPTED_GZIP.getCode(), mongoFile.get(MongoFileConstants.format)); // verify compression
             assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify compression
             assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify compression
         }

@@ -49,7 +49,7 @@ project.ext.buildingWith = { n ->
 }
 
 dependencies {
-	compile 'org.slf4j:slf4j-api:1.7.9'
+    compile 'org.slf4j:slf4j-api:1.7.9'
     compile 'org.mongodb:mongodb-driver:3.0.2'
     
     testCompile 'junit:junit:4.12'
@@ -143,7 +143,7 @@ install {
 
 uploadArchives {
 	repositories.mavenDeployer {
-        repository(url: "file:///Users/dbusch/dev/dbuschman7/mvn-repo/")
+        repository(url: "file:///Users/david/dev/dbuschman7/mvn-repo/")
 		pom.project {
 	        name 'me.lightspeed7:MongoFS'
 	        description =

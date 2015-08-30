@@ -1,27 +1,15 @@
 package me.lightspeed7.mongofs;
 
-import java.net.UnknownHostException;
-
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 
 public final class MongoTestConfig {
 
-    public static MongoClient construct() {
+	public static MongoClient construct() {
+		return new MongoClient(new MongoClientURI("mongodb://services.local:27017"));
+	}
 
-        try {
-            return new MongoClient(new MongoClientURI("mongodb://cayman-vm:27017")); // my vm server
-        } catch (UnknownHostException e) {
-            // System.out.println("Cayman-vm unavailabel, trying localhost");
-            try {
-                return new MongoClient(new MongoClientURI("mongodb://localhost:27017")); // most others
-            } catch (UnknownHostException ex) {
-                throw new IllegalArgumentException("Unable to connect a mongoDB instance", ex);
-            }
-        }
-    }
-
-    private MongoTestConfig() {
-        // empty
-    }
+	private MongoTestConfig() {
+		// empty
+	}
 }

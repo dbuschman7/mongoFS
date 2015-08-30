@@ -32,469 +32,468 @@ import com.mongodb.WriteConcern;
 
 public class MongoFileStoreTest {
 
-    private static final String DB_NAME = "MongoFSTest-fileStore";
+	private static final String DB_NAME = "MongoFSTest-fileStore";
 
-    private static MongoDatabase database;
+	private static MongoDatabase database;
 
-    private static MongoClient mongoClient;
+	private static MongoClient mongoClient;
 
-    // initializer
-    @BeforeClass
-    public static void initial() {
+	// initializer
+	@BeforeClass
+	public static void initial() {
 
-        mongoClient = MongoTestConfig.construct();
+		mongoClient = MongoTestConfig.construct();
 
-        mongoClient.dropDatabase(DB_NAME);
-        database = new MongoDatabase(mongoClient.getDB(DB_NAME));
-    }
+		mongoClient.dropDatabase(DB_NAME);
+		database = new MongoDatabase(mongoClient.getDB(DB_NAME));
+	}
 
-    @Test
-    public void testBasicUncompressedRoundTrip() throws IOException {
+	@Test
+	public void testBasicUncompressedRoundTrip() throws IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, false, false);
-    }
+		doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, false, false);
+	}
 
-    @Test
-    public void testBasicCompressedRoundTrip() throws IOException {
+	@Test
+	public void testBasicCompressedRoundTrip() throws IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, true, false);
-    }
+		doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, true, false);
+	}
 
-    @Test
-    public void testLotsOfChunksUncompressedRoundTrip() throws IOException {
+	@Test
+	public void testLotsOfChunksUncompressedRoundTrip() throws IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, false);
-    }
+		doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, false);
+	}
 
-    @Test
-    public void testLotsOfChunksCompressedRoundTrip() throws IOException {
+	@Test
+	public void testLotsOfChunksCompressedRoundTrip() throws IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true, false);
-    }
+		doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true, false);
+	}
 
-    @Test
-    public void testLotsOfChunksEncryptedRoundTrip() throws IOException {
+	@Test
+	public void testLotsOfChunksEncryptedRoundTrip() throws IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, true);
-    }
+		doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, true);
+	}
 
-    @Test
-    public void testLotsOfChunksNoCompNoEncryptRoundTrip() throws IOException {
+	@Test
+	public void testLotsOfChunksNoCompNoEncryptRoundTrip() throws IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, false);
-    }
+		doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, false);
+	}
 
-    public void testLotsOfChunksEncryptedAndCompressedRoundTrip() throws IOException {
+	public void testLotsOfChunksEncryptedAndCompressedRoundTrip() throws IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true, true);
-    }
+		doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true, true);
+	}
 
-    @Test
-    public void testSingleChunkEncryptedAndCompressedRoundTrip() throws IOException {
+	@Test
+	public void testSingleChunkEncryptedAndCompressedRoundTrip() throws IOException {
 
-        doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.large_1M, true, true);
-    }
+		doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.large_1M, true, true);
+	}
 
-    @Test
-    public void testUpload() throws IOException {
+	@Test
+	public void testUpload() throws IOException {
 
-        MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket("mongofs").chunkSize(ChunkSize.medium_256K)//
-                .enableCompression(true).enableEncryption(new BasicCrypto())//
-                .writeConcern(WriteConcern.SAFE) //
-                .build();
-        MongoFileStore store = new MongoFileStore(database, config);
+		MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
+				.bucket("mongofs").chunkSize(ChunkSize.medium_256K)//
+				.enableCompression(true).enableEncryption(new BasicCrypto())//
+				.writeConcern(WriteConcern.SAFE) //
+				.build();
+		MongoFileStore store = new MongoFileStore(database, config);
 
-        ByteArrayInputStream in = new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes());
-        MongoFile mongoFile = store.upload("loremIpsum.txt", "test/plain", null, false, in);
-        assertNotNull(mongoFile);
+		ByteArrayInputStream in = new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes());
+		MongoFile mongoFile = store.upload("loremIpsum.txt", "test/plain", null, false, in);
+		assertNotNull(mongoFile);
 
-        assertEquals(32087, mongoFile.getLength());
+		assertEquals(32087, mongoFile.getLength());
 
-    }
+	}
 
-    @Test(expected = IllegalStateException.class)
-    public void testGetInputStreamThrows() throws Exception {
-        MongoFileUrl url = MongoFileUrl.construct("mongofile:enc:fileName.pdf?52fb1e7b36707d6d13ebfda9#application/pdf");
+	@Test(expected = IllegalStateException.class)
+	public void testGetInputStreamThrows() throws Exception {
+		MongoFileUrl url = MongoFileUrl.construct("mongofile:enc:fileName.pdf?52fb1e7b36707d6d13ebfda9#application/pdf");
 
-        MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket("mongofs").enableEncryption(null)//
-                .writeConcern(null).readPreference(null)//
-                .build();
-        MongoFileStore store = new MongoFileStore(database, config);
+		MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
+				.bucket("mongofs").enableEncryption(null)//
+				.writeConcern(null).readPreference(null)//
+				.build();
+		MongoFileStore store = new MongoFileStore(database, config);
 
-        new MongoFile(store, url, 1234).getInputStream();
-    }
+		new MongoFile(store, url, 1234).getInputStream();
+	}
 
-    @Test
-    public void testFindOneReturnsNull() {
+	@Test
+	public void testFindOneReturnsNull() {
 
-        MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket("mongofs").enableEncryption(null)//
-                .writeConcern(null).readPreference(null)//
-                .build();
-        MongoFileStore store = new MongoFileStore(database, config);
-
-        assertNull(store.findOne(new ObjectId()));
-
-    }
-
-    @Test
-    public void testRemoveWithQuery() {
-
-        MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket("mongofs").enableEncryption(null)//
-                .writeConcern(null).readPreference(null)//
-                .build();
-        MongoFileStore store = new MongoFileStore(database, config);
-
-        store.remove(new Document(MongoFileConstants._id.name(), new ObjectId()));
-
-    }
-
-    @Test
-    public void testGetManifestReturnsNull() throws Exception {
-
-        MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket("mongofs").enableEncryption(null)//
-                .writeConcern(null).readPreference(null)//
-                .build();
-        MongoFileStore store = new MongoFileStore(database, config);
-
-        MongoFileUrl url = MongoFileUrl
-                .construct("mongofile:/home/oildex/x0064660/invoice/report/activeusers_19.PDF?52fb1e7b36707d6d13ebfda9#application/pdf");
-
-        assertNull(store.getManifest(url));
-
-    }
-
-    //
-    // internal
-    // /////////////////
-
-    private void doRoundTrip(final String bucket, final String filename, final ChunkSize chunkSize, final boolean compress,
-            final boolean encrypt) throws IOException {
-
-        MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket(bucket)//
-                .chunkSize(chunkSize)//
-                .enableCompression(compress)//
-                .enableEncryption(encrypt ? new BasicCrypto(chunkSize) : null)//
-                .writeConcern(WriteConcern.SAFE) //
-                .build();
-        MongoFileStore store = new MongoFileStore(database, config);
-
-        assertEquals(true, store.validateConnection());
-
-        MongoFileWriter writer = store.createNew(filename, "text/plain", null, compress);
-        ByteArrayInputStream in = new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes());
-        OutputStream out = writer.getOutputStream();
-        try {
-            new BytesCopier(in, out).transfer(true);
-        } finally {
-            out.close();
-        }
-
-        // verify it exists
-        MongoFile mongoFile = writer.getMongoFile();
-        assertTrue(store.exists(mongoFile.getURL()));
-        assertNotNull(mongoFile.getMD5());
-
-        // read a file
-        assertEquals(compress, mongoFile.getURL().isStoredCompressed());
-        assertEquals(LoremIpsum.LOREM_IPSUM.length(), mongoFile.getLength());
-        if (compress && encrypt) {
-            assertEquals(StorageFormat.ENCRYPTED_GZIP.getCode(), mongoFile.get(MongoFileConstants.format)); // verify compression
-            assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify compression
-            assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify compression
-        }
-        else if (compress) {
-            assertEquals(StorageFormat.GZIPPED.getCode(), mongoFile.get(MongoFileConstants.format)); // verify compression
-            assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify compression
-            assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify compression
-        }
-        else if (encrypt) {
-            assertEquals(StorageFormat.ENCRYPTED.getCode(), mongoFile.get(MongoFileConstants.format)); // verify encryption
-            assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify encryption
-            assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify encryption sets its ratio
-        }
-        else {
-            assertNull(mongoFile.get(MongoFileConstants.storage)); // verify no compression
-            assertNull(mongoFile.get(MongoFileConstants.format)); // verify no compression
-            assertNull(mongoFile.get(MongoFileConstants.ratio)); // verify no compression
-        }
-
-        ByteArrayOutputStream out2 = new ByteArrayOutputStream(32 * 1024);
-        new BytesCopier(new MongoFileReader(store, mongoFile).getInputStream(), out2).transfer(true);
-        assertEquals(LoremIpsum.LOREM_IPSUM, out2.toString());
-
-    }
-
-    @Test
-    public void testUpload1() throws IOException {
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        assertNotNull(store.toString());
-
-        MongoFile file = store.upload(LoremIpsum.getFile(), "text/plain");
-        assertNotNull(file);
-        assertEquals(LoremIpsum.LOREM_IPSUM.length(), file.getLength());
-        assertTrue(store.exists(file.getURL()));
-        assertTrue(store.exists(file.getId()));
-
-        MongoFile file2 = store.findOne(file.getURL().getUrl());
-        assertNotNull(file2);
-
-    }
-
-    @Test
-    public void testUpload2() throws IOException {
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        assertNotNull(store.toString());
-
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(LoremIpsum.getBytes());
-        try {
-            MongoFile file = store.upload(LoremIpsum.getFile().getAbsolutePath(), "text/plain", inputStream);
-            assertNotNull(file);
-            assertEquals(LoremIpsum.LOREM_IPSUM.length(), file.getLength());
-            assertTrue(store.exists(file.getURL()));
-            assertTrue(store.exists(file.getId()));
-
-        } finally {
-            inputStream.close();
-        }
-
-    }
-
-    @Test
-    public void testUpload3() throws IOException {
-        MongoFileStore store = new MongoFileStore(database, //
-                MongoFileStoreConfig.builder()//
-                        .enableEncryption(new BasicCrypto())//
-                        .enableCompression(false)//
-                        .build());
-        assertNotNull(store.toString());
-
-        MongoFileUrl url = MongoFileUrl
-                .construct("mongofile:/home/oildex/x0064660/invoice/report/activeusers_19.PDF?52fb1e7b36707d6d13ebfda9#application/pdf");
-
-        MongoFile file = new MongoFile(store, url, ChunkSize.small_32K.getChunkSize());
-
-        MongoFileWriterAdapter adapter = new MongoFileWriterAdapter(file);
-
-        FileChunksOutputStreamSink chunks = new FileChunksOutputStreamSink(//
-                store.getChunksCollection(), file.getId(), adapter, file.getExpiresAt());
-
-        OutputStream sink = new BufferedChunksOutputStream(chunks, file.getChunkSize());
-
-        sink = new MongoEncryptionOutputStream(store.getConfig(), file, sink);
-
-        sink.write("foo".getBytes());
-        sink.write('c');
-        sink.flush();
-        sink.close();
+		MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
+				.bucket("mongofs").enableEncryption(null)//
+				.writeConcern(null).readPreference(null)//
+				.build();
+		MongoFileStore store = new MongoFileStore(database, config);
+
+		assertNull(store.findOne(new ObjectId()));
+
+	}
+
+	@Test
+	public void testRemoveWithQuery() {
+
+		MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
+				.bucket("mongofs").enableEncryption(null)//
+				.writeConcern(null).readPreference(null)//
+				.build();
+		MongoFileStore store = new MongoFileStore(database, config);
+
+		store.remove(new Document(MongoFileConstants._id.name(), new ObjectId()));
+
+	}
+
+	@Test
+	public void testGetManifestReturnsNull() throws Exception {
+
+		MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
+				.bucket("mongofs").enableEncryption(null)//
+				.writeConcern(null).readPreference(null)//
+				.build();
+		MongoFileStore store = new MongoFileStore(database, config);
+
+		MongoFileUrl url = MongoFileUrl
+				.construct("mongofile:/home/oildex/x0064660/invoice/report/activeusers_19.PDF?52fb1e7b36707d6d13ebfda9#application/pdf");
+
+		assertNull(store.getManifest(url));
+
+	}
+
+	//
+	// internal
+	// /////////////////
+
+	private void doRoundTrip(final String bucket, final String filename, final ChunkSize chunkSize, final boolean compress,
+			final boolean encrypt) throws IOException {
+
+		MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
+				.bucket(bucket)//
+				.chunkSize(chunkSize)//
+				.enableCompression(compress)//
+				.enableEncryption(encrypt ? new BasicCrypto(chunkSize) : null)//
+				.writeConcern(WriteConcern.SAFE) //
+				.build();
+		MongoFileStore store = new MongoFileStore(database, config);
+
+		assertEquals(true, store.validateConnection());
+
+		MongoFileWriter writer = store.createNew(filename, "text/plain", null, compress);
+		ByteArrayInputStream in = new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes());
+		OutputStream out = writer.getOutputStream();
+		try {
+			new BytesCopier(in, out).transfer(true);
+		} finally {
+			out.close();
+		}
+
+		// verify it exists
+		MongoFile mongoFile = writer.getMongoFile();
+		assertTrue(store.exists(mongoFile.getURL()));
+		assertNotNull(mongoFile.getMD5());
+
+		// read a file
+		assertEquals(compress, mongoFile.getURL().isStoredCompressed());
+		assertEquals(LoremIpsum.LOREM_IPSUM.length(), mongoFile.getLength());
+		if (compress && encrypt) {
+			assertEquals(StorageFormat.ENCRYPTED_GZIP.getCode(), mongoFile.get(MongoFileConstants.format)); // verify compression
+			assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify compression
+			assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify compression
+		} else if (compress) {
+			assertEquals(StorageFormat.GZIPPED.getCode(), mongoFile.get(MongoFileConstants.format)); // verify compression
+			assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify compression
+			assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify compression
+		} else if (encrypt) {
+			assertEquals(StorageFormat.ENCRYPTED.getCode(), mongoFile.get(MongoFileConstants.format)); // verify encryption
+			assertNotNull(mongoFile.get(MongoFileConstants.storage)); // verify encryption
+			assertNotNull(mongoFile.get(MongoFileConstants.ratio)); // verify encryption sets its ratio
+		} else {
+			assertNull(mongoFile.get(MongoFileConstants.storage)); // verify no compression
+			assertNull(mongoFile.get(MongoFileConstants.format)); // verify no compression
+			assertNull(mongoFile.get(MongoFileConstants.ratio)); // verify no compression
+		}
+
+		ByteArrayOutputStream out2 = new ByteArrayOutputStream(32 * 1024);
+		new BytesCopier(new MongoFileReader(store, mongoFile).getInputStream(), out2).transfer(true);
+		assertEquals(LoremIpsum.LOREM_IPSUM, out2.toString());
+
+	}
+
+	@Test
+	public void testUpload1() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		assertNotNull(store.toString());
+
+		MongoFile file = store.upload(LoremIpsum.getFile(), "text/plain");
+		assertNotNull(file);
+		assertEquals(LoremIpsum.LOREM_IPSUM.length(), file.getLength());
+		assertTrue(store.exists(file.getURL()));
+		assertTrue(store.exists(file.getId()));
+
+		MongoFile file2 = store.findOne(file.getURL().getUrl());
+		assertNotNull(file2);
+
+	}
+
+	@Test
+	public void testUpload2() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		assertNotNull(store.toString());
+
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(LoremIpsum.getBytes());
+		try {
+			MongoFile file = store.upload(LoremIpsum.getFile().getAbsolutePath(), "text/plain", inputStream);
+			assertNotNull(file);
+			assertEquals(LoremIpsum.LOREM_IPSUM.length(), file.getLength());
+			assertTrue(store.exists(file.getURL()));
+			assertTrue(store.exists(file.getId()));
+
+		} finally {
+			inputStream.close();
+		}
+
+	}
+
+	@Test
+	public void testUpload3() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, //
+				MongoFileStoreConfig.builder()//
+						.enableEncryption(new BasicCrypto())//
+						.enableCompression(false)//
+						.build());
+		assertNotNull(store.toString());
+
+		MongoFileUrl url = MongoFileUrl
+				.construct("mongofile:/home/oildex/x0064660/invoice/report/activeusers_19.PDF?52fb1e7b36707d6d13ebfda9#application/pdf");
+
+		MongoFile file = new MongoFile(store, url, ChunkSize.small_32K.getChunkSize());
+
+		MongoFileWriterAdapter adapter = new MongoFileWriterAdapter(file);
+
+		FileChunksOutputStreamSink chunks = new FileChunksOutputStreamSink(//
+				store.getChunksCollection(), file.getId(), adapter, file.getExpiresAt());
 
-        assertEquals(59, sink.toString().length());
-        sink.close();
+		OutputStream sink = new BufferedChunksOutputStream(chunks, file.getChunkSize());
 
-    }
+		sink = new MongoEncryptionOutputStream(store.getConfig(), file, sink);
 
-    @Test(expected = FileNotFoundException.class)
-    public void testUpload4() throws IOException {
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        assertNotNull(store.toString());
+		sink.write("foo".getBytes());
+		sink.write('c');
+		sink.flush();
+		sink.close();
 
-        File file2 = new File("file.does.not.exist");
-        store.upload(file2, "text/plain", false, null);
-    }
+		assertEquals(59, sink.toString().length());
+		sink.close();
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testException1() throws IOException {
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        store.createNew(null, null);
-    }
+	@Test(expected = FileNotFoundException.class)
+	public void testUpload4() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		assertNotNull(store.toString());
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testException2() throws IOException {
+		File file2 = new File("file.does.not.exist");
+		store.upload(file2, "text/plain", false, null);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        store.createNew("", null);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testException1() throws IOException {
 
-    @Test(expected = IllegalStateException.class)
-    public void testException3() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		store.createNew(null, null);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().enableCompression(false).build());
-        store.createNew("", "", null, true);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testException2() throws IOException {
 
-    @Test(expected = IllegalStateException.class)
-    public void testException4() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		store.createNew("", null);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder()//
-                .enableCompression(false).enableEncryption(new BasicCrypto()).build());
-        store.createNew("", "", null, true);
-    }
+	@Test(expected = IllegalStateException.class)
+	public void testException3() throws IOException {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testException5() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().enableCompression(false).build());
+		store.createNew("", "", null, true);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        store.upload(null, null);
-    }
+	@Test(expected = IllegalStateException.class)
+	public void testException4() throws IOException {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testException6() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder()//
+				.enableCompression(false).enableEncryption(new BasicCrypto()).build());
+		store.createNew("", "", null, true);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        store.upload(LoremIpsum.getFile(), null);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testException5() throws IOException {
 
-    @Test(expected = IllegalStateException.class)
-    public void testException8() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		store.upload(null, null);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().enableCompression(false).build());
-        store.upload(LoremIpsum.getFile(), "text/plain", true, null);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testException6() throws IOException {
 
-    @Test(expected = IllegalStateException.class)
-    public void testException9() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		store.upload(LoremIpsum.getFile(), null);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder()//
-                .enableCompression(false).enableEncryption(new BasicCrypto()).build());
-        store.upload(LoremIpsum.getFile(), "text/plain", true, null);
-    }
+	@Test(expected = IllegalStateException.class)
+	public void testException8() throws IOException {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testException10() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().enableCompression(false).build());
+		store.upload(LoremIpsum.getFile(), "text/plain", true, null);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        store.getManifest((MongoFileUrl) null);
-    }
+	@Test(expected = IllegalStateException.class)
+	public void testException9() throws IOException {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testException11() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder()//
+				.enableCompression(false).enableEncryption(new BasicCrypto()).build());
+		store.upload(LoremIpsum.getFile(), "text/plain", true, null);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        store.getManifest((MongoFile) null);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testException10() throws IOException {
 
-    @Test(expected = IllegalStateException.class)
-    public void testException12() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		store.getManifest((MongoFileUrl) null);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        MongoFile file = store.upload(LoremIpsum.getFile(), "text/plain");
+	@Test(expected = IllegalArgumentException.class)
+	public void testException11() throws IOException {
 
-        store.getManifest(file);
-    }
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		store.getManifest((MongoFile) null);
+	}
 
-    @Test(expected = IllegalStateException.class)
-    public void testException13() throws IOException {
+	@Test(expected = IllegalStateException.class)
+	public void testException12() throws IOException {
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        MongoFile file = store.upload(LoremIpsum.getFile(), "text/plain");
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		MongoFile file = store.upload(LoremIpsum.getFile(), "text/plain");
 
-        store.getManifest(file.getURL());
-    }
+		store.getManifest(file);
+	}
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testException14() throws IOException {
+	@Test(expected = IllegalStateException.class)
+	public void testException13() throws IOException {
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        store.findOne((URL) null);
-    }
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		MongoFile file = store.upload(LoremIpsum.getFile(), "text/plain");
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testException15() throws IOException {
+		store.getManifest(file.getURL());
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        store.findOne((MongoFileUrl) null);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testException14() throws IOException {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testException16() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		store.findOne((URL) null);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        store.exists((MongoFileUrl) null);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testException15() throws IOException {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testException17() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		store.findOne((MongoFileUrl) null);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        store.createNew("filename", "test/plain").write(null);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testException16() throws IOException {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testException18() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		store.exists((MongoFileUrl) null);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        store.remove((Document) null);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testException17() throws IOException {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testException19() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		store.createNew("filename", "test/plain").write(null);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        store.remove((MongoFileUrl) null);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testException18() throws IOException {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testException20() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		store.remove((Document) null);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
-        store.remove((MongoFile) null);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testException19() throws IOException {
 
-    @Test(expected = IOException.class)
-    public void testException21() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		store.remove((MongoFileUrl) null);
+	}
 
-        MongoFileStore store = new MongoFileStore(database, //
-                MongoFileStoreConfig.builder().enableEncryption(new BasicCrypto()).build());
+	@Test(expected = IllegalArgumentException.class)
+	public void testException20() throws IOException {
 
-        MongoFile file = store.upload(LoremIpsum.getFile().getAbsolutePath(), "text/plain", new FileInputStream(LoremIpsum.getFile()));
+		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
+		store.remove((MongoFile) null);
+	}
 
-        OutputStream out = new ThrowIOOnCloseException(new ByteArrayOutputStream());
-        store.findOne(file.getURL()).readInto(out, true);
-        out.close();
-    }
+	@Test(expected = IOException.class)
+	public void testException21() throws IOException {
 
-    @Test(expected = RuntimeException.class)
-    public void testException22() throws IOException {
+		MongoFileStore store = new MongoFileStore(database, //
+				MongoFileStoreConfig.builder().enableEncryption(new BasicCrypto()).build());
 
-        MongoFileStoreConfig config = MongoFileStoreConfig.builder().enableEncryption(new BasicCrypto()).build();
-        MongoFileStore store = new MongoFileStore(database, config);
+		MongoFile file = store.upload(LoremIpsum.getFile().getAbsolutePath(), "text/plain",
+				new FileInputStream(LoremIpsum.getFile()));
 
-        MongoFile file = store.upload(LoremIpsum.getFile().getAbsolutePath(), "text/plain", new FileInputStream(LoremIpsum.getFile()));
+		OutputStream out = new ThrowIOOnCloseException(new ByteArrayOutputStream());
+		store.findOne(file.getURL()).readInto(out, true);
+		out.close();
+	}
 
-        OutputStream out = new ThrowRunOnCloseException(new ByteArrayOutputStream());
-        store.findOne(file.getURL()).readInto(out, true);
-        out.close();
-    }
+	@Test(expected = RuntimeException.class)
+	public void testException22() throws IOException {
 
-    class ThrowIOOnCloseException extends FilterOutputStream {
+		MongoFileStoreConfig config = MongoFileStoreConfig.builder().enableEncryption(new BasicCrypto()).build();
+		MongoFileStore store = new MongoFileStore(database, config);
 
-        public ThrowIOOnCloseException(final OutputStream out) {
-            super(out);
-        }
+		MongoFile file = store.upload(LoremIpsum.getFile().getAbsolutePath(), "text/plain",
+				new FileInputStream(LoremIpsum.getFile()));
 
-        @Override
-        public void close() throws IOException {
-            throw new IOException("test");
-        }
+		OutputStream out = new ThrowRunOnCloseException(new ByteArrayOutputStream());
+		store.findOne(file.getURL()).readInto(out, true);
+		out.close();
+	}
 
-    }
+	class ThrowIOOnCloseException extends FilterOutputStream {
 
-    class ThrowRunOnCloseException extends FilterOutputStream {
+		public ThrowIOOnCloseException(final OutputStream out) {
+			super(out);
+		}
 
-        public ThrowRunOnCloseException(final OutputStream out) {
-            super(out);
-        }
+		@Override
+		public void close() throws IOException {
+			throw new IOException("test");
+		}
 
-        @Override
-        public void close() throws IOException {
-            throw new RuntimeException("test");
-        }
+	}
 
-    }
+	class ThrowRunOnCloseException extends FilterOutputStream {
+
+		public ThrowRunOnCloseException(final OutputStream out) {
+			super(out);
+		}
+
+		@Override
+		public void close() throws IOException {
+			throw new RuntimeException("test");
+		}
+
+	}
 }

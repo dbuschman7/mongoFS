@@ -1,7 +1,5 @@
 package me.lightspeed7.mongofs.spring;
 
-import java.net.UnknownHostException;
-
 import me.lightspeed7.mongofs.MongoFileStore;
 import me.lightspeed7.mongofs.MongoFileStoreConfig;
 import me.lightspeed7.mongofs.util.ChunkSize;
@@ -19,39 +17,29 @@ import com.mongodb.WriteConcern;
 @ComponentScan("me.lightspeed7.mongofs.spring")
 public class JavaConfig {
 
-    static final String COLLECTION_NAME = "MongoFS-JavaConfig";
+	static final String COLLECTION_NAME = "MongoFS-JavaConfig";
 
-    @Bean(name = "mongoClient")
-    public MongoClient client() {
+	@Bean(name = "mongoClient")
+	public MongoClient client() {
+		return new MongoClient(new MongoClientURI("mongodb://services.local:27017"));
+	}
 
-        try {
-            return new MongoClient(new MongoClientURI("mongodb://cayman-vm:27017")); // my vm server
-        } catch (UnknownHostException e) {
-            // System.out.println("Cayman-vm unavailable, trying localhost");
-            try {
-                return new MongoClient(new MongoClientURI("mongodb://localhost:27017")); // most others
-            } catch (UnknownHostException ex) {
-                throw new IllegalArgumentException("Unable to connect a mongoDB instance", ex);
-            }
-        }
-    }
+	public MongoFileStoreConfig configure() {
 
-    public MongoFileStoreConfig configure() {
+		MongoFileStoreConfig config = MongoFileStoreConfig.builder().bucket("spring") //
+				.asyncDeletes(true) // background deleting
+				.chunkSize(ChunkSize.medium_256K) // good default
+				.enableCompression(true)//
+				.readPreference(ReadPreference.secondaryPreferred())//
+				.writeConcern(WriteConcern.ACKNOWLEDGED)//
+				.build();
 
-        MongoFileStoreConfig config = MongoFileStoreConfig.builder().bucket("spring") //
-                .asyncDeletes(true) // background deleting
-                .chunkSize(ChunkSize.medium_256K) // good default
-                .enableCompression(true)//
-                .readPreference(ReadPreference.secondaryPreferred())//
-                .writeConcern(WriteConcern.ACKNOWLEDGED)//
-                .build();
+		return config;
+	}
 
-        return config;
-    }
+	@Bean(name = "mongoFileStore")
+	public MongoFileStore store() {
 
-    @Bean(name = "mongoFileStore")
-    public MongoFileStore store() {
-
-        return new MongoFileStore(client().getDB(COLLECTION_NAME), configure());
-    }
+		return new MongoFileStore(client().getDB(COLLECTION_NAME), configure());
+	}
 }

@@ -18,3 +18,11 @@ build/
 
 #GFM viewer support 
 *.md.html
+
+# SBT 
+.cache-main
+.cache-tests
+
+project/project/
+project/target/
+

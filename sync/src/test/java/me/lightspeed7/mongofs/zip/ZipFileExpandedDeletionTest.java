@@ -32,7 +32,7 @@ import com.mongodb.WriteConcern;
 
 public class ZipFileExpandedDeletionTest {
 
-    private static final String TEST_ZIP = "./src/test/resources/test.zip";
+    private static final String TEST_ZIP = "./resources/test.zip";
 
     private static final String DB_NAME = "MongoFSTest-zipExpander";
 
@@ -63,7 +63,7 @@ public class ZipFileExpandedDeletionTest {
         }
 
         MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket("mongofs").chunkSize(MongoFileStoreConfig.DEFAULT_CHUNKSIZE)//
+                .bucket("zipExpander-delete").chunkSize(MongoFileStoreConfig.DEFAULT_CHUNKSIZE)//
                 .enableCompression(true)//
                 .writeConcern(WriteConcern.SAFE) //
                 .build();

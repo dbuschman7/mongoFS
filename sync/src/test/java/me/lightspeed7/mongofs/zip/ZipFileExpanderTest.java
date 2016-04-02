@@ -37,7 +37,7 @@ import com.mongodb.WriteConcern;
 
 public class ZipFileExpanderTest {
 
-    static final String TEST_ZIP = "./src/test/resources/test.zip";
+    static final String TEST_ZIP = "./resources/test.zip";
 
     static final String DB_NAME = "MongoFSTest-zipExpander";
 
@@ -62,7 +62,7 @@ public class ZipFileExpanderTest {
     @Test
     public void testUpload() throws IOException {
         MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket("mongofs")//
+                .bucket("zipExpander")//
                 .chunkSize(MongoFileStoreConfig.DEFAULT_CHUNKSIZE)//
                 .enableCompression(true)//
                 .writeConcern(WriteConcern.SAFE) //
@@ -75,7 +75,7 @@ public class ZipFileExpanderTest {
     public void testUploadEncrypted() throws IOException {
 
         MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket("mongofs")//
+                .bucket("zipExpander")//
                 .chunkSize(MongoFileStoreConfig.DEFAULT_CHUNKSIZE)//
                 .enableCompression(false) //
                 .enableEncryption(new BasicCrypto())//
@@ -89,7 +89,7 @@ public class ZipFileExpanderTest {
     public void testUploadBoth() throws IOException {
 
         MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket("mongofs")//
+                .bucket("zipExpander")//
                 .chunkSize(MongoFileStoreConfig.DEFAULT_CHUNKSIZE)//
                 .enableCompression(true) //
                 .enableEncryption(new BasicCrypto())//
@@ -102,7 +102,7 @@ public class ZipFileExpanderTest {
     @Test(expected = IllegalArgumentException.class)
     public void testZipExanderNullInputStream() throws IOException {
 
-        MongoFileStoreConfig config = MongoFileStoreConfig.builder().bucket("mongofs").build();
+        MongoFileStoreConfig config = MongoFileStoreConfig.builder().bucket("zipExpander").build();
 
         new MongoFileStore(database, config)//
                 .createNew("foo.txt", "text/plain")//

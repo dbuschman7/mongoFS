@@ -49,7 +49,7 @@ public class MongoManifestQueryTest {
         File file = ZipFileExpanderTest.generateZipFile();
 
         MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-                .bucket("mongofs")//
+                .bucket("manifestQuery")//
                 .chunkSize(MongoFileStoreConfig.DEFAULT_CHUNKSIZE)//
                 .enableCompression(true)//
                 .writeConcern(WriteConcern.SAFE) //

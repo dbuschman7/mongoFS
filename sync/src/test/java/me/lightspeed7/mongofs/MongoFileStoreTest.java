@@ -41,7 +41,6 @@ public class MongoFileStoreTest {
 	// initializer
 	@BeforeClass
 	public static void initial() {
-
 		mongoClient = MongoTestConfig.construct();
 
 		mongoClient.dropDatabase(DB_NAME);
@@ -51,48 +50,48 @@ public class MongoFileStoreTest {
 	@Test
 	public void testBasicUncompressedRoundTrip() throws IOException {
 
-		doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, false, false);
+		doRoundTrip("loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, false, false);
 	}
 
 	@Test
 	public void testBasicCompressedRoundTrip() throws IOException {
 
-		doRoundTrip("mongofs", "loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, true, false);
+		doRoundTrip("loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, true, false);
 	}
 
 	@Test
 	public void testLotsOfChunksUncompressedRoundTrip() throws IOException {
 
-		doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, false);
+		doRoundTrip("loremIpsum.txt", ChunkSize.tiny_4K, false, false);
 	}
 
 	@Test
 	public void testLotsOfChunksCompressedRoundTrip() throws IOException {
 
-		doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true, false);
+		doRoundTrip("loremIpsum.txt", ChunkSize.tiny_4K, true, false);
 	}
 
 	@Test
 	public void testLotsOfChunksEncryptedRoundTrip() throws IOException {
 
-		doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, true);
+		doRoundTrip("loremIpsum.txt", ChunkSize.tiny_4K, false, true);
 	}
 
 	@Test
 	public void testLotsOfChunksNoCompNoEncryptRoundTrip() throws IOException {
 
-		doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, false, false);
+		doRoundTrip("loremIpsum.txt", ChunkSize.tiny_4K, false, false);
 	}
 
 	public void testLotsOfChunksEncryptedAndCompressedRoundTrip() throws IOException {
 
-		doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.tiny_4K, true, true);
+		doRoundTrip("loremIpsum.txt", ChunkSize.tiny_4K, true, true);
 	}
 
 	@Test
 	public void testSingleChunkEncryptedAndCompressedRoundTrip() throws IOException {
 
-		doRoundTrip("mongofs", "loremIpsum.txt", ChunkSize.large_1M, true, true);
+		doRoundTrip("loremIpsum.txt", ChunkSize.large_1M, true, true);
 	}
 
 	@Test
@@ -172,19 +171,17 @@ public class MongoFileStoreTest {
 	// internal
 	// /////////////////
 
-	private void doRoundTrip(final String bucket, final String filename, final ChunkSize chunkSize, final boolean compress,
-			final boolean encrypt) throws IOException {
+	private void doRoundTrip(final String filename, final ChunkSize chunkSize, final boolean compress, final boolean encrypt)
+			throws IOException {
 
 		MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
-				.bucket(bucket)//
+				.bucket("fileStore")//
 				.chunkSize(chunkSize)//
 				.enableCompression(compress)//
 				.enableEncryption(encrypt ? new BasicCrypto(chunkSize) : null)//
 				.writeConcern(WriteConcern.SAFE) //
 				.build();
 		MongoFileStore store = new MongoFileStore(database, config);
-
-		assertEquals(true, store.validateConnection());
 
 		MongoFileWriter writer = store.createNew(filename, "text/plain", null, compress);
 		ByteArrayInputStream in = new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes());
@@ -290,6 +287,7 @@ public class MongoFileStoreTest {
 		sink.flush();
 		sink.close();
 
+		System.out.println("Sink = " + sink.toString());
 		assertEquals(59, sink.toString().length());
 		sink.close();
 

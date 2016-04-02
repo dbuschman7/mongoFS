@@ -201,28 +201,28 @@ public class MongoFileStore {
      * 
      * @throws MongoException
      */
-    public boolean validateConnection() {
-
-        try {
-            // String command = String.format(
-            // "{ touch: \"%s\", data: false, index: true }",
-            // config.getBucket() + ".files");
-
-            Document doc = new Document() //
-                    .append("touch", config.getBucket() + ".files") //
-                    .append("data", Boolean.FALSE) //
-                    .append("index", Boolean.TRUE);
-
-            CommandResult commandResult = filesCollection.getDatabase().executeCommand(doc);
-            if (!commandResult.isOk()) {
-                throw new MongoException(commandResult.getErrorMessage());
-            }
-
-            return true;
-        } catch (Exception e) {
-            throw new MongoException("Unable to run command on server", e);
-        }
-    }
+//	public boolean validateConnection() {
+//
+//        try {
+//            // String command = String.format(
+//            // "{ touch: \"%s\", data: false, index: true }",
+//            // config.getBucket() + ".files");
+//
+//            Document doc = new Document() //
+//                    .append("touch", config.getBucket() + ".files") //
+//                    .append("data", Boolean.FALSE) //
+//                    .append("index", Boolean.TRUE);
+//
+//            CommandResult commandResult = filesCollection.getDatabase().executeCommand(doc);
+//            if (!commandResult.isOk()) {
+//                throw new MongoException(commandResult.getErrorMessage());
+//            }
+//
+//            return true;
+//        } catch (Exception e) {
+//            throw new MongoException("Unable to run command on server", e);
+//        }
+//    }
 
     //
     // writing

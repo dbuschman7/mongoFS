@@ -24,12 +24,16 @@ object Dependencies {
   val GuavaTestLib = "com.google.guava" % "guava-testlib" % "17.0" % "test"
   val Gson = "com.google.code.gson" % "gson" % "2.2.4" % "test"
   val JUnit = "junit" % "junit" % "4.12" % "test"
+  val JUnitInterface = "com.novocode" % "junit-interface" % "0.11" % "test"
   val Mockito = "org.mockito" % "mockito-all" % "1.10.17" % "test"
   val ScalaTest = "org.scalatest" %% "scalatest" % "2.2.5" % "test" excluding ("org.scala-lang", "scala-library") excluding ("org.scala-lang", "scala-reflect")
 
+  
+  
   // Third Party
   val Enumeratum = "com.beachape" %% "enumeratum-play-json" % "1.3.1" excluding ("org.scala-lang", "scala-library")
   val FindBugs = "com.google.code.findbugs" % "jsr305" % "1.3.9"
+  val Guava = "com.google.guava" % "guava" % "17.0"
   val Java8Compat = "org.scala-lang.modules" %% "scala-java8-compat" % "0.7.0"
 
   val MongoJavaDriver = "org.mongodb" % "mongo-java-driver" % "3.2.2"

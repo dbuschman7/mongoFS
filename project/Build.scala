@@ -19,7 +19,6 @@ object ApplicationBuild extends Build {
 
   organization := "me.lightspeed7"
   version := "0.10.0"
-  scalaVersion := "2.11.8"
 
   println()
   println(s"App Version   => ${version}")
@@ -31,14 +30,14 @@ object ApplicationBuild extends Build {
   // Common Settings
   // /////////////////////////////////////////////
   lazy val commonSettings = Seq(
-    //
-    // Org  stuff
+    scalaVersion := "2.11.8",
 
     //
     // Compile time optimizations
     publishArtifact in (Compile, packageDoc) := false, // Disable ScalDoc generation
     publishArtifact in packageDoc := false,
     sources in (Compile, doc) := Seq.empty,
+    libraryDependencies ++= Seq(ScalaTest, Slf4jApi),
 
     ivyXML := Dependencies.globalExclusions, // 
 
@@ -58,9 +57,9 @@ object ApplicationBuild extends Build {
   // /////////////////////////////////////////////
   // Libraries 
   // /////////////////////////////////////////////
-  lazy val mongoFS = Project("MongoFS", file("."))
+  lazy val sync = Project("sync", file("sync"))
     .settings(commonSettings: _*)
-    .settings(libraryDependencies ++= Seq(Gson, JUnit, Mockito, MongoJavaDriver, ScalaTest, Slf4jApi))
+    .settings(libraryDependencies ++= Seq(Gson, Guava, JUnit, JUnitInterface, Mockito, MongoJavaDriver))
     .settings(
       // BuildInfo
       buildInfoPackage := "me.lightspeed7.mongofs",
@@ -68,4 +67,15 @@ object ApplicationBuild extends Build {
         System.currentTimeMillis
       })
 
+  lazy val asyncReactive = Project("async-reactive", file("async-reactive"))
+    .settings(commonSettings: _*)
+    .settings(libraryDependencies ++= Seq(ReactiveMongo))
+    .settings(
+      // BuildInfo
+      buildInfoPackage := "me.lightspeed7.mongofs",
+      buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion) :+ BuildInfoKey.action("buildTime") {
+        System.currentTimeMillis
+      })
+
+  lazy val root = Project("mongoFS", file(".")).aggregate(sync, asyncReactive)
 }

@@ -57,7 +57,7 @@ object ApplicationBuild extends Build {
   // /////////////////////////////////////////////
   // Libraries 
   // /////////////////////////////////////////////
-  lazy val sync = Project("sync", file("sync"))
+  lazy val core = Project("core", file("core"))
     .settings(commonSettings: _*)
     .settings(libraryDependencies ++= Seq(Gson, Guava, JUnit, JUnitInterface, Mockito, MongoJavaDriver))
     .settings(
@@ -67,15 +67,25 @@ object ApplicationBuild extends Build {
         System.currentTimeMillis
       })
 
-  lazy val asyncReactive = Project("async-reactive", file("async-reactive"))
+  lazy val sync = Project("sync", file("sync"))
     .settings(commonSettings: _*)
-    .settings(libraryDependencies ++= Seq(ReactiveMongo))
+    .settings(libraryDependencies ++= Seq(Gson, Guava, JUnit, JUnitInterface, Mockito, MongoJavaDriver))
     .settings(
       // BuildInfo
       buildInfoPackage := "me.lightspeed7.mongofs",
       buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion) :+ BuildInfoKey.action("buildTime") {
         System.currentTimeMillis
-      })
+      }).dependsOn(core % "test->test;compile->compile")
 
-  lazy val root = Project("mongoFS", file(".")).aggregate(sync, asyncReactive)
+  lazy val reactive = Project("reactive", file("reactive"))
+    .settings(commonSettings: _*)
+    .settings(libraryDependencies ++= Seq(Enumeratum, JodaTime, ReactiveMongo))
+    .settings(
+      // BuildInfo
+      buildInfoPackage := "me.lightspeed7.mongofs",
+      buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion) :+ BuildInfoKey.action("buildTime") {
+        System.currentTimeMillis
+      }).dependsOn(core % "test->test;compile->compile")
+
+  lazy val root = Project("mongoFS", file(".")).aggregate(core, sync, reactive)
 }

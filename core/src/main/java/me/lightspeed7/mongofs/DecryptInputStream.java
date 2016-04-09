@@ -15,10 +15,10 @@ public class DecryptInputStream extends InputStream {
     private byte[] buffer = null;
     private long remainingBytes;
 
-    public DecryptInputStream(final Crypto crypto, final MongoFile file, final InputStream inputStream) {
+    public DecryptInputStream(final Crypto crypto, final long storageLength, final InputStream inputStream) {
         this.crypto = crypto;
         this.inputStream = new DataInputStream(inputStream);
-        this.remainingBytes = file.getStorageLength();
+        this.remainingBytes = storageLength;
     }
 
     @Override

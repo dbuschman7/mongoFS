@@ -83,6 +83,7 @@ public class MongoFileStoreTest {
 		doRoundTrip("loremIpsum.txt", ChunkSize.tiny_4K, false, false);
 	}
 
+	@Test
 	public void testLotsOfChunksEncryptedAndCompressedRoundTrip() throws IOException {
 
 		doRoundTrip("loremIpsum.txt", ChunkSize.tiny_4K, true, true);

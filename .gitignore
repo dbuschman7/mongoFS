@@ -22,7 +22,8 @@ build/
 # SBT 
 .cache-main
 .cache-tests
+target/ 
 
 project/project/
 project/target/
-
+bin/

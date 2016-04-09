@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import me.lightspeed7.mongofs.MongoFileUrlTest;
-
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
@@ -37,7 +35,7 @@ public class MongoFileProtocolTest {
     public void testHandlerOpenConnection() throws IOException {
 
         ObjectId id = new ObjectId();
-        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", MongoFileUrlTest.PDF, StorageFormat.GZIPPED);
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", ParserTest.PDF, StorageFormat.GZIPPED);
         URLConnection connection = url.getUrl().openConnection();
 
         fail("This test should throw an exception");
@@ -48,7 +46,7 @@ public class MongoFileProtocolTest {
     public void testHandlerGetContent() throws IOException {
 
         ObjectId id = new ObjectId();
-        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", MongoFileUrlTest.PDF, StorageFormat.GZIPPED);
+        MongoFileUrl url = MongoFileUrl.construct(id, "fileName.pdf", ParserTest.PDF, StorageFormat.GZIPPED);
         Object object = url.getUrl().getContent();
 
         fail("This test should throw an exception");

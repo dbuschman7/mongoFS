@@ -40,15 +40,18 @@ public abstract class ChunksStatisticsAdapter {
     }
 
     public void close() {
-
+    	String md5 = FileUtil.toHex(messageDigest.digest());
+    	System.out.println("ChunksStatisticsAdapter - chunkCount = " + chunkCount);
+    	System.out.println("ChunksStatisticsAdapter - length     = " + totalSize);
+    	System.out.println("ChunksStatisticsAdapter - md5        = " + md5);
         file.put(MongoFileConstants.chunkCount.name(), chunkCount);
         file.put(MongoFileConstants.length.name(), totalSize);
-        file.put(MongoFileConstants.md5.name(), FileUtil.toHex(messageDigest.digest()));
+        file.put(MongoFileConstants.md5.name(), md5);
     }
 
     public void flush() {
 
-        // no-op
+		// no-op
 
-    }
+	}
 }

@@ -1,22 +1,25 @@
 package me.lightspeed7.mongofs
 
-import org.scalatest.FunSuite
-import reactivemongo.api.MongoDriver
-import reactivemongo.api.DefaultDB
-import reactivemongo.api.commands.GetLastError
-import reactivemongo.api.ReadPreference
-import org.scalatest.Matchers._
-import me.lightspeed7.mongofs.crypto.BasicCrypto
-import scala.concurrent.Future
-import scala.io.Source
-import java.io.InputStream
 import java.io.ByteArrayOutputStream
+
+import scala.concurrent.Await
+import scala.concurrent.duration.DurationInt
+
+import org.scalatest.Finders
+import org.scalatest.FunSuite
+import org.scalatest.Matchers._
+
+import me.lightspeed7.mongofs.crypto.BasicCrypto
 import me.lightspeed7.mongofs.util.ChunkSize
-import java.util.zip.GZIPInputStream
+import play.api.libs.iteratee.Enumerator
+import org.joda.time.DateTime
 
 class MongoFileStoreTest extends FunSuite {
 
   import Fixture._
+
+  val config = getConfig("fileStore").withCrypto(new BasicCrypto(ChunkSize.tiny_4K))
+  val store = MongoFileStore.create(config)
 
   /**
    *  {
@@ -36,13 +39,11 @@ class MongoFileStoreTest extends FunSuite {
 
   test("Read file object and all chunks") {
     val id = ObjectId("57049542e822544474c7ab2d")
-    val config = getConfig("fileStore").withCrypto(new BasicCrypto(ChunkSize.tiny_4K))
-    val store = MongoFileStore.create(config)
 
     // file 
     val file = result(store.findOne(id))
     file.isDefined should be(true)
-    
+
     val mf = file.get
     mf._id.id should be("57049542e822544474c7ab2d")
     mf.chunkCount should be(3)
@@ -71,6 +72,24 @@ class MongoFileStoreTest extends FunSuite {
     output.length should be(32087L)
     output should be(LoremIpsum.string)
 
+  }
+
+  test("Test Writing a file") {
+
+    val enum = Enumerator.fromFile(LoremIpsum.file, ChunkSize.tiny_4K.getChunkSize)
+    val file = Await.result(store.newFileFromEnumerator("loremIpsum.txt", "text/plain", true, true, None, enum), 5 seconds)
+    println(s"Written file id = ${file._id}")
+    file.chunkCount should be(3)
+    file.chunkSize should be(3384L)
+    file.contentType should be("text/plain")
+    file.filename should be("loremIpsum.txt")
+    file.format should be("encgz")
+    file.length should be(32087L)
+    file.manifestId should be(None)
+    file.md5 should be("824ab5bef28d9af51d9b9d146e4356be")
+    file.ratio should be(0.28781126312836974313)
+    file.storage should be(9235)
+    (DateTime.now.getMillis - file.uploadDate.getMillis) should be < (10L * 1000)
   }
 
 }

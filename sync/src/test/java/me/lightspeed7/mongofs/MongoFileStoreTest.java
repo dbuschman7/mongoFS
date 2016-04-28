@@ -23,12 +23,14 @@ import me.lightspeed7.mongofs.util.ChunkSize;
 
 import org.bson.types.ObjectId;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.Document;
 import org.mongodb.MongoDatabase;
 
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
+import com.mongodb.WriteError;
 
 public class MongoFileStoreTest {
 
@@ -47,37 +49,37 @@ public class MongoFileStoreTest {
 		database = new MongoDatabase(mongoClient.getDB(DB_NAME));
 	}
 
-	@Test
+//	@Test
 	public void testBasicUncompressedRoundTrip() throws IOException {
 
 		doRoundTrip("loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, false, false);
 	}
 
-	@Test
+//	@Test
 	public void testBasicCompressedRoundTrip() throws IOException {
 
 		doRoundTrip("loremIpsum.txt", MongoFileStoreConfig.DEFAULT_CHUNKSIZE, true, false);
 	}
 
-	@Test
+//	@Test
 	public void testLotsOfChunksUncompressedRoundTrip() throws IOException {
 
 		doRoundTrip("loremIpsum.txt", ChunkSize.tiny_4K, false, false);
 	}
 
-	@Test
+//	@Test
 	public void testLotsOfChunksCompressedRoundTrip() throws IOException {
 
 		doRoundTrip("loremIpsum.txt", ChunkSize.tiny_4K, true, false);
 	}
 
-	@Test
+//	@Test
 	public void testLotsOfChunksEncryptedRoundTrip() throws IOException {
 
 		doRoundTrip("loremIpsum.txt", ChunkSize.tiny_4K, false, true);
 	}
 
-	@Test
+//	@Test
 	public void testLotsOfChunksNoCompNoEncryptRoundTrip() throws IOException {
 
 		doRoundTrip("loremIpsum.txt", ChunkSize.tiny_4K, false, false);
@@ -89,13 +91,13 @@ public class MongoFileStoreTest {
 		doRoundTrip("loremIpsum.txt", ChunkSize.tiny_4K, true, true);
 	}
 
-	@Test
+//	@Test
 	public void testSingleChunkEncryptedAndCompressedRoundTrip() throws IOException {
 
 		doRoundTrip("loremIpsum.txt", ChunkSize.large_1M, true, true);
 	}
 
-	@Test
+//	@Test
 	public void testUpload() throws IOException {
 
 		MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
@@ -113,7 +115,7 @@ public class MongoFileStoreTest {
 
 	}
 
-	@Test(expected = IllegalStateException.class)
+//	@Test(expected = IllegalStateException.class)
 	public void testGetInputStreamThrows() throws Exception {
 		MongoFileUrl url = MongoFileUrl.construct("mongofile:enc:fileName.pdf?52fb1e7b36707d6d13ebfda9#application/pdf");
 
@@ -126,7 +128,7 @@ public class MongoFileStoreTest {
 		new MongoFile(store, url, 1234).getInputStream();
 	}
 
-	@Test
+//	@Test
 	public void testFindOneReturnsNull() {
 
 		MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
@@ -139,7 +141,7 @@ public class MongoFileStoreTest {
 
 	}
 
-	@Test
+//	@Test
 	public void testRemoveWithQuery() {
 
 		MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
@@ -152,7 +154,7 @@ public class MongoFileStoreTest {
 
 	}
 
-	@Test
+//	@Test
 	public void testGetManifestReturnsNull() throws Exception {
 
 		MongoFileStoreConfig config = MongoFileStoreConfig.builder()//
@@ -185,6 +187,11 @@ public class MongoFileStoreTest {
 		MongoFileStore store = new MongoFileStore(database, config);
 
 		MongoFileWriter writer = store.createNew(filename, "text/plain", null, compress);
+		System.out.println("*****************");
+		System.out.println("*");
+		System.out.println("* Writing file - " + writer.getMongoFile().getURL().toString());
+		System.out.println("*");
+		System.out.println("*****************");
 		ByteArrayInputStream in = new ByteArrayInputStream(LoremIpsum.LOREM_IPSUM.getBytes());
 		OutputStream out = writer.getOutputStream();
 		try {
@@ -197,6 +204,12 @@ public class MongoFileStoreTest {
 		MongoFile mongoFile = writer.getMongoFile();
 		assertTrue(store.exists(mongoFile.getURL()));
 		assertNotNull(mongoFile.getMD5());
+
+		System.out.println("*****************");
+		System.out.println("*");
+		System.out.println("* Reading file - " + mongoFile.getURL().toString());
+		System.out.println("*");
+		System.out.println("*****************");
 
 		// read a file
 		assertEquals(compress, mongoFile.getURL().isStoredCompressed());
@@ -225,7 +238,7 @@ public class MongoFileStoreTest {
 
 	}
 
-	@Test
+//	@Test
 	public void testUpload1() throws IOException {
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		assertNotNull(store.toString());
@@ -241,7 +254,7 @@ public class MongoFileStoreTest {
 
 	}
 
-	@Test
+//	@Test
 	public void testUpload2() throws IOException {
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		assertNotNull(store.toString());
@@ -260,7 +273,7 @@ public class MongoFileStoreTest {
 
 	}
 
-	@Test
+//	@Test
 	public void testUpload3() throws IOException {
 		MongoFileStore store = new MongoFileStore(database, //
 				MongoFileStoreConfig.builder()//
@@ -294,7 +307,7 @@ public class MongoFileStoreTest {
 
 	}
 
-	@Test(expected = FileNotFoundException.class)
+//	@Test(expected = FileNotFoundException.class)
 	public void testUpload4() throws IOException {
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		assertNotNull(store.toString());
@@ -303,28 +316,28 @@ public class MongoFileStoreTest {
 		store.upload(file2, "text/plain", false, null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+//	@Test(expected = IllegalArgumentException.class)
 	public void testException1() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		store.createNew(null, null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+//	@Test(expected = IllegalArgumentException.class)
 	public void testException2() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		store.createNew("", null);
 	}
 
-	@Test(expected = IllegalStateException.class)
+//	@Test(expected = IllegalStateException.class)
 	public void testException3() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().enableCompression(false).build());
 		store.createNew("", "", null, true);
 	}
 
-	@Test(expected = IllegalStateException.class)
+//	@Test(expected = IllegalStateException.class)
 	public void testException4() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder()//
@@ -332,28 +345,28 @@ public class MongoFileStoreTest {
 		store.createNew("", "", null, true);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+//	@Test(expected = IllegalArgumentException.class)
 	public void testException5() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		store.upload(null, null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+//	@Test(expected = IllegalArgumentException.class)
 	public void testException6() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		store.upload(LoremIpsum.getFile(), null);
 	}
 
-	@Test(expected = IllegalStateException.class)
+//	@Test(expected = IllegalStateException.class)
 	public void testException8() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().enableCompression(false).build());
 		store.upload(LoremIpsum.getFile(), "text/plain", true, null);
 	}
 
-	@Test(expected = IllegalStateException.class)
+//	@Test(expected = IllegalStateException.class)
 	public void testException9() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder()//
@@ -361,21 +374,21 @@ public class MongoFileStoreTest {
 		store.upload(LoremIpsum.getFile(), "text/plain", true, null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+//	@Test(expected = IllegalArgumentException.class)
 	public void testException10() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		store.getManifest((MongoFileUrl) null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+//	@Test(expected = IllegalArgumentException.class)
 	public void testException11() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		store.getManifest((MongoFile) null);
 	}
 
-	@Test(expected = IllegalStateException.class)
+//	@Test(expected = IllegalStateException.class)
 	public void testException12() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
@@ -384,7 +397,7 @@ public class MongoFileStoreTest {
 		store.getManifest(file);
 	}
 
-	@Test(expected = IllegalStateException.class)
+//	@Test(expected = IllegalStateException.class)
 	public void testException13() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
@@ -393,56 +406,56 @@ public class MongoFileStoreTest {
 		store.getManifest(file.getURL());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+//	@Test(expected = IllegalArgumentException.class)
 	public void testException14() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		store.findOne((URL) null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+//	@Test(expected = IllegalArgumentException.class)
 	public void testException15() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		store.findOne((MongoFileUrl) null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+//	@Test(expected = IllegalArgumentException.class)
 	public void testException16() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		store.exists((MongoFileUrl) null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+//	@Test(expected = IllegalArgumentException.class)
 	public void testException17() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		store.createNew("filename", "test/plain").write(null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+//	@Test(expected = IllegalArgumentException.class)
 	public void testException18() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		store.remove((Document) null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+//	@Test(expected = IllegalArgumentException.class)
 	public void testException19() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		store.remove((MongoFileUrl) null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+//	@Test(expected = IllegalArgumentException.class)
 	public void testException20() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, MongoFileStoreConfig.builder().build());
 		store.remove((MongoFile) null);
 	}
 
-	@Test(expected = IOException.class)
+//	@Test(expected = IOException.class)
 	public void testException21() throws IOException {
 
 		MongoFileStore store = new MongoFileStore(database, //
@@ -456,7 +469,7 @@ public class MongoFileStoreTest {
 		out.close();
 	}
 
-	@Test(expected = RuntimeException.class)
+//	@Test(expected = RuntimeException.class)
 	public void testException22() throws IOException {
 
 		MongoFileStoreConfig config = MongoFileStoreConfig.builder().enableEncryption(new BasicCrypto()).build();

@@ -6,6 +6,8 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
 import reactivemongo.api.commands.GetLastError
 import scala.concurrent.Future
+import me.lightspeed7.mongofs.util.ChunkSize
+import me.lightspeed7.mongofs.crypto.BasicCrypto
 
 object Fixture {
 
@@ -28,6 +30,17 @@ object Fixture {
 
   lazy val database: DefaultDB = result(connection.database(databaseName))
 
-  def getConfig(bucket: String) = FileStoreConfig(database, bucket, GetLastError.Default, ReadPreference.primaryPreferred, timeout)
+  def getConfig(bucket: String) = {
+    FileStoreConfig(
+      database,
+      bucket,
+      GetLastError.Default, ReadPreference.primaryPreferred,
+      ChunkSize.tiny_4K,
+      timeout,
+      true, // compression
+      Some(new BasicCrypto()) //
+    )
+  }
+
   def result[T](in: Future[T]): T = Await.result(in, timeout)
 }

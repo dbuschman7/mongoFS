@@ -16,6 +16,7 @@ import me.lightspeed7.mongofs.url.MongoFileUrl
 import me.lightspeed7.mongofs.url.StorageFormat
 import me.lightspeed7.mongofs.crypto.Crypto
 import java.io.InputStream
+import me.lightspeed7.mongofs.util.ChunkSize
 
 package object mongofs {
 
@@ -65,7 +66,7 @@ package object mongofs {
       storage: Long,
       ratio: Double,
       manifestId: Option[String] //
-      ) {
+  ) {
     val url: MongoFileUrl = MongoFileUrl.construct(_id.bson, filename, contentType, StorageFormat.find(format))
   }
 
@@ -74,12 +75,15 @@ package object mongofs {
   }
 
   case class MongoFileChunk(
-    _id: ObjectId,
-    files_id: ObjectId,
-    n: Int, // chunk number 
-    sz: Int, // size of data
-    data: Option[Array[Byte]] = None //
-    )
+      _id: ObjectId,
+      files_id: ObjectId,
+      n: Int, // chunk number 
+      sz: Int, // size of data
+      expireAt: Option[DateTime] = None,
+      data: Option[Array[Byte]] = None //
+  ) {
+    def withExpires(expires: DateTime): MongoFileChunk = copy(expireAt = Option(expires))
+  }
 
   object MongoFileChunk {
     implicit val _mongo = Macros.handler[MongoFileChunk]
@@ -103,9 +107,11 @@ package object mongofs {
       bucket: String,
       writeConcern: GetLastError,
       readPreference: ReadPreference,
+      chunkSize: ChunkSize,
       queryTimeout: Duration, //
+      compression: Boolean = true, //
       crypto: Option[Crypto] = None // 
-      )(implicit ec: ExecutionContext) {
+  )(implicit ec: ExecutionContext) {
 
     def withCrypto(crypto: Crypto) = copy(crypto = Option(crypto))
 

@@ -1,6 +1,5 @@
 package me.lightspeed7.mongofs;
 
-
 /**
  * Adapter to handle the custom parts of data collection from each chunk
  * 
@@ -9,18 +8,19 @@ package me.lightspeed7.mongofs;
  */
 public class MongoFileWriterAdapter extends ChunksStatisticsAdapter {
 
-    private MongoFile file;
+	private MongoFile file;
 
-    public MongoFileWriterAdapter(final MongoFile file) {
+	public MongoFileWriterAdapter(final MongoFile file) {
 
-        super((InputFile) file);
-        this.file = file;
-    }
+		super((InputFile) file);
+		this.file = file;
+	}
 
-    @Override
-    public void close() {
-
-        super.close();
-        file.save();
-    }
+	@Override
+	public void close() {
+		System.out.println("MongoFileWriterAdapter - close");
+		super.close();
+		
+		file.save();
+	}
 }

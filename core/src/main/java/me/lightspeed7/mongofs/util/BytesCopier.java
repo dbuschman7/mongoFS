@@ -11,84 +11,85 @@ import java.io.OutputStream;
  */
 public class BytesCopier {
 
-    private final InputStream in;
-    private final OutputStream out;
+	private final InputStream in;
+	private final OutputStream out;
 
-    private final int blocksize;
-    private boolean closeStreamOnPersist;
+	private final int blocksize;
+	private boolean closeStreamOnPersist;
 
-    public BytesCopier(final InputStream in, final OutputStream out) {
+	public BytesCopier(final InputStream in, final OutputStream out) {
 
-        this(8192, in, out, false);
-    }
+		this(8192, in, out, false);
+	}
 
-    public BytesCopier(final InputStream in, final OutputStream out, final boolean closeStreamOnPersist) {
+	public BytesCopier(final InputStream in, final OutputStream out, final boolean closeStreamOnPersist) {
 
-        this(8192, in, out, closeStreamOnPersist);
-    }
+		this(8192, in, out, closeStreamOnPersist);
+	}
 
-    public BytesCopier(final int blocksize, final InputStream in, final OutputStream out) {
+	public BytesCopier(final int blocksize, final InputStream in, final OutputStream out) {
 
-        this(blocksize, in, out, false);
-    }
+		this(blocksize, in, out, false);
+	}
 
-    public BytesCopier(final int blocksize, final InputStream in, final OutputStream out, final boolean closeStreamOnPersist) {
+	public BytesCopier(final int blocksize, final InputStream in, final OutputStream out, final boolean closeStreamOnPersist) {
 
-        this.closeStreamOnPersist = closeStreamOnPersist;
-        this.blocksize = blocksize;
-        this.in = in;
-        this.out = out;
-    }
+		this.closeStreamOnPersist = closeStreamOnPersist;
+		this.blocksize = blocksize;
+		this.in = in;
+		this.out = out;
+	}
 
-    public BytesCopier closeOutput() {
-        this.closeStreamOnPersist = true;
-        return this;
-    }
+	public BytesCopier closeOutput() {
+		this.closeStreamOnPersist = true;
+		return this;
+	}
 
-    public void transfer(final boolean flush) throws IOException {
+	public void transfer(final boolean flush) throws IOException {
 
-        int nread;
-        byte[] buf = new byte[blocksize];
-        while ((nread = in.read(buf)) != -1) {
-            out.write(buf, 0, nread);
-        }
-        if (flush) {
-            out.flush();
-        }
-        if (closeStreamOnPersist) {
-            in.close();
-        }
-    }
+		int nread;
+		byte[] buf = new byte[blocksize];
+		while ((nread = in.read(buf)) != -1) {
+			System.out.println("BytesCopier - transfer " + nread + " bytes");
+			out.write(buf, 0, nread);
+		}
+		if (flush) {
+			out.flush();
+		}
+		if (closeStreamOnPersist) {
+			in.close();
+		}
+	}
 
-    public void transfer(final long bytesToRead, final boolean flush) throws IOException {
+	public void transfer(final long bytesToRead, final boolean flush) throws IOException {
 
-        long bytesLeft = bytesToRead;
-        while (bytesLeft > 0) {
-            long buffSize = bytesToRead < blocksize ? bytesToRead : blocksize;
-            bytesLeft -= blocksize;
+		long bytesLeft = bytesToRead;
+		while (bytesLeft > 0) {
+			long buffSize = bytesToRead < blocksize ? bytesToRead : blocksize;
+			bytesLeft -= blocksize;
 
-            byte[] buf = new byte[(int) buffSize];
-            int nread = in.read(buf);
+			byte[] buf = new byte[(int) buffSize];
+			int nread = in.read(buf);
 
-            // write any bytes
-            if (nread != -1) {
-                out.write(buf, 0, nread);
-            }
+			// write any bytes
+			if (nread != -1) {
+				out.write(buf, 0, nread);
+			}
 
-            if (nread != buffSize) { // hit EOF
-                if (flush) {
-                    out.flush();
-                }
-                if (closeStreamOnPersist) {
-                    in.close();
-                }
-                bytesLeft = 0;
-            }
-        }
-        if (flush) {
-            out.flush();
-        }
+			if (nread != buffSize) { // hit EOF
+				if (flush) {
+					out.flush();
+				}
+				if (closeStreamOnPersist) {
+					in.close();
+				}
+				bytesLeft = 0;
+			}
+		}
+		if (flush) {
+			out.flush();
+		}
 
-    }
+	}
 
 }

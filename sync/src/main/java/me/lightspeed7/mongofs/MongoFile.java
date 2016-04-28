@@ -22,7 +22,8 @@ import org.mongodb.MongoException;
 import com.mongodb.BasicDBObject;
 
 /**
- * Object to hold the state of the file's metatdata. To persist this outside of MongoFS, use the getURL() and persist that.
+ * Object to hold the state of the file's metatdata. To persist this outside of
+ * MongoFS, use the getURL() and persist that.
  * 
  * @author David Buschman
  * 
@@ -65,7 +66,8 @@ public class MongoFile implements InputFile {
 	 * @param collection
 	 * @param url
 	 */
-	/* package */MongoFile(final MongoFileStore store, final MongoFileUrl url, final long chunkSize) {
+	/* package */MongoFile(final MongoFileStore store, final MongoFileUrl url,
+			final long chunkSize) {
 
 		this.store = store;
 		this.format = url.getFormat();
@@ -75,10 +77,13 @@ public class MongoFile implements InputFile {
 		surrogate.put(MongoFileConstants.uploadDate.toString(), new Date());
 
 		surrogate.put(MongoFileConstants.chunkSize.toString(), chunkSize);
-		surrogate.put(MongoFileConstants.filename.toString(), url.getFilePath());
-		surrogate.put(MongoFileConstants.contentType.toString(), url.getMediaType());
+		surrogate
+				.put(MongoFileConstants.filename.toString(), url.getFilePath());
+		surrogate.put(MongoFileConstants.contentType.toString(),
+				url.getMediaType());
 		if (url.getFormat() != null) {
-			surrogate.put(MongoFileConstants.format.toString(), url.getFormat().getCode());
+			surrogate.put(MongoFileConstants.format.toString(), url.getFormat()
+					.getCode());
 		}
 	}
 
@@ -96,12 +101,14 @@ public class MongoFile implements InputFile {
 	 * @throws MongoException
 	 */
 	public void save() {
+		System.out.println("MongoFile - save surrogate");
 
 		store.getFilesCollection().save(surrogate);
 	}
 
 	/**
-	 * Verifies that the MD5 matches between the database and the local file. This should be called after transferring a file.
+	 * Verifies that the MD5 matches between the database and the local file.
+	 * This should be called after transferring a file.
 	 * 
 	 * @throws MongoException
 	 */
@@ -115,13 +122,15 @@ public class MongoFile implements InputFile {
 
 		Document cmd = new Document("filemd5", get(MongoFileConstants._id));
 		cmd.put("root", getBucketName());
-		Document res = store.getFilesCollection().getDatabase().executeCommand(cmd).getResponse();
+		Document res = store.getFilesCollection().getDatabase()
+				.executeCommand(cmd).getResponse();
 		if (res != null && res.containsKey(md5key.toString())) {
 			String m = res.get(md5key.toString()).toString();
 			if (m.equals(md5)) {
 				return;
 			}
-			throw new MongoException("md5 differ.  mine [" + md5 + "] theirs [" + m + "]");
+			throw new MongoException("md5 differ.  mine [" + md5 + "] theirs ["
+					+ m + "]");
 		}
 
 		// no md5 from the server
@@ -132,7 +141,8 @@ public class MongoFile implements InputFile {
 	public MongoFileUrl getURL() throws MalformedURLException {
 
 		// compression and encrypted read from stored format
-		URL url = Parser.construct(getId(), getFilename(), getContentType(), this.format);
+		URL url = Parser.construct(getId(), getFilename(), getContentType(),
+				this.format);
 		return MongoFileUrl.construct(url);
 	}
 
@@ -160,10 +170,13 @@ public class MongoFile implements InputFile {
 		if (getURL().isStoredEncrypted()) {
 
 			if (store.getConfig().getEncryption() == null) {
-				throw new IllegalStateException("File is stored in ecrypted but store is not configured for decryption");
+				throw new IllegalStateException(
+						"File is stored in ecrypted but store is not configured for decryption");
 			}
 
-			returned = new DecryptInputStream(store.getConfig().getEncryption(), this.getStorageLength(), returned);
+			returned = new DecryptInputStream(
+					store.getConfig().getEncryption(), this.getStorageLength(),
+					returned);
 		}
 
 		if (getURL().isStoredCompressed()) {
@@ -180,11 +193,13 @@ public class MongoFile implements InputFile {
 	 *            the output stream to write to
 	 * 
 	 * @param flush
-	 *            should the output stream be flush when all the data has been written.
+	 *            should the output stream be flush when all the data has been
+	 *            written.
 	 * 
 	 * @throws IOException
 	 */
-	public OutputStream readInto(final OutputStream out, final boolean flush) throws IOException {
+	public OutputStream readInto(final OutputStream out, final boolean flush)
+			throws IOException {
 
 		new BytesCopier(getInputStream(), out).transfer(flush);
 
@@ -194,15 +209,18 @@ public class MongoFile implements InputFile {
 	/**
 	 * Read the contents on the file into a String
 	 * 
-	 * NOTE : This uses heap memory to store the contents on the file, the user is responsible to know that the file can safely
-	 * fit into the memory space of the running application. The memory allocated is chunkSize * chunkCount
+	 * NOTE : This uses heap memory to store the contents on the file, the user
+	 * is responsible to know that the file can safely fit into the memory space
+	 * of the running application. The memory allocated is chunkSize *
+	 * chunkCount
 	 * 
 	 * @return the file contents as a string
 	 * @throws IOException
 	 */
 	public String readIntoString() throws IOException {
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream(this.getChunkSize() * this.getChunkCount());
+		ByteArrayOutputStream out = new ByteArrayOutputStream(
+				this.getChunkSize() * this.getChunkCount());
 		new BytesCopier(getInputStream(), out).transfer(true);
 		return out.toString("UTF-8");
 	}
@@ -240,7 +258,8 @@ public class MongoFile implements InputFile {
 	/**
 	 * Gets the file's length on MongoDB, this is the actual size stored.
 	 * 
-	 * NOTE: For compressed and encrypted files, this size will differ from the getLength() method.
+	 * NOTE: For compressed and encrypted files, this size will differ from the
+	 * getLength() method.
 	 * 
 	 * @return the length of the file
 	 */
@@ -328,7 +347,8 @@ public class MongoFile implements InputFile {
 	// /////////////////////////
 
 	/**
-	 * Gets the aliases from the metadata. note: to set aliases, call put( "aliases" , List<String> )
+	 * Gets the aliases from the metadata. note: to set aliases, call put(
+	 * "aliases" , List<String> )
 	 * 
 	 * @return list of aliases
 	 */
@@ -615,7 +635,8 @@ public class MongoFile implements InputFile {
 		if (foo instanceof Boolean) {
 			return ((Boolean) foo).booleanValue();
 		}
-		throw new IllegalArgumentException("can't coerce to bool:" + foo.getClass());
+		throw new IllegalArgumentException("can't coerce to bool:"
+				+ foo.getClass());
 	}
 
 	/**
